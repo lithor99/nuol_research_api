@@ -100,10 +100,12 @@ app.use('/employee', employeeRoute);
 app.use('/faculty', facultyRoute);
 app.use('/department', departmentRoute);
 app.use('/author', authorRoute);
-app.use('/author', commiteeRoute);
+app.use('/commitee', commiteeRoute);
 app.use('/member', memberRoute);
 
 //define listen port
 app.listen(port, () => {
     console.log(`Server is running at port ${port}`);
 });
+
+
