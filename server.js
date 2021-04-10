@@ -80,7 +80,7 @@ app.post('/upload', async (req, res) => {
                     mimetype: file.mimetype,
                     size: file.size
                 },
-                url:'./public/upload/' + file.name
+                url: './public/upload/' + file.name
             });
         }
     } catch (err) {
@@ -101,6 +101,7 @@ app.use('/faculty', facultyRoute);
 app.use('/department', departmentRoute);
 app.use('/author', authorRoute);
 app.use('/commitee', commiteeRoute);
+
 app.use('/member', memberRoute);
 
 //define listen port
