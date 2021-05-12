@@ -6,9 +6,10 @@ const mssql = require('mssql');
 const config = {
     server: 'localhost',
     user: 'sa',
-    password: '12345',
+    // password: '12345',
+    password: 'simple123',
     database: 'db_nuol_research',
-    port:1443,
+    port: 1443,
     options: {
         'encrypt': true,
         'enableArithAbort': true,
@@ -25,7 +26,7 @@ mssql.connect(config, async function (err) {
         // console.log('data: ', data.recordset)
     }
 });
-module.exports=mssql;
+module.exports = mssql;
 
 
 //MySQL Connection................................................

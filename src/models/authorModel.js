@@ -46,11 +46,16 @@ exports.deleteAuthor = (req, res) => {
 
 // get all author  
 exports.getAllAuthor = (req, res) => {
+    // sql.query(`SELECT tb_author.author_id, tb_author.name_surname, tb_author.gender,
+    //     tb_author.birth_date, tb_author.tel, tb_author.email, tb_faculty.faculty_name, 
+    //     tb_department.depart_name FROM tb_author INNER JOIN tb_department 
+    //     ON tb_author.depart_id=tb_department.depart_id INNER JOIN tb_faculty
+    //     ON tb_department.faculty_id=tb_faculty.faculty_id`,
     sql.query(`SELECT tb_author.author_id, tb_author.name_surname, tb_author.gender,
-        tb_author.birth_date, tb_author.tel, tb_author.email, tb_faculty.faculty_name, 
-        tb_department.depart_name FROM tb_author INNER JOIN tb_department 
-        ON tb_author.depart_id=tb_department.depart_id INNER JOIN tb_faculty
-        ON tb_department.faculty_id=tb_faculty.faculty_id`,
+    tb_author.birth_date, tb_author.tel, tb_author.email, tb_faculty.faculty_name, 
+    tb_faculty.faculty_id, tb_department.depart_name FROM tb_author INNER JOIN tb_department 
+    ON tb_author.depart_id=tb_department.depart_id INNER JOIN tb_faculty
+    ON tb_department.faculty_id=tb_faculty.faculty_id`,
         (err, result) => {
             if (err) {
                 console.log('error while fetching user by id', err);
