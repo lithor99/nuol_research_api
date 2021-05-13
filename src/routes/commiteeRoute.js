@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const commiteeModel = require('../models/commiteeModel');
 
-router.post('/add', commiteeModel.createCommitee);
-router.put('/edit', commiteeModel.editCommitee);
-router.delete('/delete', commiteeModel.deleteCommitee);
-router.get('/getAll', commiteeModel.getAllCommitee);
-router.get('/getOne', commiteeModel.getOneCommitee);
-router.get('/search', commiteeModel.searchCommitee);
+router.post('/committee/create', commiteeModel.createCommitee);
+router.put('/committee/update/:id', commiteeModel.editCommitee);
+router.delete('/committee/delete/:id', commiteeModel.deleteCommitee);
+router.get('/committees', commiteeModel.getAllCommitee);
+router.get('/committee/:id', commiteeModel.getOneCommitee);
+router.get('/committee/search', commiteeModel.searchCommitee);
 
 module.exports = router;

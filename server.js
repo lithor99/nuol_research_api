@@ -100,7 +100,7 @@ app.use('/employee', employeeRoute);
 app.use('/', facultyRoute);
 app.use('/', departmentRoute);
 app.use('/', authorRoute);
-app.use('/commitee', commiteeRoute);
+app.use('/', commiteeRoute);
 app.use('/member', memberRoute);
 
 //define listen port
