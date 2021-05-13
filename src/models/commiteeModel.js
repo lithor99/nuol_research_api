@@ -65,7 +65,7 @@ exports.deleteCommitee = (req, res) => {
 
 // get all commitee  
 exports.getAllCommitee = (req, res) => {
-    sql.query(`SELECT * FROM tb_commitee`,
+    sql.query(`SELECT * FROM tb_commitee ORDER BY name_surname ASC;`,
         (err, result) => {
             if (err) {
                 console.log('error while fetching user by id', err);

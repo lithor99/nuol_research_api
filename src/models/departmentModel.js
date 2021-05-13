@@ -85,7 +85,7 @@ exports.deleteDepartment = (req, res) => {
 // get all department  
 exports.getAllDepartment = (req, res) => {
     sql.query(`SELECT tb_department.depart_id, tb_department.depart_name, tb_faculty.faculty_name,tb_faculty.faculty_id
-    FROM tb_department INNER JOIN tb_faculty ON tb_department.faculty_id=tb_faculty.faculty_id`, (err, result) => {
+    FROM tb_department INNER JOIN tb_faculty ON tb_department.faculty_id=tb_faculty.faculty_id ORDER BY depart_name ASC;`, (err, result) => {
         if (err) {
             console.log('error:', err);
             return res.json(err);

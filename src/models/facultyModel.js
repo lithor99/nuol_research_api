@@ -123,7 +123,7 @@ exports.getAllFaculty = async (req, res) => {
         SELECT  count(DISTINCT(faculty_id)) AS count FROM tb_faculty
         `)
 
-        await sql.query(`SELECT * FROM tb_faculty`)
+        await sql.query(`SELECT * FROM tb_faculty ORDER BY faculty_name ASC`)
             .then(data => {
                 const response = {
                     data: {

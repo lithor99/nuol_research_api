@@ -95,13 +95,16 @@ const departmentRoute = require('./src/routes/departmentRoute');
 const authorRoute = require('./src/routes/authorRoute');
 const commiteeRoute = require('./src/routes/commiteeRoute');
 const memberRoute = require('./src/routes/memberRoute');
+const fundRoute = require('./src/routes/fundRoute');
 
-app.use('/employee', employeeRoute);
 app.use('/', facultyRoute);
 app.use('/', departmentRoute);
 app.use('/', authorRoute);
 app.use('/', commiteeRoute);
+app.use('/', fundRoute);
 app.use('/member', memberRoute);
+app.use('/employee', employeeRoute);
+
 
 //define listen port
 app.listen(port, () => {
