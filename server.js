@@ -103,7 +103,7 @@ app.use('/', authorRoute);
 app.use('/', commiteeRoute);
 app.use('/', fundRoute);
 app.use('/member', memberRoute);
-app.use('/employee', employeeRoute);
+app.use('/', employeeRoute);
 
 
 //define listen port
