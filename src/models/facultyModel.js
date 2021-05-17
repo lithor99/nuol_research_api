@@ -133,7 +133,6 @@ exports.getAllFaculty = async (req, res) => {
                 };
                 res.send(response);
             });
-
     } catch (error) {
         res.status(500).send({
             message: "Error -> Can NOT complete a paging request!",
