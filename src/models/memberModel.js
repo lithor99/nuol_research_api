@@ -1,9 +1,10 @@
 const sql = require('../config/dbConfig');
 const nodemailer = require('nodemailer');
-const upload = require('../middleware/upload');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
+const { json } = require('body-parser');
+const { param } = require('../routes/memberRoute');
 // const fileupload = require('express-fileupload');
 // const util = require('util');
 // const morgan = require('morgan');
@@ -11,10 +12,8 @@ const fs = require('fs');
 // app.use(fileupload());
 // app.use(morgan('dev'));
 
-
-var email, password;
 // create employee
-exports.createMember = (req, res) => {
+exports.memberRegist = (req, res) => {
     function between(min, max) {
         return Math.floor(Math.random() * (max - min));
     }
@@ -39,8 +38,114 @@ exports.createMember = (req, res) => {
         text: `${conf_num}`
     };
 
-    sql.query(`INSERT INTO tb_member VALUES('${req.body.username}', 
-        '${req.body.password}', '${req.body.email}', ${conf_num}, 'true')`,
+    sql.query(`SELECT * FROM tb_member WHERE email='${req.body.email}'`,
+        (err, result) => {
+            if (err) {
+                res.send('error', err)
+                console.log(err)
+            } else {
+                if (result.recordset[0]) {
+                    return res.json({ message: 'this email already registered' })
+                } else {
+                    sql.query(`INSERT INTO tb_register VALUES('${req.body.username}', 
+                '${req.body.email}', '${req.body.password}', '${conf_num}')`,
+                        (err, result) => {
+                            if (err) {
+                                res.send('error', err)
+                                console.log(err)
+                            } else {
+                                sql.query(`SELECT regist_id, username, email, password FROM tb_register WHERE username='${req.body.username}' 
+                                AND email='${req.body.email}' AND password='${req.body.password}'`,
+                                    (err, result) => {
+                                        if (err) {
+                                            console.log('err:' + err)
+                                            return res.json({ message: 'error0:' }, err);
+                                        } else {
+                                            res.send(result.recordset[0]);
+                                            transporter.sendMail(mailOptions, function (err, info) {
+                                                if (err) {
+                                                    console.log({ message: 'error:' }, err);
+                                                } else {
+                                                    console.log(`Your confirm password is ${conf_num}`);
+                                                }
+                                            })
+                                        }
+                                    })
+                            }
+                        })
+                }
+            }
+        })
+
+}
+
+exports.createMember = (req, res) => {
+    sql.query(`SELECT * FROM tb_register WHERE username='${req.body.username}' AND email='${req.body.email}' 
+        AND password='${req.body.password}' AND conf_num='${req.body.conf_num}'`,
+        (err, result) => {
+            if (err) {
+                console.log('err:' + err)
+                return res.json({ message: 'error0:' }, err);
+            } else {
+                if (!result.recordset[0]) {
+                    console.log('confirm number failed');
+                    return res.json({ message: 'confirm number failed' });
+                } else {
+                    sql.query(`INSERT INTO tb_member VALUES('${req.body.username}', 
+                    '${req.body.email}', '${req.body.password}','', ${req.body.regist_id},'true')`,
+                        (err, result) => {
+                            if (err) {
+                                return res.json({ message: 'error1:' }, err);
+                            } else {
+                                sql.query(`SELECT member_id, email, password FROM tb_member WHERE email='${req.body.email}' 
+                                AND password='${req.body.password}'`,
+                                    (err, result) => {
+                                        if (err) {
+                                            return res.json({ message: 'error:' }, err);
+                                        }
+                                        else {
+                                            if (!result.recordset[0]) {
+                                                return res.json({ message: 'password failed' });
+                                            } else {
+                                                const token = jwt.sign({ data: result.recordset[0] }, process.env.TOKEN_SECRET, { expiresIn: '30d' });
+                                                res.send({ token })
+                                            }
+                                        }
+                                    });
+                            }
+                        });
+                }
+            }
+        })
+}
+
+//send mail again
+exports.sendMailAgain = (req, res) => {
+    function between(min, max) {
+        return Math.floor(Math.random() * (max - min));
+    }
+    var conf_num = between(0, 9).toString() + between(0, 9).toString() + between(0, 9).toString() + between(0, 9).toString() + between(0, 9).toString();
+
+    var transporter = nodemailer.createTransport({
+        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 534,
+        secure: false,
+        // requireTLS: true,
+        auth: {
+            user: 'leethorxiongpor1999@gmail.com',
+            pass: '1999@igmail.lee'
+        }
+    });
+
+    var mailOptions = {
+        from: 'leethorxiongpor1999@gmail.com',
+        to: `${req.body.email}`,
+        subject: 'Your confirm password is',
+        text: `${conf_num}`
+    };
+
+    sql.query(`UPDATE tb_register SET conf_num='${conf_num}' WHERE regist_id=${req.body.regist_id}`,
         (err, result) => {
             if (err) {
                 res.send('error', err)
@@ -48,54 +153,172 @@ exports.createMember = (req, res) => {
             } else {
                 transporter.sendMail(mailOptions, function (err, info) {
                     if (err) {
-                        console.log(err);
+                        console.log({ message: 'send mail error:' }, err);
                     } else {
                         console.log(`Your confirm password is ${conf_num}`);
+                        return res.json({ message: 'check your email please' });
                     }
-                });
-                res.send(result);
+                })
+            }
+        })
+}
+
+//forgot password
+exports.forgotPassword = (req, res) => {
+    function between(min, max) {
+        return Math.floor(Math.random() * (max - min));
+    }
+    var conf_num = between(0, 9).toString() + between(0, 9).toString() + between(0, 9).toString() + between(0, 9).toString() + between(0, 9).toString();
+
+    var transporter = nodemailer.createTransport({
+        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 534,
+        secure: false,
+        // requireTLS: true,
+        auth: {
+            user: 'leethorxiongpor1999@gmail.com',
+            pass: '1999@igmail.lee'
+        }
+    });
+
+    var mailOptions = {
+        from: 'leethorxiongpor1999@gmail.com',
+        to: `${req.body.email}`,
+        subject: 'Your confirm password is',
+        text: `${conf_num}`
+    };
+
+    sql.query(`UPDATE tb_member SET conf_num='${conf_num}' WHERE email='${req.body.email}'`,
+        (err, result) => {
+            if (err) {
+                res.send('error:', err)
+                console.log(err)
+            } else {
+                transporter.sendMail(mailOptions, function (err, info) {
+                    if (err) {
+                        console.log({ message: 'send mail error:' }, err);
+                    } else {
+                        console.log(`Your confirm password is ${conf_num}`);
+                        return res.json({ message: 'check your email please' });
+                    }
+                })
+            }
+        })
+}
+
+//confirm email when forgot password
+exports.confirmEmailWhenForgotPassword = (req, res) => {
+    sql.query(`SELECT password FROM tb_member WHERE email='${req.body.email}' 
+        AND conf_num='${req.body.conf_num}'`,
+        (err, result) => {
+            if (err) {
+                res.send('error:', err)
+                console.log(err)
+            } else {
+                if (result.recordset[0]) {
+                    var transporter = nodemailer.createTransport({
+                        service: 'gmail',
+                        host: 'smtp.gmail.com',
+                        port: 534,
+                        secure: false,
+                        // requireTLS: true,
+                        auth: {
+                            user: 'leethorxiongpor1999@gmail.com',
+                            pass: '1999@igmail.lee'
+                        }
+                    });
+
+                    var mailOptions = {
+                        from: 'leethorxiongpor1999@gmail.com',
+                        to: `${req.body.email}`,
+                        subject: 'Your password is',
+                        text: `${result.recordset[0].password}`
+                    };
+                    transporter.sendMail(mailOptions, function (err, info) {
+                        if (err) {
+                            console.log({ message: 'send mail error:' }, err);
+                        } else {
+                            console.log('password:' + result.recordset[0].password)
+                            return res.json({ message: 'check your email please' });
+                        }
+                    })
+                }
             }
         })
 }
 
 // edit username
-exports.editUsername = (req, res) => {
-    sql.query(`UPDATE tb_member SET username='${req.body.username}'
-    WHERE email='${req.body.email}' AND password='${req.body.password}'`),
+exports.editMemberUsername = (req, res) => {
+    sql.query(`SELECT password FROM tb_member WHERE password='${req.body.password}'`,
         (err, result) => {
             if (err) {
                 res.send('error:', err);
                 console.log('error:', err);
             } else {
-                res.send(result);
+                if (!result.recordset[0]) {
+                    return res.json({ message: 'password failed' });
+                }
+                else {
+                    sql.query(`UPDATE tb_member SET username='${req.body.new_username}'
+                    WHERE email='${req.body.email}' AND password='${req.body.password}'`,
+                        (err, result) => {
+                            if (err) {
+                                res.send('error:', err);
+                                console.log('error:', err);
+                            } else {
+                                return res.json({ message: 'username has updated' });
+                            }
+                        }
+                    )
+                }
             }
         }
+    )
+
 }
 
 // edit password
-exports.editPassword = (req, res) => {
-    sql.query(`UPDATE tb_member SET password='${req.body.newpassword}'
-    WHERE email='${req.body.email}' AND password='${req.body.olspassword}'`),
+exports.editMemberPassword = (req, res) => {
+    sql.query(`SELECT password FROM tb_member WHERE password='${req.body.old_password}'`,
         (err, result) => {
             if (err) {
-                res.send('error', err)
-                console.log(err)
+                res.send('error:', err);
+                console.log('error:', err);
             } else {
-                res.send(result);
+                if (!result.recordset[0]) {
+                    return res.json({ message: 'password failed' });
+                } else {
+                    sql.query(`UPDATE tb_member SET password='${req.body.new_password}'
+                        WHERE email='${req.body.email}' AND password='${req.body.old_password}'`,
+                        (err, result) => {
+                            if (err) {
+                                res.send('error', err)
+                                console.log(err)
+                            } else {
+                                return res.json({ message: 'password has updated' });
+                            }
+                        }
+                    )
+                }
             }
         }
+    )
+
 }
 
 // edit ban state
 exports.editBanState = (req, res) => {
     sql.query(`UPDATE tb_member SET ban_state=1^ban_state
-    WHERE email='${req.body.email}'`),
+    WHERE member_id=${req.body.member_id}`),
         (err, result) => {
             if (err) {
                 res.send('error:', err);
                 console.log('error:', err);
             } else {
-                res.send(result);
+                if (result.recordset[0]) {
+                    return res.json(result.recordset[0]);
+                }
             }
         }
 }
@@ -109,14 +332,16 @@ exports.deleteMember = (req, res) => {
                 res.send('error', err)
                 console.log(err)
             } else {
-                res.send(result);
+                if (result.recordset[0]) {
+                    return res.json(result.recordset[0]);
+                }
             }
         }
 }
 
 // get all member  
 exports.getAllMember = (req, res) => {
-    sql.query('SELECT * FROM tb_member', (err, result) => {
+    sql.query(`SELECT * FROM tb_member`, (err, result) => {
         if (err) {
             console.log('error:', err);
             return res.json(err);
@@ -127,13 +352,13 @@ exports.getAllMember = (req, res) => {
 }
 
 // get one member  
-exports.getOneMember = (req, res) => {
-    sql.query(`SELECT * FROM tb_member WHERE memb_id=${req.body.memb_id}`, (err, result) => {
+exports.getMemberUser = (req, res) => {
+    sql.query(`SELECT * FROM tb_member WHERE email='${req.body.email}'`, (err, result) => {
         if (err) {
             console.log('error:', err);
-            return res.json('error:', err);
+            return res.json('error');
         } else {
-            res.send(result.recordset);
+            return res.json(result.recordset[0]);
         }
     });
 }
@@ -153,27 +378,27 @@ exports.searchMember = (req, res) => {
 
 //user login 
 exports.memberLogin = (req, res) => {
-    sql.query(`SELECT member_id, email, password FROM tb_member WHERE email='${req.body.email}'`,
+    sql.query(`SELECT member_id, email FROM tb_member WHERE email='${req.body.email}'`,
         (err, result) => {
             if (err) {
                 return res.json({ message: 'error:' }, err);
             } else {
                 if (!result.recordset[0]) {
-                    console.log('email not found');
+                    // console.log('email not found');
                     return res.json({ message: 'email not found' });
                 } else {
-                    sql.query(`SELECT member_id, email, password FROM tb_member WHERE email='${req.body.email}' AND password='${req.body.password}'`,
+                    sql.query(`SELECT member_id, email FROM tb_member WHERE email='${req.body.email}' AND password='${req.body.password}'`,
                         (err, result) => {
                             if (err) {
                                 return res.json({ message: 'error:' }, err);
                             }
                             else {
                                 if (!result.recordset[0]) {
-                                    console.log('password failed', err);
+                                    // console.log('password failed');
                                     return res.json({ message: 'password failed' });
                                 } else {
                                     console.log('login successful');
-                                    const token = jwt.sign({ data: result.recordset[0] }, process.env.TOKEN_SECRET);
+                                    const token = jwt.sign({ data: result.recordset[0] }, process.env.TOKEN_SECRET, { expiresIn: '30d' });
                                     res.send({ token })
                                 }
                             }
@@ -183,75 +408,4 @@ exports.memberLogin = (req, res) => {
         });
 }
 
-//https://bezkoder.com/node-js-express-file-upload/
-exports.uploadFile = async (req, res) => {
-    try {
-        await upload(req, res);
-        if (req.files) {
-            let file = req.files.file;
-            file.mv('./public/uploads/' + file.name);
-            res.json({
-                message: 'File is uploaded',
-                data: {
-                    name: file.name,
-                    mimetype: file.mimetype,
-                    size: file.size,
-                    url: path.join(__dirname, '..', '..', 'public', 'uploads', file.name),
-                },
-            });
-        } else {
-            res.status(400).send({
-                message: "Please upload a file!"
-            });
-        }
-
-
-    } catch (err) {
-        if (err.code == "LIMIT_FILE_SIZE") {
-            return res.status(500).send({
-                message: "File size cannot be larger than 2MB!",
-            });
-        }
-
-        res.status(500).send({
-            message: `Could not upload the file: ${req.file.originalname}. ${err}`,
-        });
-    }
-};
-
-exports.getFile = (req, res) => {
-    // const directoryPath = 'D:\\Final Project\\nuol_research_api\\public\\uploads\\';
-    // const dirPath = path.join(__dirname + '../../../public/uploads/');
-    const dirPath = path.join(__dirname, '..', '..', 'public', 'uploads');
-    fs.readdir(dirPath, function (err, files) {
-        if (err) {
-            return res.status(500).send({
-                message: "Unable to scan files!",
-                err,
-            });
-        } else {
-            let fileInfo = [];
-            files.forEach((file) => {
-                fileInfo.push({
-                    name: file,
-                    url: path.join(__dirname, '..', '..', 'public', 'uploads', file),
-                });
-            });
-            return res.json(fileInfo);
-        }
-    });
-};
-
-const downloadFile = (req, res) => {
-    // const fileName = req.params.file;
-    // const dirPath = path.join(__dirname, '..', '..', 'public', 'uploads');
-
-    // res.downloadFile(dirPath + fileName, (err, result) => {
-    //     if (err) {
-    //         res.status(500).send({
-    //             message: "Could not download the file. " + err,
-    //         });
-    //     }
-    // });
-};
 // module.exports = { downloadFile };

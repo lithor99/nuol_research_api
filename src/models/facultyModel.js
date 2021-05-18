@@ -3,7 +3,7 @@ const employeeModel=require('../models/employeeModel')
 
 // create faculty
 exports.createFaculty = (req, res) => {
-    sql.query(`INSERT INTO tb_faculty VALUES('${req.body.faculty_name}')`,
+    sql.query(`INSERT INTO tb_faculty VALUES(N'${req.body.faculty_name}')`,
         (err, result) => {
             if (err) {
                 res.send('error', err)
@@ -16,8 +16,8 @@ exports.createFaculty = (req, res) => {
 
 // edit faculty
 exports.editFaculty = (req, res) => {
-    sql.query(`UPDATE tb_faculty SET faculty_name='${req.body.faculty_name}'
-    WHERE faculty_id=${req.body.faculty_id}`),
+    sql.query(`UPDATE tb_faculty SET faculty_name=N'${req.body.faculty_name}'
+    WHERE faculty_id=N${req.body.faculty_id}`),
         (err, result) => {
             if (err) {
                 res.send('error', err)

@@ -1,19 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const memberModel = require('../models/memberModel');
-const verify = require('../jwt/jwt');
+const token = require('../jwt/jwt');
 
-router.post('/add', memberModel.createMember);
-router.put('/edit/username', memberModel.editUsername);
-router.put('/edit/password', memberModel.editPassword);
-router.get('/edit/banstate', memberModel.editBanState);
+router.post('/register', memberModel.memberRegist);
+router.post('/confirm_register', token, memberModel.createMember);
+router.put('/send_mail_again', memberModel.sendMailAgain);
+router.post('/login', token, memberModel.memberLogin);
+router.put('/forgot_password',memberModel.forgotPassword);
+router.put('/confirm_email', memberModel.confirmEmailWhenForgotPassword);
+router.put('/edit/username', memberModel.editMemberUsername);
+router.put('/edit/password', memberModel.editMemberPassword);
+router.post('/get_member_user', memberModel.getMemberUser);
+
+
+
+router.put('/edit/banstate', memberModel.editBanState);
 router.get('/delete', memberModel.deleteMember);
-router.get('/getAll', memberModel.getAllMember);
-// router.get('/getOne', facultyModel.getOneFaculty);
+router.get('/get', memberModel.getAllMember);
 router.get('/search', memberModel.searchMember);
-router.get('/login', verify, memberModel.memberLogin);
-router.post('/upload', memberModel.uploadFile);
-router.get('/file', memberModel.getFile);
-// router.get('/download/:name', memberModel.downloadFile);
 
 module.exports = router;

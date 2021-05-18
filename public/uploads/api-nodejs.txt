@@ -1,6 +1,0 @@
-npm init
-npm install --save express
-npm install --save body-parser
-npm install mysql
-npm install --save-dev nodemon
-D:\Final Project\nuol_research_api\public\upload\20200107_130210.jpg
