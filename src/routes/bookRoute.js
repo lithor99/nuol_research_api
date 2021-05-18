@@ -11,7 +11,6 @@ router.post('/view_as_download', bookModel.viewBookAsDownload);
 router.post('/view_as_bookmark', bookModel.viewBookAsBookmark);
 router.post('/get_author', bookModel.getAuthor);
 
-router.post('/view_book_file', bookModel.viewBookFile);
 router.post('/upload_proposal_file', bookModel.uploadProposalFile);
 router.post('/upload_book_file', bookModel.uploadBookFile);
 router.post('/view_book_file', bookModel.viewBookFile);

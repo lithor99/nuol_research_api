@@ -18,77 +18,9 @@ const { DateTime } = require('../config/dbConfig');
 // app.use(morgan('dev'));
 
 
-// // create employee
-// exports.createEmployee = (req, res) => {
-//     sql.query(`INSERT INTO tb_employee VALUES('${req.body.name_surname}',
-//         '${req.body.username}','${req.body.password}','${req.body.gender}','${req.body.birth_date}',
-//         '${req.body.tel}','${req.body.email}',${req.body.role}, ${req.body.ban_state})`,
-//         (err, result) => {
-//             if (err) {
-//                 res.send('error', err)
-//                 console.log(err)
-//             } else {
-//                 res.send(result);
-//             }
-//         })
-// }
 
-// // edit employee
-// exports.editEmployee = (req, res) => {
-//     sql.query(`UPDATE tb_employee SET name_surname='${req.body.name_surname}',
-//     username='${req.body.username}',password='${req.body.password}',
-//     gender='${req.body.gender}',birth_date='${req.body.birth_date}',
-//     tel='${req.body.tel}',email='${req.body.email}',role=${req.body.role}, 
-//     ban_state=${req.body.ban_state} WHERE emp_id=${req.body.emp_id}`),
-//         (err, result) => {
-//             if (err) {
-//                 res.send('error', err)
-//                 console.log(err)
-//             } else {
-//                 res.send(req.body.emp_id);
-//                 // return res.json(req.body.emp_id);
-//             }
-//         }
-// }
 
-// // delete employee
-// exports.deleteEmployee = (req, res) => {
-//     sql.query(`DELETE FROM tb_employee WHERE emp_id=${req.body.emp_id}`),
-//         (err, result) => {
-//             if (err) {
-//                 res.send('error', err)
-//                 console.log(err)
-//             } else {
-//                 res.send(result);
-//             }
-//         }
-// }
-
-// // get all employee  
-// exports.getAllEmployee = (req, res) => {
-//     sql.query('SELECT * FROM tb_employee', (err, result) => {
-//         if (err) {
-//             console.log('error:', err);
-//             return res.json(err);
-//         } else {
-//             console.log('get all user');
-//             res.send(result.recordset);
-//         }
-//     });
-// }
-
-// // get one employee  
-// exports.getOneEmployee = (req, res) => {
-//     sql.query(`SELECT * FROM tb_employee WHERE emp_id=${req.body.emp_id}`, (err, result) => {
-//         if (err) {
-//             console.log('error:', err);
-//             return res.json('error:', err);
-//         } else {
-//             res.send(result.recordset);
-//         }
-//     });
-// }
-
+//..........................................................................................
 //view book as all
 exports.viewBookAsAll = (req, res) => {
     sql.query(`SELECT tb_book.book_id, tb_book.book_name, tb_book.book_group, tb_book.year_print, 
@@ -217,18 +149,26 @@ exports.getAuthor = (req, res) => {
         });
 }
 
-//view book file
-// exports.viewBookFile = (req, res) => {
-//     sql.query(`UPDATE tb_book SET total_view = total_view + 1 
-//         WHERE book_id = N'${req.body.book_id}'`,
-//         (err, result) => {
-//             if (err) {
-//                 return res.json('error');
-//             } else {
-//                 res.send(result.recordset);
-//             }
-//         });
-// }
+//get book file from database
+exports.viewBookFile = (req, res) => {
+    sql.query(`SELECT book_file FROM tb_book WHERE book_id = N'${req.body.book_id}' 
+        AND upload_state = 'true'`,
+        (err, result) => {
+            if (err) {
+                return res.json('error');
+            } else {
+                sql.query(`UPDATE tb_book SET total_view = total_view + 1 
+                    WHERE book_id = N'${req.body.book_id}'`,
+                    (err) => {
+                        if (err) {
+                            return res.json('error');
+                        } else {
+                            return res.json(result.recordset[0]);
+                        }
+                    });
+            }
+        })
+};
 
 //like
 exports.like = (req, res) => {
@@ -374,47 +314,28 @@ exports.uploadBookFile = async (req, res) => {
         var date = new Date().toLocaleString().split(',')[0];
         await upload(req, res);
         if (req.files) {
-            // let file = req.files.file;
-            // var filePath = path.join(__dirname, '..', '..', 'public', 'bookFiles', file.name).toString();
-            // file.mv('./public/bookFiles/' + file.name);
-            // sql.query(`UPDATE tb_book SET book_file = N'${filePath}', upload_date = '${date}', 
-            //     upl_emp_id = N'${empId}', upload_state = 'true'
-            //     WHERE book_id = N'${bookId}'`,
-            //     (err, result) => {
-            //         console.log(bookId);
-            //         if (err) {
-            //             return res.json('error');
-            //         } else {
-            //             return res.json({
-            //                 message: 'File has uploaded',
-            //                 data: {
-            //                     name: file.name,
-            //                     mimetype: file.mimetype,
-            //                     size: file.size,
-            //                     url: filePath,
-            //                 },
-            //             });
-            //         }
-            //     });
-
-
-            ///to firebase..................................................
-            await storage.bucket(bucketName).upload(filename, {
-                // Support for HTTP requests made with `Accept-Encoding: gzip`
-                gzip: true,
-                // By setting the option `destination`, you can change the name of the
-                // object you are uploading to a bucket.
-                metadata: {
-                    // Enable long-lived HTTP caching headers
-                    // Use only if the contents of the file will never change
-                    // (If the contents will change, use cacheControl: 'no-cache')
-                    cacheControl: 'public, max-age=31536000',
-                },
-            });
-
-            console.log(`${filename} uploaded to ${bucketName}.`);
-
-
+            let file = req.files.file;
+            var filePath = path.join(__dirname, '..', '..', 'public', 'bookFiles', file.name).toString();
+            file.mv('./public/bookFiles/' + file.name);
+            sql.query(`UPDATE tb_book SET book_file = N'${filePath}', upload_date = '${date}', 
+                upl_emp_id = N'${empId}', upload_state = 'true'
+                WHERE book_id = N'${bookId}'`,
+                (err, result) => {
+                    console.log(bookId);
+                    if (err) {
+                        return res.json('error');
+                    } else {
+                        return res.json({
+                            message: 'File has uploaded',
+                            data: {
+                                name: file.name,
+                                mimetype: file.mimetype,
+                                size: file.size,
+                                url: filePath,
+                            },
+                        });
+                    }
+                });
         } else {
             return res.json({
                 status: false,
@@ -434,26 +355,6 @@ exports.uploadBookFile = async (req, res) => {
 };
 
 
-//get book file from database
-exports.viewBookFile = (req, res) => {
-    sql.query(`SELECT book_file FROM tb_book WHERE book_id = N'${req.body.book_id}' 
-        AND upload_state = 'true'`,
-        (err, result) => {
-            if (err) {
-                return res.json('error');
-            } else {
-                sql.query(`UPDATE tb_book SET total_view = total_view + 1 
-                    WHERE book_id = N'${req.body.book_id}'`,
-                    (err) => {
-                        if (err) {
-                            return res.json('error');
-                        } else {
-                            return res.json(result.recordset[0]);
-                        }
-                    });
-            }
-        })
-};
 
 // exports.getFile = (req, res) => {
 //     // const directoryPath = 'D:\\Final Project\\nuol_research_api\\public\\uploads\\';

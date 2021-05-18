@@ -178,7 +178,7 @@ exports.forgotPassword = (req, res) => {
         // requireTLS: true,
         auth: {
             user: 'leethorxiongpor1999@gmail.com',
-            pass: '1999@igmail.lee'
+            pass: 'your email password'
         }
     });
 
@@ -225,7 +225,7 @@ exports.confirmEmailWhenForgotPassword = (req, res) => {
                         // requireTLS: true,
                         auth: {
                             user: 'leethorxiongpor1999@gmail.com',
-                            pass: '1999@igmail.lee'
+                            pass: 'your email password'
                         }
                     });
 
