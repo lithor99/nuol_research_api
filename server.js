@@ -12,7 +12,7 @@ require('dotenv').config();
 const app = express();
 
 //setup the server port
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 9000;
 
 // using body-parser
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -80,7 +80,7 @@ app.post('/upload', async (req, res) => {
                     mimetype: file.mimetype,
                     size: file.size
                 },
-                url:'./public/upload/' + file.name
+                url: './public/upload/' + file.name
             });
         }
     } catch (err) {
@@ -95,13 +95,16 @@ const departmentRoute = require('./src/routes/departmentRoute');
 const authorRoute = require('./src/routes/authorRoute');
 const commiteeRoute = require('./src/routes/commiteeRoute');
 const memberRoute = require('./src/routes/memberRoute');
+const fundRoute = require('./src/routes/fundRoute');
 
-app.use('/employee', employeeRoute);
-app.use('/faculty', facultyRoute);
-app.use('/department', departmentRoute);
-app.use('/author', authorRoute);
-app.use('/commitee', commiteeRoute);
+app.use('/', facultyRoute);
+app.use('/', departmentRoute);
+app.use('/', authorRoute);
+app.use('/', commiteeRoute);
+app.use('/', fundRoute);
 app.use('/member', memberRoute);
+app.use('/', employeeRoute);
+
 
 //define listen port
 app.listen(port, () => {
