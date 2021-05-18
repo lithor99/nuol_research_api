@@ -3,11 +3,12 @@ const router = express.Router();
 const authorModel = require('../models/authorModel');
 const verifyToken = require('../jwt/jwt');
 
-router.post('/add', authorModel.createAuthor);
-router.put('/edit', authorModel.editAuthor);
-router.delete('/delete', authorModel.deleteAuthor);
-router.get('/getAll', verifyToken, authorModel.getAllAuthor);
-router.get('/getOne', authorModel.getOneAuthor);
+router.post('/author/create', authorModel.createAuthor);
+router.put('/author/update/:id', authorModel.editAuthor);
+router.delete('/author/delete/:id', authorModel.deleteAuthor);
+// router.get('/getAll', verifyToken, authorModel.getAllAuthor);
+router.get('/authors', authorModel.getAllAuthor);
+router.get('/author/:id', authorModel.getOneAuthor);
 router.get('/search', authorModel.searchAuthor);
 
 module.exports = router;

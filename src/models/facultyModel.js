@@ -1,5 +1,4 @@
 const sql = require('../config/dbConfig');
-const employeeModel=require('../models/employeeModel')
 
 // create faculty
 exports.createFaculty = (req, res) => {
@@ -14,49 +13,47 @@ exports.createFaculty = (req, res) => {
         })
 }
 
-// edit faculty
+// edit faculty_
 exports.editFaculty = (req, res) => {
-    sql.query(`UPDATE tb_faculty SET faculty_name=N'${req.body.faculty_name}'
-    WHERE faculty_id=N${req.body.faculty_id}`),
+    const _id = req.params.id
+    const faculty_name = req.body.faculty_name
+
+    sql.query(`UPDATE tb_faculty SET faculty_name=N'${faculty_name}'
+    WHERE faculty_id=${_id}`,
         (err, result) => {
             if (err) {
                 res.send('error', err)
                 console.log(err)
             } else {
-                res.send(result);
+                res.send({
+                    message: `Faculty is edited successfully. result: ${result}`
+                });
             }
-        }
+        });
 }
 
 // delete faculty
 exports.deleteFaculty = (req, res) => {
-    sql.query(`DELETE FROM tb_faculty WHERE faculty_id=${req.body.faculty_id}`),
+    const _id = req.params.id
+    sql.query(`DELETE FROM tb_faculty WHERE faculty_id=${_id}`,
         (err, result) => {
             if (err) {
-                res.send('error', err)
-                console.log(err)
+                res.send({
+                    message: `'error', ${err}`
+                })
             } else {
-                res.send(result);
+                res.send({
+                    message: `delete faculty with id= ${_id} sccessfully. result= ${result}`
+                });
             }
-        }
+        });
 }
 
-// get all faculty  
-exports.getAllFaculty = (req, res) => {
-    sql.query('SELECT * FROM tb_faculty', (err, result) => {
-        if (err) {
-            console.log('error:', err);
-            return res.json(err);
-        } else {
-            console.log('get all user');
-            res.send(result.recordset);
-        }
-    });
-}
 
 // get one faculty  
 exports.getOneFaculty = (req, res) => {
-    sql.query(`SELECT * FROM tb_faculty WHERE faculty_id=${req.body.faculty_id}`, (err, result) => {
+    const _id = req.params.id
+    sql.query(`SELECT * FROM tb_faculty WHERE faculty_id=${_id}`, (err, result) => {
         if (err) {
             console.log('error:', err);
             return res.json('error:', err);
@@ -68,7 +65,8 @@ exports.getOneFaculty = (req, res) => {
 
 // search faculty
 exports.searchFaculty = (req, res) => {
-    sql.query(`SELECT * FROM tb_faculty WHERE faculty_name LIKE'%${req.body.faculty_name}%'`, (err, result) => {
+    const facultyName = req.params.faculty_name
+    sql.query(`SELECT * FROM tb_faculty WHERE faculty_name LIKE'N%${facultyName}%'`, (err, result) => {
         if (err) {
             console.log('error:', err);
             return res.json('error:', err);
@@ -76,4 +74,69 @@ exports.searchFaculty = (req, res) => {
             res.send(result.recordset);
         }
     });
+}
+
+// pagination faculty
+exports.pagination = async (req, res) => {
+    try {
+
+        const page = parseInt(req.params.page_Id);
+        const limit = parseInt(req.params.limit_Id);
+        const totalPage = await sql.query(`
+                    SELECT  count(DISTINCT(faculty_id)) AS count FROM tb_faculty
+                    `)
+
+        await sql.query(
+            `  
+        SELECT faculty_id,faculty_name 
+        FROM tb_faculty
+        ORDER BY faculty_id 
+        OFFSET (${page} - 1)*${limit} ROWS
+        FETCH NEXT ${limit} ROWS ONLY`
+        )
+            .then(data => {
+                const totalPages = Math.ceil(totalPage.recordset[0].count / limit);
+                const response = {
+                    data: {
+                        "total_items": totalPage.recordset[0].count,
+                        "total_pages": totalPages,
+                        "limit_page": limit,
+                        "currentpage": page,
+                        "currentPageSize": data.recordset.length,
+                        "faculty": data.recordset
+                    }
+                };
+                res.send(response);
+            });
+
+    } catch (error) {
+        res.status(500).send({
+            message: "Error -> Can NOT complete a paging request!",
+            error: error.message,
+        });
+    }
+}
+
+exports.getAllFaculty = async (req, res) => {
+    try {
+        const totalPage = await sql.query(`
+        SELECT  count(DISTINCT(faculty_id)) AS count FROM tb_faculty
+        `)
+
+        await sql.query(`SELECT * FROM tb_faculty ORDER BY faculty_name ASC`)
+            .then(data => {
+                const response = {
+                    data: {
+                        "total_items": totalPage.recordset[0].count,
+                        "faculty": data.recordset
+                    }
+                };
+                res.send(response);
+            });
+    } catch (error) {
+        res.status(500).send({
+            message: "Error -> Can NOT complete a paging request!",
+            error: error.message,
+        });
+    }
 }

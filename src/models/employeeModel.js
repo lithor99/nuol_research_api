@@ -1,24 +1,14 @@
 const sql = require('../config/dbConfig');
 const jwt = require('jsonwebtoken');
 
-// var Employee = function (employee) {
-//     // this.emp_id = employee.emp_id;
-//     this.name_surname = employee.name_surname;
-//     this.username = employee.username;
-//     this.password = employee.password;
-//     this.gender = employee.gender;
-//     this.birth_date = employee.birth_date;
-//     this.tel = employee.tel;
-//     this.email = employee.email;
-//     this.role = employee.role;
-//     this.ban_state = employee.ban_state;
-// }
+
 
 // create employee
 exports.createEmployee = (req, res) => {
-    sql.query(`INSERT INTO tb_employee VALUES('${req.body.name_surname}',
-        '${req.body.username}','${req.body.password}','${req.body.gender}','${req.body.birth_date}',
-        '${req.body.tel}','${req.body.email}',${req.body.role}, ${req.body.ban_state})`,
+    let { name, surname, username, password, gender, birth_date, tel, email, role, ban_state } = req.body;
+    sql.query(`
+    INSERT INTO tb_employee VALUES(N'${name}',N'${surname}',N'${username}',N'${password}',N'${gender}',N'${birth_date}',N'${tel}', N'${email}',${role},${ban_state})
+    `,
         (err, result) => {
             if (err) {
                 res.send('error', err)
@@ -31,25 +21,28 @@ exports.createEmployee = (req, res) => {
 
 // edit employee
 exports.editEmployee = (req, res) => {
-    sql.query(`UPDATE tb_employee SET name_surname='${req.body.name_surname}',
-    username='${req.body.username}',password='${req.body.password}',
-    gender='${req.body.gender}',birth_date='${req.body.birth_date}',
-    tel='${req.body.tel}',email='${req.body.email}',role=${req.body.role}, 
-    ban_state=${req.body.ban_state} WHERE emp_id=${req.body.emp_id}`),
+    let emp_id = req.params.id
+    let { name, surname, username, password, gender, birth_date, tel, email, role, ban_state } = req.body;
+    sql.query(`UPDATE tb_employee SET name=N'${name}',surname=N'${surname}',
+    username=N'${username}',password=N'${password}',
+    gender=N'${gender}',birth_date=N'${birth_date}',
+    tel=N'${tel}',email=N'${email}',role=${role}, 
+    ban_state=${ban_state} WHERE emp_id=${emp_id}`),
         (err, result) => {
             if (err) {
                 res.send('error', err)
                 console.log(err)
             } else {
-                res.send(req.body.emp_id);
-                // return res.json(req.body.emp_id);
+                // res.send(req.body.emp_id);
+                return res.json(result);
             }
         }
 }
 
+
 // delete employee
 exports.deleteEmployee = (req, res) => {
-    sql.query(`DELETE FROM tb_employee WHERE emp_id=${req.body.emp_id}`),
+    sql.query(`DELETE FROM tb_employee WHERE emp_id=${req.params.id}`),
         (err, result) => {
             if (err) {
                 res.send('error', err)
@@ -75,7 +68,8 @@ exports.getAllEmployee = (req, res) => {
 
 // get one employee  
 exports.getOneEmployee = (req, res) => {
-    sql.query(`SELECT * FROM tb_employee WHERE emp_id=${req.body.emp_id}`, (err, result) => {
+    let emp_id = req.params.id
+    sql.query(`SELECT * FROM tb_employee WHERE emp_id=${emp_id}`, (err, result) => {
         if (err) {
             console.log('error:', err);
             return res.json('error:', err);
