@@ -26,15 +26,15 @@ exports.memberRegist = (req, res) => {
         secure: false,
         // requireTLS: true,
         auth: {
-            user: 'leethorxiongpor1999@gmail.com',
-            pass: '1999@igmail.lee'
+            user: 'nuoltest2021@gmail.com',
+            pass: '@lee&khamla'
         }
     });
 
     var mailOptions = {
-        from: 'leethorxiongpor1999@gmail.com',
+        from: 'nuoltest2021@gmail.com',
         to: `${req.body.email}`,
-        subject: 'Your confirm password is',
+        subject: 'Your confirm number is',
         text: `${conf_num}`
     };
 
@@ -104,12 +104,7 @@ exports.createMember = (req, res) => {
                                             return res.json({ message: 'error:' }, err);
                                         }
                                         else {
-                                            if (!result.recordset[0]) {
-                                                return res.json({ message: 'password failed' });
-                                            } else {
-                                                const token = jwt.sign({ data: result.recordset[0] }, process.env.TOKEN_SECRET, { expiresIn: '30d' });
-                                                res.send({ token })
-                                            }
+                                            return res.json(result.recordset[0])
                                         }
                                     });
                             }
@@ -133,15 +128,15 @@ exports.sendMailAgain = (req, res) => {
         secure: false,
         // requireTLS: true,
         auth: {
-            user: 'leethorxiongpor1999@gmail.com',
-            pass: '1999@igmail.lee'
+            user: 'nuoltest2021@gmail.com',
+            pass: '@lee&khamla'
         }
     });
 
     var mailOptions = {
-        from: 'leethorxiongpor1999@gmail.com',
+        from: 'nuoltest2021@gmail.com',
         to: `${req.body.email}`,
-        subject: 'Your confirm password is',
+        subject: 'Your confirm number is',
         text: `${conf_num}`
     };
 
@@ -163,6 +158,20 @@ exports.sendMailAgain = (req, res) => {
         })
 }
 
+//upload member Image
+exports.uploadMemberProfile = (req, res) => {
+    sql.query(`UPDATE tb_member SET profile = N'${req.body.profile}' 
+        WHERE email= N'${req.body.email}'`,
+        (err, result) => {
+            if (err) {
+                console.log('error:', err);
+                return res.json('error:', err);
+            } else {
+                return res.json('upload complete');
+            }
+        });
+}
+
 //forgot password
 exports.forgotPassword = (req, res) => {
     function between(min, max) {
@@ -177,15 +186,15 @@ exports.forgotPassword = (req, res) => {
         secure: false,
         // requireTLS: true,
         auth: {
-            user: 'leethorxiongpor1999@gmail.com',
-            pass: 'your email password'
+            user: 'nuoltest2021@gmail.com',
+            pass: '@lee&khamla'
         }
     });
 
     var mailOptions = {
-        from: 'leethorxiongpor1999@gmail.com',
+        from: 'nuoltest2021@gmail.com',
         to: `${req.body.email}`,
-        subject: 'Your confirm password is',
+        subject: 'Your confirm number is',
         text: `${conf_num}`
     };
 
@@ -224,13 +233,13 @@ exports.confirmEmailWhenForgotPassword = (req, res) => {
                         secure: false,
                         // requireTLS: true,
                         auth: {
-                            user: 'leethorxiongpor1999@gmail.com',
-                            pass: 'your email password'
+                            user: 'nuoltest2021@gmail.com',
+                            pass: '@lee&khamla'
                         }
                     });
-
+                
                     var mailOptions = {
-                        from: 'leethorxiongpor1999@gmail.com',
+                        from: 'nuoltest2021@gmail.com',
                         to: `${req.body.email}`,
                         subject: 'Your password is',
                         text: `${result.recordset[0].password}`
@@ -352,13 +361,14 @@ exports.getAllMember = (req, res) => {
 }
 
 // get one member  
-exports.getMemberUser = (req, res) => {
+exports.getMemberData = (req, res) => {
     sql.query(`SELECT * FROM tb_member WHERE email='${req.body.email}'`, (err, result) => {
         if (err) {
             console.log('error:', err);
             return res.json('error');
         } else {
-            return res.json(result.recordset[0]);
+            const token = jwt.sign({ data: result.recordset[0] }, process.env.TOKEN_SECRET, { expiresIn: '90d' });
+            return res.json({ token })
         }
     });
 }
@@ -384,7 +394,6 @@ exports.memberLogin = (req, res) => {
                 return res.json({ message: 'error:' }, err);
             } else {
                 if (!result.recordset[0]) {
-                    // console.log('email not found');
                     return res.json({ message: 'email not found' });
                 } else {
                     sql.query(`SELECT member_id, email FROM tb_member WHERE email='${req.body.email}' AND password='${req.body.password}'`,
@@ -394,12 +403,9 @@ exports.memberLogin = (req, res) => {
                             }
                             else {
                                 if (!result.recordset[0]) {
-                                    // console.log('password failed');
                                     return res.json({ message: 'password failed' });
                                 } else {
-                                    console.log('login successful');
-                                    const token = jwt.sign({ data: result.recordset[0] }, process.env.TOKEN_SECRET, { expiresIn: '30d' });
-                                    res.send({ token })
+                                    return res.json(result.recordset[0])
                                 }
                             }
                         });

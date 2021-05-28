@@ -3,29 +3,23 @@ const router = express.Router();
 const bookModel = require('../models/bookModel');
 
 
-router.post('/view_as_all', bookModel.viewBookAsAll);
-router.post('/view_as_search', bookModel.viewBookAsSearch);
-router.post('/view_as_view', bookModel.viewBookAsView);
-router.post('/view_as_like', bookModel.viewBookAsLike);
-router.post('/view_as_download', bookModel.viewBookAsDownload);
-router.post('/view_as_bookmark', bookModel.viewBookAsBookmark);
-router.post('/get_author', bookModel.getAuthor);
+router.post('/book/view_as_all', bookModel.viewBookAsAll);
+router.post('/book/view_as_search', bookModel.viewBookAsSearch);
+router.post('/book/view_as_view', bookModel.viewBookAsView);
+router.post('/book/view_as_like', bookModel.viewBookAsLike);
+router.post('/book/view_as_download', bookModel.viewBookAsDownload);
+router.post('/book/view_as_bookmark', bookModel.viewBookAsBookmark);
+router.post('/book/get_author', bookModel.getAuthor);
 
-router.post('/upload_proposal_file', bookModel.uploadProposalFile);
-router.post('/upload_book_file', bookModel.uploadBookFile);
-router.post('/view_book_file', bookModel.viewBookFile);
-router.get('/download_book_file', bookModel.downloadBookFile);
+router.post('/book/upload_proposal_file', bookModel.uploadProposalFile);
+router.post('/book/upload_book_file', bookModel.uploadBookFile);
+router.post('/book/view_book_file', bookModel.viewBookFile);
+router.post('/book/download_book_file', bookModel.downloadBookFile);
 
-router.post('/like', bookModel.like);
-router.post('/get_like', bookModel.getLike);
-router.post('/dislike', bookModel.dislike);
-
-router.post('/bookmark', bookModel.bookmark);
-router.post('/get_bookmark', bookModel.getBookmark);
-router.post('/unbookmark', bookModel.unbookmark);
-// router.post('/login', token, memberModel.memberLogin);
-// router.put('/forgot_password',memberModel.forgotPassword);
-// router.put('/confirm_email', memberModel.confirmEmailWhenForgotPassword);
-// router.put('/edit/username', memberModel.editMemberUsername);
-// router.put('/edit/password', memberModel.editMemberPassword);
+router.post('/book/like', bookModel.like);
+router.post('/book/get_like', bookModel.getLike);
+router.post('/book/dislike', bookModel.dislike);
+router.post('/book/bookmark', bookModel.bookmark);
+router.post('/book/get_bookmark', bookModel.getBookmark);
+router.post('/book/unbookmark', bookModel.unbookmark);
 module.exports = router;

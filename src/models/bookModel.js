@@ -247,114 +247,139 @@ exports.unbookmark = (req, res) => {
         });
 }
 
-//download file
-exports.downloadFile = (req, res) => {
+//upload proposal file
+exports.uploadProposalFile = (req, res) => {
+    sql.query(`UPDATE tb_book SET proposal_file = N'${req.body.proposal_file}' 
+        WHERE book_id= N'${req.body.book_id}'`,
+        (err, result) => {
+            if (err) {
+                console.log('error:', err);
+                return res.json('error:', err);
+            } else {
+                return res.json('upload complete');
+            }
+        });
+}
+
+//upload book file
+exports.uploadBookFile = (req, res) => {
+    sql.query(`UPDATE tb_book SET book_file = N'${req.body.book_file}' 
+        WHERE book_id= N'${req.body.book_id}'`,
+        (err, result) => {
+            if (err) {
+                console.log('error:', err);
+                return res.json('error:', err);
+            } else {
+                return res.json('upload complete');
+            }
+        });
+}
+
+//download book file
+exports.downloadBookFile = (req, res) => {
     sql.query(`UPDATE tb_book SET total_load = total_load + 1 
         WHERE book_id = N'${req.body.book_id}'`,
         (err, result) => {
             if (err) {
                 return res.json('error');
             } else {
-                return res.json(result.recordset);
+                return res.json('download complete');
             }
         });
 }
 
 //https://bezkoder.com/node-js-express-file-upload/
 
-//upload proposal file
+////upload proposal file
+// exports.uploadProposalFile = async (req, res) => {
+//     try {
+//         var bookId = req.body.book_id;
+//         await upload(req, res);
+//         if (req.files) {
+//             let file = req.files.file;
+//             var filePath = path.join(__dirname, '..', '..', 'public', 'proposalFiles', file.name).toString();
+//             file.mv('./public/proposalFiles/' + file.name);
+//             sql.query(`UPDATE tb_book SET proposal_file = N'${filePath}' WHERE book_id = N'${bookId}'`,
+//                 (err, result) => {
+//                     if (err) {
+//                         return res.json('error');
+//                     } else {
+//                         return res.json({
+//                             message: 'File has uploaded',
+//                             data: {
+//                                 name: file.name,
+//                                 mimetype: file.mimetype,
+//                                 size: file.size,
+//                                 url: filePath,
+//                             },
+//                         });
+//                     }
+//                 });
+//         } else {
+//             return res.json({
+//                 status: false,
+//                 message: "Please choose file for upload!"
+//             });
+//         }
+//     } catch (err) {
+//         if (err.code == "LIMIT_FILE_SIZE") {
+//             return res.status(500).send({
+//                 message: "File size cannot be larger than 1000MB!",
+//             });
+//         }
+//         res.status(500).send({
+//             message: `Could not upload the file: ${req.file.originalname}. ${err}`,
+//         });
+//     }
+// };
 
-exports.uploadProposalFile = async (req, res) => {
-    try {
-        var bookId = req.body.book_id;
-        await upload(req, res);
-        if (req.files) {
-            let file = req.files.file;
-            var filePath = path.join(__dirname, '..', '..', 'public', 'proposalFiles', file.name).toString();
-            file.mv('./public/proposalFiles/' + file.name);
-            sql.query(`UPDATE tb_book SET proposal_file = N'${filePath}' WHERE book_id = N'${bookId}'`,
-                (err, result) => {
-                    if (err) {
-                        return res.json('error');
-                    } else {
-                        return res.json({
-                            message: 'File has uploaded',
-                            data: {
-                                name: file.name,
-                                mimetype: file.mimetype,
-                                size: file.size,
-                                url: filePath,
-                            },
-                        });
-                    }
-                });
-        } else {
-            return res.json({
-                status: false,
-                message: "Please choose file for upload!"
-            });
-        }
-    } catch (err) {
-        if (err.code == "LIMIT_FILE_SIZE") {
-            return res.status(500).send({
-                message: "File size cannot be larger than 1000MB!",
-            });
-        }
-        res.status(500).send({
-            message: `Could not upload the file: ${req.file.originalname}. ${err}`,
-        });
-    }
-};
-
-//upload book file
-exports.uploadBookFile = async (req, res) => {
-    try {
-        var bookId = req.body.book_id;
-        var empId = req.body.emp_id;
-        var date = new Date().toLocaleString().split(',')[0];
-        await upload(req, res);
-        if (req.files) {
-            let file = req.files.file;
-            var filePath = path.join(__dirname, '..', '..', 'public', 'bookFiles', file.name).toString();
-            file.mv('./public/bookFiles/' + file.name);
-            sql.query(`UPDATE tb_book SET book_file = N'${filePath}', upload_date = '${date}', 
-                upl_emp_id = N'${empId}', upload_state = 'true'
-                WHERE book_id = N'${bookId}'`,
-                (err, result) => {
-                    console.log(bookId);
-                    if (err) {
-                        return res.json('error');
-                    } else {
-                        return res.json({
-                            message: 'File has uploaded',
-                            data: {
-                                name: file.name,
-                                mimetype: file.mimetype,
-                                size: file.size,
-                                url: filePath,
-                            },
-                        });
-                    }
-                });
-        } else {
-            return res.json({
-                status: false,
-                message: "Please choose file for upload!"
-            });
-        }
-    } catch (err) {
-        if (err.code == "LIMIT_FILE_SIZE") {
-            return res.status(500).send({
-                message: "File size cannot be larger than 1000MB!",
-            });
-        }
-        res.status(500).send({
-            message: `Could not upload the file: ${req.file.originalname}. ${err}`,
-        });
-    }
-};
-
-
+////upload book file
+// exports.uploadBookFile = async (req, res) => {
+//     try {
+//         var bookId = req.body.book_id;
+//         var empId = req.body.emp_id;
+//         var date = new Date().toLocaleString().split(',')[0];
+//         await upload(req, res);
+//         if (req.files) {
+//             let file = req.files.file;
+//             var filePath = path.join(__dirname, '..', '..', 'public', 'bookFiles', file.name).toString();
+//             file.mv('./public/bookFiles/' + file.name);
+//             sql.query(`UPDATE tb_book SET book_file = N'${filePath}', upload_date = '${date}', 
+//                 upl_emp_id = N'${empId}', upload_state = 'true'
+//                 WHERE book_id = N'${bookId}'`,
+//                 (err, result) => {
+//                     console.log(bookId);
+//                     if (err) {
+//                         return res.json('error');
+//                     } else {
+//                         return res.json({
+//                             message: 'File has uploaded',
+//                             data: {
+//                                 name: file.name,
+//                                 mimetype: file.mimetype,
+//                                 size: file.size,
+//                                 url: filePath,
+//                             },
+//                         });
+//                     }
+//                 });
+//         } else {
+//             return res.json({
+//                 status: false,
+//                 message: "Please choose file for upload!"
+//             });
+//         }
+//     } catch (err) {
+//         if (err.code == "LIMIT_FILE_SIZE") {
+//             return res.status(500).send({
+//                 message: "File size cannot be larger than 1000MB!",
+//             });
+//         }
+//         res.status(500).send({
+//             message: `Could not upload the file: ${req.file.originalname}. ${err}`,
+//         });
+//     }
+// };
 
 // exports.getFile = (req, res) => {
 //     // const directoryPath = 'D:\\Final Project\\nuol_research_api\\public\\uploads\\';
@@ -392,20 +417,14 @@ exports.uploadBookFile = async (req, res) => {
 //     // });
 // };
 
-exports.downloadBookFile = (req, res) => {
-    sql.query(`SELECT book_file FROM tb_book WHERE book_id = N'${req.body.book_id}'`,
-        (err, result) => {
-            if (err) {
-                return res.json('error');
-            } else {
-                var url = res.json(result.recordset[0]['book_file']).toString()
-                var file = fs.createWriteStream('.pdf');
-                var request = http.get('https://firebasestorage.googleapis.com/v0/b/myfirebaseproject-37ce1.appspot.com/o/Analysis%20Diagram%201.pdf?alt=media&token=91228fc2-1c53-4db6-8de5-18c9c04976d9', function (response) {
-                    response.pipe(file);
-                    // file.on('finish', function () {
-                    //     file.close(cb);  
-                    // });
-                });
-            }
-        });
-};
+// // down load file (get url from database)
+// exports.downloadBookFile = (req, res) => {
+//     sql.query(`SELECT book_file FROM tb_book WHERE book_id = N'${req.body.book_id}'`,
+//         (err, result) => {
+//             if (err) {
+//                 return res.json('error');
+//             } else {
+//                 return res.json(result.recordset[0]);
+//             }
+//         });
+// };
