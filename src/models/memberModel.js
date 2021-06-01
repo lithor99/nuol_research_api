@@ -237,7 +237,7 @@ exports.confirmEmailWhenForgotPassword = (req, res) => {
                             pass: '@lee&khamla'
                         }
                     });
-                
+
                     var mailOptions = {
                         from: 'nuoltest2021@gmail.com',
                         to: `${req.body.email}`,
@@ -414,4 +414,76 @@ exports.memberLogin = (req, res) => {
         });
 }
 
-// module.exports = { downloadFile };
+// getSingleLike 
+
+exports.getSingleLike = (req, res) => {
+    const book_id = req.params.id
+    sql.query(`SELECT * FROM tb_like where book_id='${book_id}'`,
+        (err, result) => {
+            if (err) {
+                console.log('error while fetching getSingleLike by id', err);
+                return res.json(err);
+            } else {
+                console.log('get all getSingleLike');
+                res.send(result.recordset);
+
+            }
+        });
+}
+
+exports.deleteLike = (req, res) => {
+    try {
+        const { book_id, member_id } = req.body;
+
+        sql.query(`DELETE FROM tb_like WHERE member_id=${member_id} and book_id='${book_id}'`,
+            (err, result) => {
+                if (err) {
+                    console.log('error while fetching member_id by id', err);
+                    res.send(err);
+                } else {
+                    console.log('get all successfulyy member_id delete');
+                    res.send(result.recordset);
+
+                }
+            });
+    } catch (error) {
+        console.log("ERORR: ", error)
+    }
+}
+
+// getSingleBookMark 
+
+exports.getSingleBookMark = (req, res) => {
+    const book_id = req.params.id
+    sql.query(`SELECT * FROM tb_bookmark where book_id='${book_id}'`,
+        (err, result) => {
+            if (err) {
+                console.log('error while fetching getSingleBookMark by id', err);
+                return res.json(err);
+            } else {
+                console.log('get all getSingleBookMark');
+                res.send(result.recordset);
+
+            }
+        });
+}
+
+exports.deleteBookMark = (req, res) => {
+    try {
+        const { book_id, member_id } = req.body;
+
+        sql.query(`DELETE FROM tb_bookmark WHERE member_id=${member_id} and book_id='${book_id}'`,
+            (err, result) => {
+                if (err) {
+                    console.log('error while fetching deleteBookMark member_id by id', err);
+                    res.send(err);
+                } else {
+                    console.log('get all successfulyy deleteBookMark member_id delete');
+                    res.send(result.recordset);
+
+                }
+            });
+    } catch (error) {
+        console.log("ERORR: ", error)
+    }
+}

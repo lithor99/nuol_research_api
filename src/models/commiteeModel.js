@@ -103,3 +103,42 @@ exports.searchCommitee = (req, res) => {
             }
         });
 }
+
+
+
+// getSingleCommiteeGroup 
+
+exports.getSingleCommiteeGroup = (req, res) => {
+    const book_id = req.params.id
+    sql.query(`SELECT * FROM tb_commitee_group where book_id='${book_id}'`,
+        (err, result) => {
+            if (err) {
+                console.log('error while fetching singleCommitteGrouop by id', err);
+                return res.json(err);
+            } else {
+                console.log('get all singleCommitteGrouop');
+                res.send(result.recordset);
+
+            }
+        });
+}
+
+exports.deleteCommitteeGroup = (req, res) => {
+    try {
+        const { book_id, commit_id } = req.body;
+
+        sql.query(`DELETE FROM tb_commitee_group WHERE commit_id=${commit_id} and book_id='${book_id}'`,
+            (err, result) => {
+                if (err) {
+                    console.log('error while fetching commit_id by id', err);
+                    res.send(err);
+                } else {
+                    console.log('get all successfulyy commit_id delete');
+                    res.send(result.recordset);
+
+                }
+            });
+    } catch (error) {
+        console.log("ERORR: ", error)
+    }
+}

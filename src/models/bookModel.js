@@ -9,6 +9,7 @@ const fs = require('fs');
 const { json } = require('body-parser');
 const { dirname } = require('path');
 const { DateTime } = require('../config/dbConfig');
+
 // const { param } = require('../routes/memberRoute');
 // const fileupload = require('express-fileupload');
 // const util = require('util');
@@ -428,3 +429,66 @@ exports.downloadBookFile = (req, res) => {
 //             }
 //         });
 // };
+
+
+
+
+// Create book request add:
+
+exports.createBookRequest = async (req, res) => {
+    const { book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id } = req.body
+    sql.query(`
+    INSERT INTO tb_book (book_id,book_name, book_group, proposal_file, offer_date, offer_emp_id)  VALUES(N'${book_id}',N'${book_name}',N'${book_group}',N'${proposal_file}','${offer_date}',${offer_emp_id});`,
+        (err, result) => {
+            if (err) {
+                res.send('error:', err)
+                console.log(err)
+
+            } else {
+                res.send(result);
+            }
+        })
+}
+
+// delete book request DELETE:
+
+// delete author
+// exports.deleteRequestBokk = (req, res) => {
+//     sql.query(`
+//         delete tb_author from tb_author left join tb_department on tb_author.depart_id = tb_department.depart_id
+// 		left join tb_faculty on tb_faculty.faculty_id = tb_department.faculty_id WHERE tb_author.author_id=${req.params.id}`),
+//         (err, result) => {
+//             if (err) {
+//                 res.send('error:', err)
+//                 console.log('error:', err)
+//             } else {
+//                 res.send(result);
+//             }
+//         }
+// }
+
+// get all getAllRequestBook
+exports.getAllRequestBook = (req, res) => {
+    sql.query(`select book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id from tb_book ORDER BY book_name ASC;`,
+        (err, result) => {
+            if (err) {
+                console.log('error while fetching user by id', err);
+                return res.json(err);
+            } else {
+                console.log('get all author_group');
+                res.send(result.recordset);
+            }
+        });
+}
+
+exports.deleteSingleRequestBook = (req, res) => {
+    const { book_id } = req.body
+    sql.query(`delete from tb_book where book_id='${book_id}';`,
+        (err, result) => {
+            if (err) {
+                console.log(err)
+            } else {
+                console.log(result)
+            }
+        })
+}
