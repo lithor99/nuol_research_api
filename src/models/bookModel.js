@@ -450,22 +450,6 @@ exports.createBookRequest = async (req, res) => {
         })
 }
 
-// delete book request DELETE:
-
-// delete author
-// exports.deleteRequestBokk = (req, res) => {
-//     sql.query(`
-//         delete tb_author from tb_author left join tb_department on tb_author.depart_id = tb_department.depart_id
-// 		left join tb_faculty on tb_faculty.faculty_id = tb_department.faculty_id WHERE tb_author.author_id=${req.params.id}`),
-//         (err, result) => {
-//             if (err) {
-//                 res.send('error:', err)
-//                 console.log('error:', err)
-//             } else {
-//                 res.send(result);
-//             }
-//         }
-// }
 
 // get all getAllRequestBook
 exports.getAllRequestBook = (req, res) => {
@@ -492,3 +476,44 @@ exports.deleteSingleRequestBook = (req, res) => {
             }
         })
 }
+
+// update RequestBookById
+exports.updateRequestBookById = (req, res) => {
+
+    const book_id = req.params.id
+
+    const { book_name, book_group, proposal_file, offer_date, offer_emp_id } = req.body;
+
+    sql.query(`
+    UPDATE tb_book SET book_name=N'${book_name}', book_group=N'${book_group}', proposal_file=N'${proposal_file}', offer_date='${offer_date}', offer_emp_id=${offer_emp_id} WHERE book_id='${book_id}'
+    `, (err, result) => {
+        if (err) {
+            res.send('  UPDATE tb_book error', err)
+            console.log(err)
+        } else {
+            res.send({
+                message: ` UPDATE tb_book is edited successfully. result: ${result}`
+            });
+        }
+    });
+}
+
+
+
+// getRequestBookById
+exports.getRequestBookById = (req, res) => {
+    const book_id = req.params.id
+
+    sql.query(`
+    select book_name, book_group, proposal_file, offer_date, offer_emp_id  from tb_book where book_id='${book_id}'
+    `, (err, result) => {
+        if (err) {
+            console.log('error tb_book:', err);
+            return res.json('error tb_book:', err);
+        } else {
+            console.log('successfully fetcj book request by Id tb_book:');
+            res.send(result.recordset);
+        }
+    });
+}
+

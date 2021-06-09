@@ -5,8 +5,10 @@ const authorGroup = require('../models/authorGroupModel');
 
 
 router.post('/authorGroup/create', authorGroup.createAuthor_group);
+router.put('/authorGroup/update', authorGroup.updateAuthor_group);
 router.delete('/authorGroup/delete', authorGroup.deleteAuthor_group);
 router.get('/authorGroup/:id', authorGroup.getSingleAuthorGroup);
+
 
 
 module.exports = router;

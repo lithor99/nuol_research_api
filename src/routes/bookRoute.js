@@ -28,6 +28,8 @@ router.post('/book/unbookmark', bookModel.unbookmark);
 // request book
 router.post('/book/request/create', bookModel.createBookRequest);
 router.get('/book/requests', bookModel.getAllRequestBook);
+router.put('/book/request/:id', bookModel.updateRequestBookById);
+router.get('/book/request/:id', bookModel.getRequestBookById);
 router.delete('/book/request/delete', bookModel.deleteSingleRequestBook);
 
 // 

@@ -39,7 +39,7 @@ exports.createAuthor_group = (req, res) => {
 // get all authorGroup
 exports.getSingleAuthorGroup = (req, res) => {
     const book_id = req.params.id
-    sql.query(`select author_id from tb_author_group where book_id='${book_id}';`,
+    sql.query(`select author_id from tb_author_group where book_id=N'${book_id}';`,
         (err, result) => {
             if (err) {
                 console.log('error while fetching user by id', err);
@@ -57,7 +57,7 @@ exports.deleteAuthor_group = (req, res) => {
     try {
         const { book_id, author_id } = req.body;
 
-        sql.query(`DELETE FROM tb_author_group WHERE author_id=${author_id} and book_id='${book_id}'`,
+        sql.query(`DELETE FROM tb_author_group WHERE author_id=${author_id} and book_id=N'${book_id}'`,
             (err, result) => {
                 if (err) {
                     console.log('error while fetching author_id by id', err);
@@ -71,4 +71,35 @@ exports.deleteAuthor_group = (req, res) => {
     } catch (error) {
         console.log("ERORR: ", error)
     }
+}
+
+
+// update AuthorGroup By Id
+
+exports.updateAuthor_group = (req, res) => {
+
+    const author_id = req.body.author_id
+    const book_id = req.body.book_id
+
+    sql.query(`UPDATE tb_author_group SET author_id=${author_id} WHERE book_id=N'${book_id}'`)
+        .then((result) => {
+            if (res.status == 200) {
+                console.log("ssucessdfully update: ", result)
+                res.send({
+                    message: "update successfully ", result
+                })
+            }
+            if (res.status >= 400) {
+                res.send({
+                    message: "update error author.... ", result
+                })
+                console.log("error update: ", result)
+            }
+        })
+        .catch((err) => {
+            res.send({
+                message: "update error author id ", err
+            })
+            console.log("update error leo: ", result)
+        });
 }
