@@ -218,10 +218,10 @@ exports.employeeLogin = async (req, res) => {
 
 
 
-    console.log("Token is sent : ", token)
+    // console.log("Token is sent : ", token)
 
 
-    res.send("Login Succcessfully")
+    // res.send("Login Succcessfully")
 
     // sql.query(`SELECT emp_id, username, password FROM tb_employee WHERE username='${req.body.username}'`,
     //     (err, result) => {
@@ -253,3 +253,71 @@ exports.employeeLogin = async (req, res) => {
     //         }
     //     });
 }
+
+// getEmployeesPagination
+
+const getPagination = (page, size) => {
+    const limit = size ? +size : 3;
+    const offset = page ? page * limit : 0;
+
+    return { limit, offset };
+};
+
+exports.getEmployeesPagination = async (req, res) => {
+    try {
+
+        const { page, size } = req.query;
+        const { limit, offset } = getPagination(page, size);
+
+
+        // const limit = 10;
+        // const page = 10;
+
+        const totalPage = await sql.query(`
+                    SELECT  count(DISTINCT(emp_id)) AS count FROM tb_employee
+                    `)
+
+        await sql.query(
+            `  
+        SELECT * 
+        FROM tb_employee
+        ORDER BY emp_id 
+        OFFSET (${offset} - 1)*${limit} ROWS
+        FETCH NEXT ${limit} ROWS ONLY`
+        )
+            .then(data => {
+                const totalPages = Math.ceil(totalPage.recordset[0].count / limit);
+                const response = {
+                    data: {
+                        "totalItems": totalPage.recordset[0].count,
+                        "totalPages": totalPages,
+                        // "limit": limit,
+                        "currentPages": page + 1 - page,
+                        // "currentPageSize": data.recordset.length,
+                        "employees": data.recordset
+                    }
+                };
+                res.send(response);
+            });
+
+    } catch (error) {
+        res.status(500).send({
+            message: "Error -> Can NOT complete a paging request!",
+            error: error.message,
+        });
+    }
+}
+
+// exports.getEmployeesPagination = async (req, res) => { 
+
+
+//     sql.query('SELECT * FROM tb_employee', (err, result) => {
+//         if (err) {
+//             console.log('error while get all employees:', err);
+//             return res.json(err);
+//         } else {
+//             console.log('get all employees');
+//             res.send(result.recordset);
+//         }
+//     });
+// }

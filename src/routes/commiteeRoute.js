@@ -12,8 +12,10 @@ router.get('/committee/search', commiteeModel.searchCommitee);
 
 // tb_committee_group
 
+router.post('/committeeGroup/create', commiteeModel.createCommitteeGroup);
 router.get('/committeeGroup/:id', commiteeModel.getSingleCommiteeGroup);
 router.delete('/committeeGroup/delete', commiteeModel.deleteCommitteeGroup);
+
 
 
 module.exports = router;

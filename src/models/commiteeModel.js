@@ -125,9 +125,9 @@ exports.getSingleCommiteeGroup = (req, res) => {
 
 exports.deleteCommitteeGroup = (req, res) => {
     try {
-        const { book_id, commit_id } = req.body;
+        const { book_id } = req.body;
 
-        sql.query(`DELETE FROM tb_commitee_group WHERE commit_id=${commit_id} and book_id='${book_id}'`,
+        sql.query(`DELETE FROM tb_commitee_group WHERE book_id='${book_id}'`,
             (err, result) => {
                 if (err) {
                     console.log('error while fetching commit_id by id', err);
@@ -141,4 +141,36 @@ exports.deleteCommitteeGroup = (req, res) => {
     } catch (error) {
         console.log("ERORR: ", error)
     }
+}
+
+
+// createCommitteeGroup
+
+exports.createCommitteeGroup = (req, res) => {
+
+    const commit_id = req.body.commit_id
+    const book_id = req.body.book_id
+
+    sql.query(`
+        INSERT INTO tb_commitee_group (book_id,commit_id)  VALUES (N'${book_id}',${commit_id});`)
+        .then((result) => {
+            if (res.status == 200) {
+                console.log("ssucessdfully: ", result)
+                res.send({
+                    message: "create successfully committee group ", result
+                })
+            }
+            if (res.status >= 400) {
+                res.send({
+                    message: "create error commit.... ", result
+                })
+                console.log("error: ", result)
+            }
+        })
+        .catch((err) => {
+            res.send({
+                message: "create error commit id ", err
+            })
+            console.log("error leo: ", result)
+        });
 }

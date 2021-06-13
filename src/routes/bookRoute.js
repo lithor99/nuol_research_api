@@ -32,7 +32,13 @@ router.put('/book/request/:id', bookModel.updateRequestBookById);
 router.get('/book/request/:id', bookModel.getRequestBookById);
 router.delete('/book/request/delete', bookModel.deleteSingleRequestBook);
 
-// 
+// approve research  
+router.post('/book/approve/create', bookModel.createApproveResearchBook);
+router.get('/book/approves', bookModel.getAllApproveResearchBook);
+router.get('/book/approve/:id', bookModel.getSingleApproveResearchById);
+router.put('/book/approve/cancel', bookModel.cancelApproveResearchBook);
+
+
 
 
 module.exports = router;
