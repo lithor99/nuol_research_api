@@ -9,6 +9,7 @@ const fs = require('fs');
 const { json } = require('body-parser');
 const { dirname } = require('path');
 const { DateTime } = require('../config/dbConfig');
+
 // const { param } = require('../routes/memberRoute');
 // const fileupload = require('express-fileupload');
 // const util = require('util');
@@ -433,3 +434,164 @@ exports.addDownload = (req, res) => {
 //             }
 //         });
 // };
+
+
+
+
+// Create book request add:
+
+exports.createBookRequest = async (req, res) => {
+    const { book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id, research_state } = req.body
+    sql.query(`
+    INSERT INTO tb_book (book_id,book_name, book_group, proposal_file, offer_date, offer_emp_id,research_state)  VALUES(N'${book_id}',N'${book_name}',N'${book_group}',N'${proposal_file}','${offer_date}',${offer_emp_id},${research_state});`,
+        (err, result) => {
+            if (err) {
+                res.send('error:', err)
+                console.log(err)
+
+            } else {
+                res.send(result);
+            }
+        })
+}
+
+
+// get all getAllRequestBook
+exports.getAllRequestBook = (req, res) => {
+    sql.query(`select book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id from tb_book where research_state=0  ORDER BY book_name ASC;`,
+        (err, result) => {
+            if (err) {
+                console.log('error while fetching user by id', err);
+                return res.json(err);
+            } else {
+                console.log('get all author_group');
+                res.send(result.recordset);
+            }
+        });
+}
+
+exports.deleteSingleRequestBook = (req, res) => {
+    const { book_id } = req.body
+    sql.query(`delete from tb_book where book_id='${book_id}';`,
+        (err, result) => {
+            if (err) {
+                console.log(err)
+            } else {
+                console.log(result)
+            }
+        })
+}
+
+// update RequestBookById
+exports.updateRequestBookById = (req, res) => {
+
+    const book_id = req.params.id
+
+    const { book_name, book_group, proposal_file, offer_date, offer_emp_id } = req.body;
+
+    sql.query(`
+    UPDATE tb_book SET book_name=N'${book_name}', book_group=N'${book_group}', proposal_file=N'${proposal_file}', offer_date='${offer_date}', offer_emp_id=${offer_emp_id} WHERE book_id='${book_id}'
+    `, (err, result) => {
+        if (err) {
+            res.send('  UPDATE tb_book error', err)
+            console.log(err)
+        } else {
+            res.send({
+                message: ` UPDATE tb_book is edited successfully. result: ${result}`
+            });
+        }
+    });
+}
+
+
+
+// getRequestBookById
+exports.getRequestBookById = (req, res) => {
+    const book_id = req.params.id
+
+    sql.query(`
+    select book_name, book_group, proposal_file, offer_date, offer_emp_id  from tb_book where book_id='${book_id}'
+    `, (err, result) => {
+        if (err) {
+            console.log('error tb_book:', err);
+            return res.json('error tb_book:', err);
+        } else {
+            console.log('successfully fetcj book request by Id tb_book:');
+            res.send(result.recordset);
+        }
+    });
+}
+
+
+// createApproveResearchBook
+
+exports.createApproveResearchBook = (req, res) => {
+
+    const { appro_date, appro_emp_id, book_id, date_line, fund, fund_id, research_state } = req.body
+    sql.query(`UPDATE tb_book SET appro_date='${appro_date}',appro_emp_id='${appro_emp_id}',date_line='${date_line}',fund=${fund},fund_id=${fund_id},research_state=${research_state} WHERE book_id='${book_id}';`,
+        (err, result) => {
+            if (err) {
+                res.send('error update:', err)
+                console.log("create approve resarch err")
+
+            } else {
+                console.log("create approve resarch success")
+
+                res.send(result);
+            }
+        })
+}
+
+
+// query all getAllApproveResearchBook
+
+exports.getAllApproveResearchBook = (req, res) => {
+    sql.query(`select book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id,appro_date,date_line  from tb_book where research_state=1  ORDER BY book_name ASC;`,
+        (err, result) => {
+            if (err) {
+                console.log('error getAllApproveResearchBook', err);
+                return res.json(err);
+            } else {
+                console.log('get all getAllApproveResearchBook');
+                res.send(result.recordset);
+            }
+        });
+}
+
+// getSingleApproveResearchById
+
+exports.getSingleApproveResearchById = (req, res) => {
+    const book_id = req.params.id
+    const _id = 1
+    sql.query(`
+    select * from tb_book where book_id='${book_id}'
+    `, (err, result) => {
+        if (err) {
+            console.log('error getSingleApproveResearchById:', err);
+            return res.json('error getSingleApproveResearchById:', err);
+        } else {
+            console.log('successfully getSingleApproveResearchById: ');
+            res.status(200).json(result.recordset);
+        }
+    });
+}
+
+
+// cancelApproveResearchBook
+
+exports.cancelApproveResearchBook = (req, res) => {
+    const { book_id, research_state, appro_date, appro_emp_id, date_line, fund, fund_id } = req.body
+    sql.query(`UPDATE tb_book SET appro_date='${appro_date}',appro_emp_id='${appro_emp_id}',date_line='${date_line}',fund=${fund},fund_id=${fund_id},research_state=${research_state} WHERE book_id='${book_id}';`,
+        (err, result) => {
+            if (err) {
+                res.send('error update:', err)
+                console.log("cancel approve resarch err")
+
+            } else {
+                console.log("cancel approve resarch success")
+
+                res.send(result);
+            }
+        })
+}
+
