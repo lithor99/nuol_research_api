@@ -13,9 +13,10 @@ router.post('/book/get_author', bookModel.getAuthor);
 
 router.post('/book/upload_proposal_file', bookModel.uploadProposalFile);
 router.post('/book/upload_book_file', bookModel.uploadBookFile);
-router.post('/book/view_book_file', bookModel.viewBookFile);
-router.post('/book/download_book_file', bookModel.downloadBookFile);
+router.post('/book/get_book_file', bookModel.getBookFile);
+router.post('/book/add_download', bookModel.addDownload);
 
+router.put('/book/add_view', bookModel.addView);
 router.post('/book/like', bookModel.like);
 router.post('/book/get_like', bookModel.getLike);
 router.post('/book/dislike', bookModel.dislike);

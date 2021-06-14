@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
 
 
 //import route
-const employeeRoute = require('./src/routes/employeeRoute');
+// const employeeRoute = require('./src/routes/employeeRoute');
 const facultyRoute = require('./src/routes/facultyRoute');
 const departmentRoute = require('./src/routes/departmentRoute');
 const authorRoute = require('./src/routes/authorRoute');
@@ -45,7 +45,7 @@ app.use('/', authorRoute);
 app.use('/', commiteeRoute);
 app.use('/', fundRoute);
 app.use('/', memberRoute);
-app.use('/', employeeRoute);
+// app.use('/', employeeRoute);
 app.use('/', bookRoute);
 
 

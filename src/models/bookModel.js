@@ -150,24 +150,29 @@ exports.getAuthor = (req, res) => {
 }
 
 //get book file from database
-exports.viewBookFile = (req, res) => {
+exports.getBookFile = (req, res) => {
     sql.query(`SELECT book_file FROM tb_book WHERE book_id = N'${req.body.book_id}' 
         AND upload_state = 'true'`,
         (err, result) => {
             if (err) {
                 return res.json('error');
             } else {
-                sql.query(`UPDATE tb_book SET total_view = total_view + 1 
-                    WHERE book_id = N'${req.body.book_id}'`,
-                    (err) => {
-                        if (err) {
-                            return res.json('error');
-                        } else {
-                            return res.json(result.recordset[0]);
-                        }
-                    });
+                return res.json(result.recordset[0]);
             }
         })
+};
+
+//add view 
+exports.addView = (req, res) => {
+    sql.query(`UPDATE tb_book SET total_view = total_view + 1 
+        WHERE book_id = N'${req.body.book_id}'`,
+        (err, result) => {
+            if (err) {
+                return res.json('error');
+            } else {
+                return res.json(result.recordset);
+            }
+        });
 };
 
 //like
@@ -276,7 +281,7 @@ exports.uploadBookFile = (req, res) => {
 }
 
 //download book file
-exports.downloadBookFile = (req, res) => {
+exports.addDownload = (req, res) => {
     sql.query(`UPDATE tb_book SET total_load = total_load + 1 
         WHERE book_id = N'${req.body.book_id}'`,
         (err, result) => {

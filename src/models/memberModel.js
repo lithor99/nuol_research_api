@@ -47,8 +47,8 @@ exports.memberRegist = (req, res) => {
                 if (result.recordset[0]) {
                     return res.json({ message: 'this email already registered' })
                 } else {
-                    sql.query(`INSERT INTO tb_register VALUES('${req.body.username}', 
-                '${req.body.email}', '${req.body.password}', '${conf_num}')`,
+                    sql.query(`INSERT INTO tb_register VALUES(N'${req.body.username}', 
+                '${req.body.email}', N'${req.body.password}', '${conf_num}')`,
                         (err, result) => {
                             if (err) {
                                 res.send('error', err)
@@ -66,7 +66,7 @@ exports.memberRegist = (req, res) => {
                                                 if (err) {
                                                     console.log({ message: 'error:' }, err);
                                                 } else {
-                                                    console.log(`Your confirm password is ${conf_num}`);
+                                                    console.log(`Your confirm number is ${conf_num}`);
                                                 }
                                             })
                                         }
@@ -91,20 +91,22 @@ exports.createMember = (req, res) => {
                     console.log('confirm number failed');
                     return res.json({ message: 'confirm number failed' });
                 } else {
-                    sql.query(`INSERT INTO tb_member VALUES('${req.body.username}', 
-                    '${req.body.email}', '${req.body.password}','', ${req.body.regist_id},'true')`,
+                    sql.query(`INSERT INTO tb_member VALUES(N'${req.body.username}', 
+                    '${req.body.email}', '${req.body.password}', null, 'no profile', ${req.body.regist_id},'true')`,
                         (err, result) => {
                             if (err) {
                                 return res.json({ message: 'error1:' }, err);
                             } else {
-                                sql.query(`SELECT member_id, email, password FROM tb_member WHERE email='${req.body.email}' 
+                                sql.query(`SELECT * FROM tb_member WHERE email='${req.body.email}' 
                                 AND password='${req.body.password}'`,
                                     (err, result) => {
                                         if (err) {
-                                            return res.json({ message: 'error:' }, err);
+                                            return res.json({ message: 'error2:' }, err);
                                         }
                                         else {
-                                            return res.json(result.recordset[0])
+                                            return res.json(result.recordset[0]);
+                                            // const token = jwt.sign({ data: result.recordset[0] }, process.env.TOKEN_SECRET, { expiresIn: '90d' });
+                                            // return res.json({ token })
                                         }
                                     });
                             }
@@ -160,16 +162,31 @@ exports.sendMailAgain = (req, res) => {
 
 //upload member Image
 exports.uploadMemberProfile = (req, res) => {
-    sql.query(`UPDATE tb_member SET profile = N'${req.body.profile}' 
+    if (req.body.profile == "") {
+        sql.query(`UPDATE tb_member SET profile = N'no profile' 
         WHERE email= N'${req.body.email}'`,
-        (err, result) => {
-            if (err) {
-                console.log('error:', err);
-                return res.json('error:', err);
-            } else {
-                return res.json('upload complete');
-            }
-        });
+            (err, result) => {
+                if (err) {
+                    console.log('error:', err);
+                    return res.json('error:', err);
+                } else {
+                    return res.json('upload complete');
+                }
+            });
+
+    } else {
+        sql.query(`UPDATE tb_member SET profile = N'${req.body.profile}' 
+        WHERE email= N'${req.body.email}'`,
+            (err, result) => {
+                if (err) {
+                    console.log('error:', err);
+                    return res.json('error:', err);
+                } else {
+                    return res.json('upload complete');
+                }
+            });
+    }
+
 }
 
 //forgot password
@@ -237,7 +254,7 @@ exports.confirmEmailWhenForgotPassword = (req, res) => {
                             pass: '@lee&khamla'
                         }
                     });
-                
+
                     var mailOptions = {
                         from: 'nuoltest2021@gmail.com',
                         to: `${req.body.email}`,
@@ -269,8 +286,8 @@ exports.editMemberUsername = (req, res) => {
                     return res.json({ message: 'password failed' });
                 }
                 else {
-                    sql.query(`UPDATE tb_member SET username='${req.body.new_username}'
-                    WHERE email='${req.body.email}' AND password='${req.body.password}'`,
+                    sql.query(`UPDATE tb_member SET username=N'${req.body.new_username}'
+                    WHERE email='${req.body.email}' AND password=N'${req.body.password}'`,
                         (err, result) => {
                             if (err) {
                                 res.send('error:', err);
@@ -298,8 +315,8 @@ exports.editMemberPassword = (req, res) => {
                 if (!result.recordset[0]) {
                     return res.json({ message: 'password failed' });
                 } else {
-                    sql.query(`UPDATE tb_member SET password='${req.body.new_password}'
-                        WHERE email='${req.body.email}' AND password='${req.body.old_password}'`,
+                    sql.query(`UPDATE tb_member SET password=N'${req.body.new_password}'
+                        WHERE email='${req.body.email}' AND password=N'${req.body.old_password}'`,
                         (err, result) => {
                             if (err) {
                                 res.send('error', err)
@@ -334,8 +351,8 @@ exports.editBanState = (req, res) => {
 
 // delete employee
 exports.deleteMember = (req, res) => {
-    sql.query(`DELETE FROM tb_member WHERE username='${req.body.username}'
-    AND email='${req.body.email}' AND password='${req.body.password}'`),
+    sql.query(`DELETE FROM tb_member WHERE username=N'${req.body.username}'
+    AND email='${req.body.email}' AND password=N'${req.body.password}'`),
         (err, result) => {
             if (err) {
                 res.send('error', err)
@@ -367,15 +384,14 @@ exports.getMemberData = (req, res) => {
             console.log('error:', err);
             return res.json('error');
         } else {
-            const token = jwt.sign({ data: result.recordset[0] }, process.env.TOKEN_SECRET, { expiresIn: '90d' });
-            return res.json({ token })
+            return res.json(result.recordset[0]);
         }
     });
 }
 
 // search member
 exports.searchMember = (req, res) => {
-    sql.query(`SELECT * FROM tb_member WHERE username LIKE'%${req.body.username}%'`,
+    sql.query(`SELECT * FROM tb_member WHERE username LIKE N'%${req.body.username}%'`,
         (err, result) => {
             if (err) {
                 console.log('error:', err);
@@ -396,7 +412,7 @@ exports.memberLogin = (req, res) => {
                 if (!result.recordset[0]) {
                     return res.json({ message: 'email not found' });
                 } else {
-                    sql.query(`SELECT member_id, email FROM tb_member WHERE email='${req.body.email}' AND password='${req.body.password}'`,
+                    sql.query(`SELECT * FROM tb_member WHERE email='${req.body.email}' AND password='${req.body.password}'`,
                         (err, result) => {
                             if (err) {
                                 return res.json({ message: 'error:' }, err);
@@ -405,7 +421,9 @@ exports.memberLogin = (req, res) => {
                                 if (!result.recordset[0]) {
                                     return res.json({ message: 'password failed' });
                                 } else {
-                                    return res.json(result.recordset[0])
+                                    return res.json(result.recordset[0]);
+                                    // const token = jwt.sign({ data: result.recordset[0] }, process.env.TOKEN_SECRET, { expiresIn: '90d' });
+                                    // return res.json({ token })
                                 }
                             }
                         });
