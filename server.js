@@ -38,6 +38,7 @@ const memberRoute = require('./src/routes/memberRoute');
 const fundRoute = require('./src/routes/fundRoute');
 const bookRoute = require("./src/routes/bookRoute")
 const authorGroupRoute = require("./src/routes/authorGroupRoute")
+const employeeRoute = require("./src/routes/employeeRoute")
 
 
 app.use('/', facultyRoute);
@@ -46,7 +47,7 @@ app.use('/', authorRoute);
 app.use('/', commiteeRoute);
 app.use('/', fundRoute);
 app.use('/', memberRoute);
-// app.use('/', employeeRoute);
+app.use('/', employeeRoute);
 app.use('/', bookRoute);
 app.use('/', authorGroupRoute);
 
