@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const bookModel = require('../models/bookModel');
+const token = require('../jwt/jwt');
+
 
 
 router.post('/book/view_as_all', bookModel.viewBookAsAll);
@@ -23,4 +25,21 @@ router.post('/book/dislike', bookModel.dislike);
 router.post('/book/bookmark', bookModel.bookmark);
 router.post('/book/get_bookmark', bookModel.getBookmark);
 router.post('/book/unbookmark', bookModel.unbookmark);
+
+// request book
+router.post('/book/request/create', bookModel.createBookRequest);
+router.get('/book/requests', bookModel.getAllRequestBook);
+router.put('/book/request/:id', bookModel.updateRequestBookById);
+router.get('/book/request/:id', bookModel.getRequestBookById);
+router.delete('/book/request/delete', bookModel.deleteSingleRequestBook);
+
+// approve research  
+router.post('/book/approve/create', bookModel.createApproveResearchBook);
+router.get('/book/approves', bookModel.getAllApproveResearchBook);
+router.get('/book/approve/:id', bookModel.getSingleApproveResearchById);
+router.put('/book/approve/cancel', bookModel.cancelApproveResearchBook);
+
+
+
+
 module.exports = router;

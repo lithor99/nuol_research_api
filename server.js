@@ -37,6 +37,7 @@ const commiteeRoute = require('./src/routes/commiteeRoute');
 const memberRoute = require('./src/routes/memberRoute');
 const fundRoute = require('./src/routes/fundRoute');
 const bookRoute = require("./src/routes/bookRoute")
+const authorGroupRoute = require("./src/routes/authorGroupRoute")
 
 
 app.use('/', facultyRoute);
@@ -47,6 +48,7 @@ app.use('/', fundRoute);
 app.use('/', memberRoute);
 // app.use('/', employeeRoute);
 app.use('/', bookRoute);
+app.use('/', authorGroupRoute);
 
 
 //define listen port
