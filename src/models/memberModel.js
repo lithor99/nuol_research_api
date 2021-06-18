@@ -2,15 +2,6 @@ const sql = require('../config/dbConfig');
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 const path = require('path');
-const fs = require('fs');
-const { json } = require('body-parser');
-const { param } = require('../routes/memberRoute');
-// const fileupload = require('express-fileupload');
-// const util = require('util');
-// const morgan = require('morgan');
-// const _ = require('lodash');
-// app.use(fileupload());
-// app.use(morgan('dev'));
 
 // create employee
 exports.memberRegist = (req, res) => {
@@ -54,8 +45,8 @@ exports.memberRegist = (req, res) => {
                                 res.send('error', err)
                                 console.log(err)
                             } else {
-                                sql.query(`SELECT regist_id, username, email, password FROM tb_register WHERE username='${req.body.username}' 
-                                AND email='${req.body.email}' AND password='${req.body.password}'`,
+                                sql.query(`SELECT regist_id, username, email, password FROM tb_register WHERE username=N'${req.body.username}' 
+                                AND email='${req.body.email}' AND password=N'${req.body.password}'`,
                                     (err, result) => {
                                         if (err) {
                                             console.log('err:' + err)
@@ -80,8 +71,8 @@ exports.memberRegist = (req, res) => {
 }
 
 exports.createMember = (req, res) => {
-    sql.query(`SELECT * FROM tb_register WHERE username='${req.body.username}' AND email='${req.body.email}' 
-        AND password='${req.body.password}' AND conf_num='${req.body.conf_num}'`,
+    sql.query(`SELECT * FROM tb_register WHERE username=N'${req.body.username}' AND email='${req.body.email}' 
+        AND password=N'${req.body.password}' AND conf_num='${req.body.conf_num}'`,
         (err, result) => {
             if (err) {
                 console.log('err:' + err)
@@ -92,13 +83,13 @@ exports.createMember = (req, res) => {
                     return res.json({ message: 'confirm number failed' });
                 } else {
                     sql.query(`INSERT INTO tb_member VALUES(N'${req.body.username}', 
-                    '${req.body.email}', '${req.body.password}', null, 'no profile', ${req.body.regist_id},'true')`,
+                    '${req.body.email}', N'${req.body.password}', null, 'no profile', ${req.body.regist_id},'true')`,
                         (err, result) => {
                             if (err) {
                                 return res.json({ message: 'error1:' }, err);
                             } else {
                                 sql.query(`SELECT * FROM tb_member WHERE email='${req.body.email}' 
-                                AND password='${req.body.password}'`,
+                                AND password=N'${req.body.password}'`,
                                     (err, result) => {
                                         if (err) {
                                             return res.json({ message: 'error2:' }, err);
@@ -164,7 +155,7 @@ exports.sendMailAgain = (req, res) => {
 exports.uploadMemberProfile = (req, res) => {
     if (req.body.profile == "") {
         sql.query(`UPDATE tb_member SET profile = N'no profile' 
-        WHERE email= N'${req.body.email}'`,
+        WHERE email='${req.body.email}'`,
             (err, result) => {
                 if (err) {
                     console.log('error:', err);
@@ -176,7 +167,7 @@ exports.uploadMemberProfile = (req, res) => {
 
     } else {
         sql.query(`UPDATE tb_member SET profile = N'${req.body.profile}' 
-        WHERE email= N'${req.body.email}'`,
+        WHERE email= '${req.body.email}'`,
             (err, result) => {
                 if (err) {
                     console.log('error:', err);
@@ -276,7 +267,7 @@ exports.confirmEmailWhenForgotPassword = (req, res) => {
 
 // edit username
 exports.editMemberUsername = (req, res) => {
-    sql.query(`SELECT password FROM tb_member WHERE password='${req.body.password}'`,
+    sql.query(`SELECT password FROM tb_member WHERE password=N'${req.body.password}'`,
         (err, result) => {
             if (err) {
                 res.send('error:', err);
@@ -306,7 +297,7 @@ exports.editMemberUsername = (req, res) => {
 
 // edit password
 exports.editMemberPassword = (req, res) => {
-    sql.query(`SELECT password FROM tb_member WHERE password='${req.body.old_password}'`,
+    sql.query(`SELECT password FROM tb_member WHERE password=N'${req.body.old_password}'`,
         (err, result) => {
             if (err) {
                 res.send('error:', err);
@@ -412,7 +403,7 @@ exports.memberLogin = (req, res) => {
                 if (!result.recordset[0]) {
                     return res.json({ message: 'email not found' });
                 } else {
-                    sql.query(`SELECT * FROM tb_member WHERE email='${req.body.email}' AND password='${req.body.password}'`,
+                    sql.query(`SELECT * FROM tb_member WHERE email='${req.body.email}' AND password=N'${req.body.password}'`,
                         (err, result) => {
                             if (err) {
                                 return res.json({ message: 'error:' }, err);
@@ -436,7 +427,7 @@ exports.memberLogin = (req, res) => {
 
 exports.getSingleLike = (req, res) => {
     const book_id = req.params.id
-    sql.query(`SELECT * FROM tb_like where book_id='${book_id}'`,
+    sql.query(`SELECT * FROM tb_like where book_id=N'${book_id}'`,
         (err, result) => {
             if (err) {
                 console.log('error while fetching getSingleLike by id', err);
@@ -453,7 +444,7 @@ exports.deleteLike = (req, res) => {
     try {
         const { book_id, member_id } = req.body;
 
-        sql.query(`DELETE FROM tb_like WHERE member_id=${member_id} and book_id='${book_id}'`,
+        sql.query(`DELETE FROM tb_like WHERE member_id=${member_id} and book_id=N'${book_id}'`,
             (err, result) => {
                 if (err) {
                     console.log('error while fetching member_id by id', err);
@@ -473,7 +464,7 @@ exports.deleteLike = (req, res) => {
 
 exports.getSingleBookMark = (req, res) => {
     const book_id = req.params.id
-    sql.query(`SELECT * FROM tb_bookmark where book_id='${book_id}'`,
+    sql.query(`SELECT * FROM tb_bookmark where book_id=N'${book_id}'`,
         (err, result) => {
             if (err) {
                 console.log('error while fetching getSingleBookMark by id', err);
@@ -490,7 +481,7 @@ exports.deleteBookMark = (req, res) => {
     try {
         const { book_id, member_id } = req.body;
 
-        sql.query(`DELETE FROM tb_bookmark WHERE member_id=${member_id} and book_id='${book_id}'`,
+        sql.query(`DELETE FROM tb_bookmark WHERE member_id=${member_id} and book_id=N'${book_id}'`,
             (err, result) => {
                 if (err) {
                     console.log('error while fetching deleteBookMark member_id by id', err);
@@ -498,7 +489,6 @@ exports.deleteBookMark = (req, res) => {
                 } else {
                     console.log('get all successfulyy deleteBookMark member_id delete');
                     res.send(result.recordset);
-
                 }
             });
     } catch (error) {

@@ -8,7 +8,7 @@ router.post('/member/confirm_register', memberModel.createMember);
 router.put('/member/send_mail_again', memberModel.sendMailAgain);
 router.put('/member/upload_profile', memberModel.uploadMemberProfile);
 router.post('/member/login', memberModel.memberLogin);
-router.post('/member/get_member_data', token, memberModel.getMemberData);
+router.post('/member/get_member_data', memberModel.getMemberData);
 router.put('/member/forgot_password', memberModel.forgotPassword);
 router.put('/member/confirm_email', memberModel.confirmEmailWhenForgotPassword);
 router.put('/member/edit/username', memberModel.editMemberUsername);

@@ -27,7 +27,7 @@ exports.viewBookAsAll = (req, res) => {
     sql.query(`SELECT tb_book.book_id, tb_book.book_name, tb_book.book_group, tb_book.year_print, 
     tb_book.total_view, tb_book.total_load, count(tb_like.member_id) AS total_like
     FROM tb_book FULL OUTER JOIN tb_like ON tb_book.book_id = tb_like.book_id
-    WHERE tb_book.upload_state='true'
+    WHERE tb_book.upload_state = 'true'
     GROUP BY tb_book.book_id, tb_book.book_name, tb_book.book_group, tb_book.year_print, tb_book.total_view, tb_book.total_load`,
         (err, result) => {
             if (err) {
@@ -45,8 +45,11 @@ exports.viewBookAsSearch = (req, res) => {
     sql.query(`SELECT tb_book.book_id, tb_book.book_name, tb_book.book_group, tb_book.year_print, 
     tb_book.total_view, tb_book.total_load, count(tb_like.member_id) AS total_like
     FROM tb_book FULL OUTER JOIN tb_like ON tb_book.book_id = tb_like.book_id
-    WHERE (tb_book.book_name LIKE('%${req.body.search}%') OR tb_book.book_group LIKE('%${req.body.search}%') 
-    OR tb_book.year_print LIKE('%${req.body.search}%')) AND tb_book.upload_state='true'
+    INNER JOIN tb_author_detail ON tb_book.book_id = tb_author_detail.author_id 
+    INNER JOIN tb_author ON tb_author_detail.author_id = tb_author.author_id
+    WHERE (tb_book.book_name LIKE(N'%${req.body.search}%')
+    OR tb_author.name LIKE(N'%${req.body.search}%') 
+    OR tb_author.surname LIKE(N'%${req.body.search}%') AND tb_book.upload_state = 'true')
     GROUP BY tb_book.book_id, tb_book.book_name, tb_book.book_group, tb_book.year_print, tb_book.total_view, tb_book.total_load`,
         (err, result) => {
             if (err) {
@@ -64,7 +67,7 @@ exports.viewBookAsView = (req, res) => {
     sql.query(`SELECT  TOP(${req.body.top}) tb_book.book_id, tb_book.book_name, tb_book.book_group, tb_book.year_print, tb_book.total_view, tb_book.total_load, 
     COUNT(tb_like.member_id) as total_like
     FROM tb_book FULL OUTER JOIN tb_like ON tb_book.book_id = tb_like.book_id 
-    WHERE tb_book.upload_state='true'
+    WHERE tb_book.upload_state = 'true'
     GROUP BY tb_book.book_id, tb_book.book_name, tb_book.book_group, tb_book.year_print, tb_book.total_view, tb_book.total_load
     ORDER BY tb_book.total_view DESC`,
         (err, result) => {
@@ -83,7 +86,7 @@ exports.viewBookAsLike = (req, res) => {
     sql.query(`SELECT TOP(${req.body.top}) tb_book.book_id, tb_book.book_name, tb_book.book_group, tb_book.year_print, tb_book.total_view, tb_book.total_load, 
     COUNT(tb_like.member_id) as total_like
     FROM tb_book FULL OUTER JOIN tb_like ON tb_book.book_id = tb_like.book_id 
-    WHERE tb_book.upload_state='true'
+    WHERE tb_book.upload_state = 'true'
     GROUP BY tb_book.book_id, tb_book.book_name, tb_book.book_group, tb_book.year_print, tb_book.total_view, tb_book.total_load 
     ORDER BY total_like DESC`,
         (err, result) => {
@@ -102,7 +105,7 @@ exports.viewBookAsDownload = (req, res) => {
     sql.query(`SELECT TOP(${req.body.top}) tb_book.book_id, tb_book.book_name, tb_book.book_group, tb_book.year_print, tb_book.total_view, tb_book.total_load, 
     COUNT(tb_like.member_id) as total_like
     FROM tb_book FULL OUTER JOIN tb_like ON tb_book.book_id = tb_like.book_id 
-    WHERE tb_book.upload_state='true'
+    WHERE tb_book.upload_state = 'true'
     GROUP BY tb_book.book_id, tb_book.book_name, tb_book.book_group, tb_book.year_print, tb_book.total_view, tb_book.total_load
     ORDER BY tb_book.total_load DESC`,
         (err, result) => {
@@ -122,7 +125,7 @@ exports.viewBookAsBookmark = (req, res) => {
     COUNT(tb_like.member_id) as total_like
     FROM tb_book FULL OUTER JOIN tb_like ON tb_book.book_id = tb_like.book_id 
     FULL OUTER JOIN tb_bookmark ON tb_book.book_id = tb_bookmark.book_id
-    WHERE tb_bookmark.member_id=${req.body.member_id} AND tb_book.upload_state='true'
+    WHERE tb_bookmark.member_id = ${req.body.member_id} AND tb_book.upload_state = 'true'
     GROUP BY tb_book.book_id, tb_book.book_name, tb_book.book_group, tb_book.year_print, tb_book.total_view, tb_book.total_load`,
         (err, result) => {
             if (err) {
@@ -137,10 +140,10 @@ exports.viewBookAsBookmark = (req, res) => {
 
 //get author
 exports.getAuthor = (req, res) => {
-    sql.query(`SELECT (tb_author.name + ' '+ tb_author.surname ) as author
-    FROM tb_author INNER JOIN tb_author_group ON tb_author.author_id = tb_author_group.author_id 
-    INNER JOIN tb_book ON tb_author_group.book_id = tb_book.book_id
-    WHERE tb_author_group.book_id='${req.body.book_id}' AND tb_book.upload_state='true'`,
+    sql.query(`SELECT (tb_author.name + '  '+ tb_author.surname ) as author
+    FROM tb_author INNER JOIN tb_author_detail ON tb_author.author_id = tb_author_detail.author_id 
+    INNER JOIN tb_book ON tb_author_detail.book_id = tb_book.book_id
+    WHERE tb_author_detail.book_id = N'${req.body.book_id}' AND tb_book.upload_state = 'true'`,
         (err, result) => {
             if (err) {
                 return res.json('error');
@@ -178,7 +181,7 @@ exports.addView = (req, res) => {
 
 //like
 exports.like = (req, res) => {
-    sql.query(`INSERT INTO tb_like VALUES(${req.body.member_id},N'${req.body.book_id}')`,
+    sql.query(`INSERT INTO tb_like VALUES(${req.body.member_id}, N'${req.body.book_id}')`,
         (err, result) => {
             if (err) {
                 return res.json('error');
@@ -191,7 +194,7 @@ exports.like = (req, res) => {
 //get like
 exports.getLike = (req, res) => {
     sql.query(`SELECT tb_like.book_id FROM tb_like INNER JOIN tb_book ON tb_like.book_id = tb_book.book_id
-        WHERE tb_like.member_id = ${req.body.member_id} AND tb_book.upload_state='true'`,
+        WHERE tb_like.member_id = ${req.body.member_id} AND tb_book.upload_state = 'true'`,
         (err, result) => {
             if (err) {
                 return res.json('error');
@@ -203,8 +206,8 @@ exports.getLike = (req, res) => {
 
 //dislike
 exports.dislike = (req, res) => {
-    sql.query(`DELETE FROM tb_like WHERE tb_like.member_id=${req.body.member_id} 
-    AND tb_like.book_id=N'${req.body.book_id}'`,
+    sql.query(`DELETE FROM tb_like WHERE tb_like.member_id = ${req.body.member_id} 
+    AND tb_like.book_id = N'${req.body.book_id}'`,
         (err, result) => {
             if (err) {
                 return res.json('error');
@@ -216,7 +219,7 @@ exports.dislike = (req, res) => {
 
 //bookmark
 exports.bookmark = (req, res) => {
-    sql.query(`INSERT INTO tb_bookmark VALUES(${req.body.member_id},N'${req.body.book_id}')`,
+    sql.query(`INSERT INTO tb_bookmark VALUES(${req.body.member_id}, N'${req.body.book_id}')`,
         (err, result) => {
             if (err) {
                 return res.json('error');
@@ -230,7 +233,7 @@ exports.bookmark = (req, res) => {
 exports.getBookmark = (req, res) => {
     sql.query(`SELECT tb_bookmark.book_id FROM tb_bookmark INNER JOIN tb_book 
         ON tb_bookmark.book_id = tb_book.book_id
-        WHERE tb_bookmark.member_id=${req.body.member_id} AND tb_book.upload_state='true'`,
+        WHERE tb_bookmark.member_id = ${req.body.member_id} AND tb_book.upload_state = 'true'`,
         (err, result) => {
             if (err) {
                 return res.json('error');
@@ -242,8 +245,8 @@ exports.getBookmark = (req, res) => {
 
 //unbookmark
 exports.unbookmark = (req, res) => {
-    sql.query(`DELETE FROM tb_bookmark WHERE tb_bookmark.member_id=${req.body.member_id} 
-    AND tb_bookmark.book_id=N'${req.body.book_id}'`,
+    sql.query(`DELETE FROM tb_bookmark WHERE tb_bookmark.member_id = ${req.body.member_id} 
+    AND tb_bookmark.book_id = N'${req.body.book_id}'`,
         (err, result) => {
             if (err) {
                 return res.json('error');
@@ -256,7 +259,7 @@ exports.unbookmark = (req, res) => {
 //upload proposal file
 exports.uploadProposalFile = (req, res) => {
     sql.query(`UPDATE tb_book SET proposal_file = N'${req.body.proposal_file}' 
-        WHERE book_id= N'${req.body.book_id}'`,
+        WHERE book_id = N'${req.body.book_id}'`,
         (err, result) => {
             if (err) {
                 console.log('error:', err);
@@ -270,7 +273,7 @@ exports.uploadProposalFile = (req, res) => {
 //upload book file
 exports.uploadBookFile = (req, res) => {
     sql.query(`UPDATE tb_book SET book_file = N'${req.body.book_file}' 
-        WHERE book_id= N'${req.body.book_id}'`,
+        WHERE book_id = N'${req.body.book_id}'`,
         (err, result) => {
             if (err) {
                 console.log('error:', err);
@@ -443,7 +446,7 @@ exports.addDownload = (req, res) => {
 exports.createBookRequest = async (req, res) => {
     const { book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id, research_state } = req.body
     sql.query(`
-    INSERT INTO tb_book (book_id,book_name, book_group, proposal_file, offer_date, offer_emp_id,research_state)  VALUES(N'${book_id}',N'${book_name}',N'${book_group}',N'${proposal_file}','${offer_date}',${offer_emp_id},${research_state});`,
+    INSERT INTO tb_book (book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id, research_state)  VALUES(N'${book_id}',N'${book_name}',N'${book_group}',N'${proposal_file}','${offer_date}',${offer_emp_id},${research_state});`,
         (err, result) => {
             if (err) {
                 res.send('error:', err)
@@ -472,7 +475,7 @@ exports.getAllRequestBook = (req, res) => {
 
 exports.deleteSingleRequestBook = (req, res) => {
     const { book_id } = req.body
-    sql.query(`delete from tb_book where book_id='${book_id}';`,
+    sql.query(`delete from tb_book where book_id = N'${book_id}';`,
         (err, result) => {
             if (err) {
                 console.log(err)
@@ -490,7 +493,7 @@ exports.updateRequestBookById = (req, res) => {
     const { book_name, book_group, proposal_file, offer_date, offer_emp_id } = req.body;
 
     sql.query(`
-    UPDATE tb_book SET book_name=N'${book_name}', book_group=N'${book_group}', proposal_file=N'${proposal_file}', offer_date='${offer_date}', offer_emp_id=${offer_emp_id} WHERE book_id='${book_id}'
+    UPDATE tb_book SET book_name=N'${book_name}', book_group=N'${book_group}', proposal_file=N'${proposal_file}', offer_date='${offer_date}', offer_emp_id=${offer_emp_id} WHERE book_id=N'${book_id}'
     `, (err, result) => {
         if (err) {
             res.send('  UPDATE tb_book error', err)
@@ -510,7 +513,7 @@ exports.getRequestBookById = (req, res) => {
     const book_id = req.params.id
 
     sql.query(`
-    select book_name, book_group, proposal_file, offer_date, offer_emp_id  from tb_book where book_id='${book_id}'
+    select book_name, book_group, proposal_file, offer_date, offer_emp_id  from tb_book where book_id=N'${book_id}'
     `, (err, result) => {
         if (err) {
             console.log('error tb_book:', err);
@@ -528,7 +531,7 @@ exports.getRequestBookById = (req, res) => {
 exports.createApproveResearchBook = (req, res) => {
 
     const { appro_date, appro_emp_id, book_id, date_line, fund, fund_id, research_state } = req.body
-    sql.query(`UPDATE tb_book SET appro_date='${appro_date}',appro_emp_id='${appro_emp_id}',date_line='${date_line}',fund=${fund},fund_id=${fund_id},research_state=${research_state} WHERE book_id='${book_id}';`,
+    sql.query(`UPDATE tb_book SET appro_date='${appro_date}',appro_emp_id='${appro_emp_id}',date_line='${date_line}',fund=${fund},fund_id=${fund_id},research_state=${research_state} WHERE book_id=N'${book_id}';`,
         (err, result) => {
             if (err) {
                 res.send('error update:', err)
@@ -564,7 +567,7 @@ exports.getSingleApproveResearchById = (req, res) => {
     const book_id = req.params.id
     const _id = 1
     sql.query(`
-    select * from tb_book where book_id='${book_id}'
+    select * from tb_book where book_id=N'${book_id}'
     `, (err, result) => {
         if (err) {
             console.log('error getSingleApproveResearchById:', err);
@@ -581,7 +584,7 @@ exports.getSingleApproveResearchById = (req, res) => {
 
 exports.cancelApproveResearchBook = (req, res) => {
     const { book_id, research_state, appro_date, appro_emp_id, date_line, fund, fund_id } = req.body
-    sql.query(`UPDATE tb_book SET appro_date='${appro_date}',appro_emp_id='${appro_emp_id}',date_line='${date_line}',fund=${fund},fund_id=${fund_id},research_state=${research_state} WHERE book_id='${book_id}';`,
+    sql.query(`UPDATE tb_book SET appro_date='${appro_date}',appro_emp_id='${appro_emp_id}',date_line='${date_line}',fund=${fund},fund_id=${fund_id},research_state=${research_state} WHERE book_id=N'${book_id}';`,
         (err, result) => {
             if (err) {
                 res.send('error update:', err)
