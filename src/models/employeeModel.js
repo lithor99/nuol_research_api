@@ -6,9 +6,9 @@ const bcrypt = require('bcryptjs');
 
 // create employee
 // exports.createEmployee = (req, res) => {
-//     let { name, surname, username, password, gender, birth_date, tel, email, role, ban_state } = req.body;
+//     let { name, surname, username, password, gender, birth_date, tel, email, supper_admin, ban_state } = req.body;
 //     sql.query(`
-//     INSERT INTO tb_employee VALUES(N'${name}',N'${surname}',N'${username}',N'${password}',N'${gender}',N'${birth_date}',N'${tel}', N'${email}',${role},${ban_state})
+//     INSERT INTO tb_employee VALUES(N'${name}',N'${surname}',N'${username}',N'${password}',N'${gender}',N'${birth_date}',N'${tel}', N'${email}',${supper_admin},${ban_state})
 // `,
 //     (err, result) => {
 //         if (err) {
@@ -23,8 +23,8 @@ const bcrypt = require('bcryptjs');
 exports.createEmployee = async (req, res, next) => {
 
     // check validation employee
-    const { username, password, email, role, ban_state, tel, name, birth_date, gender, surname } = req.body;
-    const data = { username, password, email, role, ban_state, tel, name, birth_date, gender, surname }
+    const { username, password, email, supper_admin, ban_state, tel, name, birth_date, gender, surname } = req.body;
+    const data = { username, password, email, supper_admin, ban_state, tel, name, birth_date, gender, surname }
 
 
     const { error } = createEmployeeValidation(data);
@@ -47,7 +47,7 @@ exports.createEmployee = async (req, res, next) => {
     const hashPassword = await bcrypt.hash(req.body.password, salt);
 
     sql.query(`
-    INSERT INTO tb_employee VALUES(N'${name}',N'${surname}',N'${username}',N'${hashPassword}',N'${gender}',N'${birth_date}',N'${tel}', N'${email}',${role},${ban_state})
+    INSERT INTO tb_employee VALUES(N'${name}',N'${surname}',N'${username}',N'${hashPassword}',N'${gender}',N'${birth_date}',N'${tel}', N'${email}',${supper_admin},${ban_state})
     `,
         (err, result) => {
             if (err) {
@@ -65,11 +65,11 @@ exports.createEmployee = async (req, res, next) => {
 // edit employee
 exports.editEmployee = (req, res) => {
     let emp_id = req.params.id
-    let { name, surname, username, password, gender, birth_date, tel, email, role, ban_state } = req.body;
+    let { name, surname, username, password, gender, birth_date, tel, email, supper_admin, ban_state } = req.body;
     sql.query(`UPDATE tb_employee SET name=N'${name}',surname=N'${surname}',
     username=N'${username}',password=N'${password}',
     gender=N'${gender}',birth_date=N'${birth_date}',
-    tel=N'${tel}',email=N'${email}',role=${role}, 
+    tel=N'${tel}',email=N'${email}',supper_admin=${supper_admin}, 
     ban_state=${ban_state} WHERE emp_id=${emp_id}`),
         (err, result) => {
             if (err) {
@@ -181,25 +181,26 @@ exports.employeeLogin = async (req, res) => {
 
 
 
-    // checking if the email is already in the database 
-    const employee = await sql.query(`select * from tb_employee where email='${req.body.username}'`)
+    // checking if the username is already in the database 
+    const employee = await sql.query(`select * from tb_employee where username='${req.body.username}'`)
     if (!employee) {
-        console.log("Email isn't found....")
-        return res.status(400).send("Email isn't found"); cl
-
+        console.log("username isn't found....")
+        return res.status(400).send("username isn't found");
     };
 
     // password is correct
 
-    const _employeeData = await sql.query(`select password,emp_id,ban_state,role from tb_employee where username='${req.body.username}'`)
+    const _employeeData = await sql.query(`select password,emp_id,ban_state,supper_admin from tb_employee where username='${req.body.username}'`)
     const validPass = await bcrypt.compare(req.body.password, _employeeData.recordset[0].password);
 
-    if (!validPass) {
+    if (validPass !== true) {
         console.log("Password invalid....")
         return res.status(400).send({ password: "Invalid password" });
     }
 
-    if (_employeeData.recordset[0].ban_state !== 1) {
+    // console.log('validPass: ', validPass)
+
+    if (_employeeData.recordset[0].ban_state === 1) {
         console.log("Your account is baned isn't found....")
         return res.status(403).send({ login_account: "Your login account is banned" })
     };
@@ -208,7 +209,7 @@ exports.employeeLogin = async (req, res) => {
     const token = jwt.sign({ emp_id: _employeeData.recordset[0].emp_id }, process.env.TOKEN_SECRET, { expiresIn: '30d' });
     res.header('Authorization', token).send({
         emp_id: _employeeData.recordset[0].emp_id,
-        role: _employeeData.recordset[0].role,
+        supper_admin: _employeeData.recordset[0].supper_admin,
         ban_state: _employeeData.recordset[0].ban_state,
         token: token
 

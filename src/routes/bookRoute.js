@@ -33,11 +33,20 @@ router.put('/book/request/:id', bookModel.updateRequestBookById);
 router.get('/book/request/:id', bookModel.getRequestBookById);
 router.delete('/book/request/delete', bookModel.deleteSingleRequestBook);
 
+// unSelected Request Proposal
+router.put('/book/unselected_proposal/update', bookModel.updateUnselected_proposal);
+router.get('/book/unselected_proposals', bookModel.getAllUnselected_proposals);
+router.get('/book/unselected_proposal/:id', bookModel.getUnselectedRequestProposalById);
+
+
+
+
 // approve research  
-router.post('/book/approve/create', bookModel.createApproveResearchBook);
+router.put('/book/approve/create', bookModel.createApproveResearchBook);
 router.get('/book/approves', bookModel.getAllApproveResearchBook);
 router.get('/book/approve/:id', bookModel.getSingleApproveResearchById);
 router.put('/book/approve/cancel', bookModel.cancelApproveResearchBook);
+router.put('/book/approve/update', bookModel.updateApproveResearchBook);
 
 
 

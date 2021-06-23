@@ -444,9 +444,9 @@ exports.addDownload = (req, res) => {
 // Create book request add:
 
 exports.createBookRequest = async (req, res) => {
-    const { book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id, research_state } = req.body
+    const { book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id, research_state, total_load, total_view, deleted } = req.body
     sql.query(`
-    INSERT INTO tb_book (book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id, research_state)  VALUES(N'${book_id}',N'${book_name}',N'${book_group}',N'${proposal_file}','${offer_date}',${offer_emp_id},${research_state});`,
+    INSERT INTO tb_book (book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id, research_state,total_load,total_view,deleted)  VALUES(N'${book_id}',N'${book_name}',N'${book_group}',N'${proposal_file}','${offer_date}',${offer_emp_id},${research_state},${total_load}, ${total_view}, ${deleted});`,
         (err, result) => {
             if (err) {
                 res.send('error:', err)
@@ -461,7 +461,7 @@ exports.createBookRequest = async (req, res) => {
 
 // get all getAllRequestBook
 exports.getAllRequestBook = (req, res) => {
-    sql.query(`select book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id from tb_book where research_state=0  ORDER BY book_name ASC;`,
+    sql.query(`select book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id from tb_book where research_state=0 and deleted=0  ORDER BY book_name ASC;`,
         (err, result) => {
             if (err) {
                 console.log('error while fetching user by id', err);
@@ -506,6 +506,57 @@ exports.updateRequestBookById = (req, res) => {
     });
 }
 
+
+// updateUnselected_proposal
+exports.updateUnselected_proposal = (req, res) => {
+
+    const { deleted, book_id } = req.body;
+
+    sql.query(`
+    UPDATE tb_book SET deleted='${deleted}' WHERE book_id=N'${book_id}'
+    `, (err, result) => {
+        if (err) {
+            res.send('  UPDATE on status of delelte tb_book error', err)
+            console.log(err)
+        } else {
+            res.send({
+                message: ` UPDATE on status of delelte tb_book is edited successfully. result: ${result}`
+            });
+        }
+    });
+}
+
+// getAllUnselected_proposals
+
+exports.getAllUnselected_proposals = (req, res) => {
+    sql.query(`select deleted,book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id from tb_book where deleted=1 and research_state=0  ORDER BY book_name ASC;`,
+        (err, result) => {
+            if (err) {
+                console.log('error while fetching user by id', err);
+                return res.json(err);
+            } else {
+                console.log('get all book');
+                res.send(result.recordset);
+            }
+        });
+}
+
+// 
+
+exports.getUnselectedRequestProposalById = (req, res) => {
+    const book_id = req.params.id
+    sql.query(`
+    select deleted, book_name, book_group, proposal_file, offer_date, offer_emp_id  from tb_book where book_id=N'${book_id}'
+    `, (err, result) => {
+        if (err) {
+            console.log('error tb_book:', err);
+            return res.json('error tb_book:', err);
+        } else {
+            console.log('successfully fetch book request by Id tb_book:');
+            res.send(result.recordset);
+        }
+    });
+}
 
 
 // getRequestBookById
@@ -580,11 +631,14 @@ exports.getSingleApproveResearchById = (req, res) => {
 }
 
 
-// cancelApproveResearchBook
 
 exports.cancelApproveResearchBook = (req, res) => {
-    const { book_id, research_state, appro_date, appro_emp_id, date_line, fund, fund_id } = req.body
-    sql.query(`UPDATE tb_book SET appro_date='${appro_date}',appro_emp_id='${appro_emp_id}',date_line='${date_line}',fund=${fund},fund_id=${fund_id},research_state=${research_state} WHERE book_id=N'${book_id}';`,
+    const { book_id } = req.body;
+    sql.query(`
+    UPDATE tb_book SET appro_date='',appro_emp_id=null,
+    date_line='',fund=null,fund_id=null,research_state=0,
+    deleted=0 WHERE book_id=N'${book_id}'
+    `,
         (err, result) => {
             if (err) {
                 res.send('error update:', err)
@@ -597,4 +651,26 @@ exports.cancelApproveResearchBook = (req, res) => {
             }
         })
 }
+
+exports.updateApproveResearchBook = (req, res) => {
+    const { book_id, book_name, book_group, proposal_file, fund_id, fund, appro_date, date_line, appro_emp_id, deleted, research_state } = req.body;
+    sql.query(`
+    UPDATE tb_book SET 
+    book_name=N'${book_name}',book_group=N'${book_group}',proposal_file=N'${proposal_file}',fund_id=N'${fund_id}',
+    fund=N'${fund}', appro_date=N'${appro_date}',
+    date_line=N'${date_line}',appro_emp_id=N'${appro_emp_id}',deleted=N'${deleted}',research_state=N'${research_state}'
+    WHERE book_id=N'${book_id}'
+    `,
+        (err, result) => {
+            if (err) {
+                res.send('error update:', err)
+                console.log("update approve resarch err")
+
+            } else {
+                console.log("update approve resarch success")
+                res.send(result);
+            }
+        })
+}
+
 
