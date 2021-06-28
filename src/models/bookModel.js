@@ -461,7 +461,7 @@ exports.createBookRequest = async (req, res) => {
 
 // get all getAllRequestBook
 exports.getAllRequestBook = (req, res) => {
-    sql.query(`select book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id from tb_book where research_state=0 and deleted=0  ORDER BY book_name ASC;`,
+    sql.query(`select book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id from tb_book where research_state=1 and deleted=0  ORDER BY book_name ASC;`,
         (err, result) => {
             if (err) {
                 console.log('error while fetching user by id', err);
@@ -493,7 +493,7 @@ exports.updateRequestBookById = (req, res) => {
     const { book_name, book_group, proposal_file, offer_date, offer_emp_id } = req.body;
 
     sql.query(`
-    UPDATE tb_book SET book_name=N'${book_name}', book_group=N'${book_group}', proposal_file=N'${proposal_file}', offer_date='${offer_date}', offer_emp_id=${offer_emp_id} WHERE book_id=N'${book_id}'
+    UPDATE tb_book SET book_name=N'${book_name}', book_group=N'${book_group}', proposal_file=N'${proposal_file}', offer_date='${offer_date}', offer_emp_id=${offer_emp_id},research_state=1,deleted=0 WHERE book_id=N'${book_id}'
     `, (err, result) => {
         if (err) {
             res.send('  UPDATE tb_book error', err)
@@ -513,7 +513,7 @@ exports.updateUnselected_proposal = (req, res) => {
     const { deleted, book_id } = req.body;
 
     sql.query(`
-    UPDATE tb_book SET deleted='${deleted}' WHERE book_id=N'${book_id}'
+    UPDATE tb_book SET research_state=1, deleted='${deleted}' WHERE book_id=N'${book_id}'
     `, (err, result) => {
         if (err) {
             res.send('  UPDATE on status of delelte tb_book error', err)
@@ -529,7 +529,7 @@ exports.updateUnselected_proposal = (req, res) => {
 // getAllUnselected_proposals
 
 exports.getAllUnselected_proposals = (req, res) => {
-    sql.query(`select deleted,book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id from tb_book where deleted=1 and research_state=0  ORDER BY book_name ASC;`,
+    sql.query(`select deleted,book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id from tb_book where deleted=1 and research_state=1  ORDER BY book_name ASC;`,
         (err, result) => {
             if (err) {
                 console.log('error while fetching user by id', err);
@@ -580,9 +580,8 @@ exports.getRequestBookById = (req, res) => {
 // createApproveResearchBook
 
 exports.createApproveResearchBook = (req, res) => {
-
-    const { appro_date, appro_emp_id, book_id, date_line, fund, fund_id, research_state } = req.body
-    sql.query(`UPDATE tb_book SET appro_date='${appro_date}',appro_emp_id='${appro_emp_id}',date_line='${date_line}',fund=${fund},fund_id=${fund_id},research_state=${research_state} WHERE book_id=N'${book_id}';`,
+    const { appro_date, appro_emp_id, book_id, date_line, fund, fund_id, research_state, deleted } = req.body
+    sql.query(`UPDATE tb_book SET appro_date='${appro_date}',appro_emp_id='${appro_emp_id}',date_line='${date_line}',fund=${fund},fund_id=${fund_id},research_state=${research_state},deleted=${deleted} WHERE book_id=N'${book_id}';`,
         (err, result) => {
             if (err) {
                 res.send('error update:', err)
@@ -600,7 +599,7 @@ exports.createApproveResearchBook = (req, res) => {
 // query all getAllApproveResearchBook
 
 exports.getAllApproveResearchBook = (req, res) => {
-    sql.query(`select book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id,appro_date,date_line  from tb_book where research_state=1  ORDER BY book_name ASC;`,
+    sql.query(`select *  from tb_book where research_state=2 and deleted=0  ORDER BY book_name ASC;`,
         (err, result) => {
             if (err) {
                 console.log('error getAllApproveResearchBook', err);
@@ -636,7 +635,7 @@ exports.cancelApproveResearchBook = (req, res) => {
     const { book_id } = req.body;
     sql.query(`
     UPDATE tb_book SET appro_date='',appro_emp_id=null,
-    date_line='',fund=null,fund_id=null,research_state=0,
+    date_line='',fund=null,fund_id=null,research_state=1,
     deleted=0 WHERE book_id=N'${book_id}'
     `,
         (err, result) => {
@@ -673,4 +672,149 @@ exports.updateApproveResearchBook = (req, res) => {
         })
 }
 
+
+
+// createApproveResearchBookProcedure_0_50_percentage 
+
+exports.createApproveResearchBookProcedure_0_50_percentage = (req, res) => {
+    const { book_id } = req.body
+    sql.query(`UPDATE tb_book SET research_state=3,deleted=0 WHERE book_id=N'${book_id}';`,
+        (err, result) => {
+            if (err) {
+                res.send('error update:', err)
+                console.log("create approve resarch 50% err")
+
+            } else {
+                console.log("create approve resarch 50% success")
+
+                res.send(result);
+            }
+        })
+}
+
+// cancelApproveResearchBookProcedure_0_50_percentage
+
+exports.cancelApproveResearchBookProcedure_0_50_percentage = (req, res) => {
+    const { book_id } = req.body
+    sql.query(`UPDATE tb_book SET research_state=1,deleted=0 WHERE book_id=N'${book_id}';`,
+        (err, result) => {
+            if (err) {
+                res.send('error update:', err)
+                console.log("create approve resarch 50% err")
+
+            } else {
+                console.log("create approve resarch 50% success")
+
+                res.send(result);
+            }
+        })
+}
+
+
+// getAllApproveResearchBookProcedure_0_70_percentage
+
+
+exports.getAllApproveResearchBookProcedure_0_70_percentage = (req, res) => {
+    sql.query(`select * from tb_book where research_state=3 and deleted=0;`,
+        (err, result) => {
+            if (err) {
+                res.send('error update:', err)
+            } else {
+                console.log("create approve resarch 50% success")
+                res.send(result.recordset);
+            }
+        })
+}
+
+// getAllApproveResearchBookProcedure_70_100_percentage
+
+exports.getAllApproveResearchBookProcedure_70_100_percentage = (req, res) => {
+    sql.query(`select * from tb_book where research_state=4 and deleted=0;`,
+        (err, result) => {
+            if (err) {
+                res.send('error update:', err)
+            } else {
+                console.log("create approve resarch 50% success")
+                res.send(result.recordset);
+            }
+        })
+}
+
+
+exports.cancelApproveResearchSecondFaseBook = (req, res) => {
+    const { book_id } = req.body;
+    sql.query(`
+    UPDATE tb_book SET research_state=2,
+    deleted=0 WHERE book_id=N'${book_id}'
+    `,
+        (err, result) => {
+            if (err) {
+                res.send('error update:', err)
+                console.log("cancel approve resarch err")
+
+            } else {
+                console.log("cancel approve resarch success")
+
+                res.send(result);
+            }
+        })
+}
+
+
+exports.cancelApproveResearchThirdFaseBook = (req, res) => {
+    const { book_id } = req.body;
+    sql.query(`
+    UPDATE tb_book SET research_state=3,
+    deleted=0 WHERE book_id=N'${book_id}'
+    `,
+        (err, result) => {
+            if (err) {
+                res.send('error update:', err)
+                console.log("cancel approve resarch err")
+
+            } else {
+                console.log("cancel approve resarch success")
+
+                res.send(result);
+            }
+        })
+}
+
+// cancelApproveResearchThirdFaseBook
+exports.cancelApproveResearchThirdFaseBook = (req, res) => {
+    const { book_id } = req.body;
+    sql.query(`
+    UPDATE tb_book SET research_state=3,
+    deleted=0 WHERE book_id=N'${book_id}'
+    `,
+        (err, result) => {
+            if (err) {
+                res.send('error update:', err)
+                console.log("cancel approve resarch err")
+
+            } else {
+                console.log("cancel approve resarch success")
+
+                res.send(result);
+            }
+        })
+}
+
+
+
+exports.createApproveResearchBookProcedure_50_70_percentage = (req, res) => {
+    const { book_id } = req.body
+    sql.query(`UPDATE tb_book SET research_state=4,deleted=0 WHERE book_id=N'${book_id}';`,
+        (err, result) => {
+            if (err) {
+                res.send('error update:', err)
+                console.log("create approve resarch 70% err")
+
+            } else {
+                console.log("create approve resarch 70% success")
+
+                res.send(result);
+            }
+        })
+}
 

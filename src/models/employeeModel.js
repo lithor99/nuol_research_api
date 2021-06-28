@@ -180,7 +180,6 @@ exports.employeeLogin = async (req, res) => {
     }
 
 
-
     // checking if the username is already in the database 
     const employee = await sql.query(`select * from tb_employee where username='${req.body.username}'`)
     if (!employee) {

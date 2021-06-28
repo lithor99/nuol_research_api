@@ -22,7 +22,7 @@ const createEmployeeValidation = (data) => {
 const loginValidation = data => {
     const schema = Joi.object().keys({
         username: Joi.string().min(1).required(),
-        password: Joi.string().min(6).required(),
+        password: Joi.string().min(3).required(),
     });
     return schema.validate(data)
 }
