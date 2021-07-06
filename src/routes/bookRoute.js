@@ -61,15 +61,15 @@ router.get('/book/procedureTwos', bookModel.getAllApproveResearchBookProcedure_0
 router.put('/book/approveThirdFase/cancel', bookModel.cancelApproveResearchThirdFaseBook);
 router.get('/book/procedureThree', bookModel.getAllApproveResearchBookProcedure_70_100_percentage);
 
-// research_paper_upload
-router.put('/research_paper_upload', bookModel.createResearch_paper_upload);
-router.put('/research_paper_upload/cancel', bookModel.cancelResearch_paper_upload);
-router.get('/research_paper_uploads', bookModel.getAllApproveResearchBookFile);
+// // research_paper_upload
+// router.put('/research_paper_upload', bookModel.createResearch_paper_upload);
+// router.put('/research_paper_upload/cancel', bookModel.cancelResearch_paper_upload);
+// router.get('/research_paper_uploads', bookModel.getAllApproveResearchBookFile);
 
-// research_paper_upload_state = 0
-router.put('/research_paper_upload_state/false', bookModel.updateResearch_uploadState_false);
-// research_paper_upload_state = 1
-router.put('/research_paper_upload_state/true', bookModel.updateResearch_uploadState_true);
+// // research_paper_upload_state = 0
+// router.put('/research_paper_upload_state/false', bookModel.updateResearch_uploadState_false);
+// // research_paper_upload_state = 1
+// router.put('/research_paper_upload_state/true', bookModel.updateResearch_uploadState_true);
 
 
 
