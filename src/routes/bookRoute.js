@@ -40,6 +40,31 @@ router.get('/book/approve/:id', bookModel.getSingleApproveResearchById);
 router.put('/book/approve/cancel', bookModel.cancelApproveResearchBook);
 
 
+//report---------------------------------------------------------------------------
+router.put('/book/report/getAuthor', bookModel.getAuthorReport);
+router.put('/book/report/count_offer_book_one_year', bookModel.countOfferBookReportOneYear);
+router.put('/book/report/netural_offer_book_one_year', bookModel.naturalOfferBookReportOneYear);
+router.put('/book/report/social_offer_book_one_year', bookModel.socialOfferBookReportOneYear);
+router.put('/book/report/count_offer_book_between_year', bookModel.countOfferBookReportBetweenYear);
+router.put('/book/report/netural_offer_book_between_year', bookModel.naturalOfferBookReportBetweenYear);
+router.put('/book/report/social_offer_book_between_year', bookModel.socialOfferBookReportBetweenYear);
+
+router.put('/book/report/count_book_one_year', bookModel.countBookReportOneYear);
+router.put('/book/report/netural_book_one_year', bookModel.naturalBookReportOneYear);
+router.put('/book/report/social_book_one_year', bookModel.socialBookReportOneYear);
+router.put('/book/report/count_book_between_year', bookModel.countBookReportBetweenYear);
+router.put('/book/report/netural_book_between_year', bookModel.naturalBookReportBetweenYear);
+router.put('/book/report/social_book_between_year', bookModel.socialBookReportBetweenYear);
+
+router.put('/book/report/approved_book', bookModel.approvedBookReport);
+router.put('/book/report/unapprove_book_one_year', bookModel.unapproveBookReportOneYear);
+router.put('/book/report/unapprove_book_between_year', bookModel.unapproveBookReportBetweenYear);
+router.put('/book/report/nearly_dateline_book', bookModel.nearlyDatelineBookReport);
+router.put('/book/report/over_dateline_book', bookModel.overDatelineBookReport);
+router.put('/book/report/complete_book_one_year', bookModel.completeBookReportOneYear);
+router.put('/book/report/complete_book_between_year', bookModel.completeBookReportBetweenYear);
+
+
 
 
 module.exports = router;

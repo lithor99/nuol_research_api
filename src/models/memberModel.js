@@ -2,6 +2,7 @@ const sql = require('../config/dbConfig');
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 const path = require('path');
+const { Int } = require('../config/dbConfig');
 
 // create employee
 exports.memberRegist = (req, res) => {
@@ -29,45 +30,49 @@ exports.memberRegist = (req, res) => {
         text: `${conf_num}`
     };
 
-    sql.query(`SELECT * FROM tb_member WHERE email='${req.body.email}'`,
-        (err, result) => {
-            if (err) {
-                res.send('error', err)
-                console.log(err)
-            } else {
-                if (result.recordset[0]) {
-                    return res.json({ message: 'this email already registered' })
+    if (req.body.email.indexOf("@") > 0 && req.body.email.indexOf("@") < req.body.email.length - 1) {
+        sql.query(`SELECT * FROM tb_member WHERE email='${req.body.email}'`,
+            (err, result) => {
+                if (err) {
+                    res.send('error', err)
+                    console.log(err)
                 } else {
-                    sql.query(`INSERT INTO tb_register VALUES(N'${req.body.username}', 
+                    if (result.recordset[0]) {
+                        return res.json({ message: 'this email already registered' })
+                    } else {
+                        sql.query(`INSERT INTO tb_register VALUES(N'${req.body.username}', 
                 '${req.body.email}', N'${req.body.password}', '${conf_num}')`,
-                        (err, result) => {
-                            if (err) {
-                                res.send('error', err)
-                                console.log(err)
-                            } else {
-                                sql.query(`SELECT regist_id, username, email, password FROM tb_register WHERE username=N'${req.body.username}' 
+                            (err, result) => {
+                                if (err) {
+                                    res.send('error', err)
+                                    console.log(err)
+                                } else {
+                                    sql.query(`SELECT regist_id, username, email, password FROM tb_register WHERE username=N'${req.body.username}' 
                                 AND email='${req.body.email}' AND password=N'${req.body.password}'`,
-                                    (err, result) => {
-                                        if (err) {
-                                            console.log('err:' + err)
-                                            return res.json({ message: 'error0:' }, err);
-                                        } else {
-                                            res.send(result.recordset[0]);
-                                            transporter.sendMail(mailOptions, function (err, info) {
-                                                if (err) {
-                                                    console.log({ message: 'error:' }, err);
-                                                } else {
-                                                    console.log(`Your confirm number is ${conf_num}`);
-                                                }
-                                            })
-                                        }
-                                    })
-                            }
-                        })
+                                        (err, result) => {
+                                            if (err) {
+                                                console.log('err:' + err)
+                                                return res.json({ message: 'error0:' }, err);
+                                            } else {
+                                                res.send(result.recordset[0]);
+                                                transporter.sendMail(mailOptions, function (err, info) {
+                                                    if (err) {
+                                                        console.log({ message: 'error:' }, err);
+                                                    } else {
+                                                        console.log(`Your confirm number is ${conf_num}`);
+                                                    }
+                                                })
+                                            }
+                                        })
+                                }
+                            })
+                    }
                 }
-            }
-        })
-
+            })
+    } else {
+        console.log('email format is not true')
+        return res.json({ message: 'email format is not true' })
+    }
 }
 
 exports.createMember = (req, res) => {
@@ -109,46 +114,54 @@ exports.createMember = (req, res) => {
 
 //send mail again
 exports.sendMailAgain = (req, res) => {
-    function between(min, max) {
-        return Math.floor(Math.random() * (max - min));
-    }
-    var conf_num = between(0, 9).toString() + between(0, 9).toString() + between(0, 9).toString() + between(0, 9).toString() + between(0, 9).toString();
-
-    var transporter = nodemailer.createTransport({
-        service: 'gmail',
-        host: 'smtp.gmail.com',
-        port: 534,
-        secure: false,
-        // requireTLS: true,
-        auth: {
-            user: 'nuoltest2021@gmail.com',
-            pass: '@lee&khamla'
+    try {
+        function between(min, max) {
+            return Math.floor(Math.random() * (max - min));
         }
-    });
+        var conf_num = between(0, 9).toString() + between(0, 9).toString() + between(0, 9).toString() + between(0, 9).toString() + between(0, 9).toString();
 
-    var mailOptions = {
-        from: 'nuoltest2021@gmail.com',
-        to: `${req.body.email}`,
-        subject: 'Your confirm number is',
-        text: `${conf_num}`
-    };
+        var transporter = nodemailer.createTransport({
+            service: 'gmail',
+            host: 'smtp.gmail.com',
+            port: 534,
+            secure: false,
+            // requireTLS: true,
+            auth: {
+                user: 'nuoltest2021@gmail.com',
+                pass: '@lee&khamla'
+            }
+        });
 
-    sql.query(`UPDATE tb_register SET conf_num='${conf_num}' WHERE regist_id=${req.body.regist_id}`,
-        (err, result) => {
-            if (err) {
-                res.send('error', err)
-                console.log(err)
-            } else {
-                transporter.sendMail(mailOptions, function (err, info) {
+        var mailOptions = {
+            from: 'nuoltest2021@gmail.com',
+            to: `${req.body.email}`,
+            subject: 'Your confirm number is',
+            text: `${conf_num}`
+        };
+        if (req.body.email.indexOf("@") > 0 && req.body.email.indexOf("@") < req.body.email.length - 1) {
+            sql.query(`UPDATE tb_register SET conf_num='${conf_num}' WHERE regist_id=${req.body.regist_id}`,
+                (err, result) => {
                     if (err) {
-                        console.log({ message: 'send mail error:' }, err);
+                        res.send('error', err)
+                        console.log(err)
                     } else {
-                        console.log(`Your confirm password is ${conf_num}`);
-                        return res.json({ message: 'check your email please' });
+                        transporter.sendMail(mailOptions, function (err, info) {
+                            if (err) {
+                                console.log({ message: 'send mail error:' }, err);
+                            } else {
+                                console.log(`Your confirm password is ${conf_num}`);
+                                return res.json({ message: 'check your email please' });
+                            }
+                        })
                     }
                 })
-            }
-        })
+        } else {
+            console.log('email format is not true')
+            return res.json({ message: 'email format is not true' })
+        }
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 //upload member Image
@@ -182,87 +195,105 @@ exports.uploadMemberProfile = (req, res) => {
 
 //forgot password
 exports.forgotPassword = (req, res) => {
-    function between(min, max) {
-        return Math.floor(Math.random() * (max - min));
-    }
-    var conf_num = between(0, 9).toString() + between(0, 9).toString() + between(0, 9).toString() + between(0, 9).toString() + between(0, 9).toString();
-
-    var transporter = nodemailer.createTransport({
-        service: 'gmail',
-        host: 'smtp.gmail.com',
-        port: 534,
-        secure: false,
-        // requireTLS: true,
-        auth: {
-            user: 'nuoltest2021@gmail.com',
-            pass: '@lee&khamla'
+    try {
+        function between(min, max) {
+            return Math.floor(Math.random() * (max - min));
         }
-    });
+        var conf_num = between(0, 9).toString() + between(0, 9).toString() + between(0, 9).toString() + between(0, 9).toString() + between(0, 9).toString();
 
-    var mailOptions = {
-        from: 'nuoltest2021@gmail.com',
-        to: `${req.body.email}`,
-        subject: 'Your confirm number is',
-        text: `${conf_num}`
-    };
+        var transporter = nodemailer.createTransport({
+            service: 'gmail',
+            host: 'smtp.gmail.com',
+            port: 534,
+            secure: false,
+            // requireTLS: true,
+            auth: {
+                user: 'nuoltest2021@gmail.com',
+                pass: '@lee&khamla'
+            }
+        });
 
-    sql.query(`UPDATE tb_member SET conf_num='${conf_num}' WHERE email='${req.body.email}'`,
-        (err, result) => {
-            if (err) {
-                res.send('error:', err)
-                console.log(err)
-            } else {
-                transporter.sendMail(mailOptions, function (err, info) {
+        var mailOptions = {
+            from: 'nuoltest2021@gmail.com',
+            to: `${req.body.email}`,
+            subject: 'Your confirm number is',
+            text: `${conf_num}`
+        };
+
+        if (req.body.email.indexOf("@") > 0 && req.body.email.indexOf("@") < req.body.email.length - 1) {
+            sql.query(`UPDATE tb_member SET conf_num='${conf_num}' WHERE email='${req.body.email}'`,
+                (err, result) => {
                     if (err) {
-                        console.log({ message: 'send mail error:' }, err);
+                        res.send('error:', err)
+                        console.log(err)
                     } else {
-                        console.log(`Your confirm password is ${conf_num}`);
-                        return res.json({ message: 'check your email please' });
+                        transporter.sendMail(mailOptions, function (err, info) {
+                            if (err) {
+                                console.log({ message: 'send mail error:' }, err);
+                            } else {
+                                console.log(`Your confirm number is ${conf_num}`);
+                                return res.json({ message: 'check your email please' });
+                            }
+                        })
                     }
                 })
-            }
-        })
+        } else {
+            console.log('email format is not true')
+            return res.json({ message: 'email format is not true' })
+        }
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 //confirm email when forgot password
 exports.confirmEmailWhenForgotPassword = (req, res) => {
-    sql.query(`SELECT password FROM tb_member WHERE email='${req.body.email}' 
+    try {
+        if (req.body.email.indexOf("@") > 0 && req.body.email.indexOf("@") < req.body.email.length - 1) {
+            sql.query(`SELECT password FROM tb_member WHERE email='${req.body.email}' 
         AND conf_num='${req.body.conf_num}'`,
-        (err, result) => {
-            if (err) {
-                res.send('error:', err)
-                console.log(err)
-            } else {
-                if (result.recordset[0]) {
-                    var transporter = nodemailer.createTransport({
-                        service: 'gmail',
-                        host: 'smtp.gmail.com',
-                        port: 534,
-                        secure: false,
-                        // requireTLS: true,
-                        auth: {
-                            user: 'nuoltest2021@gmail.com',
-                            pass: '@lee&khamla'
-                        }
-                    });
+                (err, result) => {
+                    if (err) {
+                        res.send('error:', err)
+                        console.log(err)
+                    } else {
+                        if (result.recordset[0]) {
+                            var transporter = nodemailer.createTransport({
+                                service: 'gmail',
+                                host: 'smtp.gmail.com',
+                                port: 534,
+                                secure: false,
+                                // requireTLS: true,
+                                auth: {
+                                    user: 'nuoltest2021@gmail.com',
+                                    pass: '@lee&khamla'
+                                }
+                            });
 
-                    var mailOptions = {
-                        from: 'nuoltest2021@gmail.com',
-                        to: `${req.body.email}`,
-                        subject: 'Your password is',
-                        text: `${result.recordset[0].password}`
-                    };
-                    transporter.sendMail(mailOptions, function (err, info) {
-                        if (err) {
-                            console.log({ message: 'send mail error:' }, err);
-                        } else {
-                            console.log('password:' + result.recordset[0].password)
-                            return res.json({ message: 'check your email please' });
+                            var mailOptions = {
+                                from: 'nuoltest2021@gmail.com',
+                                to: `${req.body.email}`,
+                                subject: 'Your password is',
+                                text: `${result.recordset[0].password}`
+                            };
+                            transporter.sendMail(mailOptions, function (err, info) {
+                                if (err) {
+                                    console.log({ message: 'send mail error:' }, err);
+                                } else {
+                                    console.log('Your password is:' + result.recordset[0].password)
+                                    return res.json({ message: 'check your email please' });
+                                }
+                            })
                         }
-                    })
-                }
-            }
-        })
+                    }
+                })
+        } else {
+            console.log('email format is not true')
+            return res.json({ message: 'email format is not true' })
+        }
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 // edit username
@@ -375,7 +406,18 @@ exports.getMemberData = (req, res) => {
             console.log('error:', err);
             return res.json('error');
         } else {
-            return res.json(result.recordset[0]);
+            sql.query(`SELECT * FROM tb_member WHERE email='${req.body.email}' AND ban_state='true'`, (err, result) => {
+                if (err) {
+                    console.log('error:', err);
+                    return res.json('get member data error');
+                } else {
+                    if (!result.recordset[0]) {
+                        return res.json({ message: 'this user has banned' });
+                    } else {
+                        return res.json(result.recordset[0]);
+                    }
+                }
+            });
         }
     });
 }
@@ -394,7 +436,9 @@ exports.searchMember = (req, res) => {
 }
 
 //user login 
-exports.memberLogin = (req, res) => {
+exports.
+
+memberLogin = (req, res) => {
     sql.query(`SELECT member_id, email FROM tb_member WHERE email='${req.body.email}'`,
         (err, result) => {
             if (err) {
@@ -412,7 +456,25 @@ exports.memberLogin = (req, res) => {
                                 if (!result.recordset[0]) {
                                     return res.json({ message: 'password failed' });
                                 } else {
-                                    return res.json(result.recordset[0]);
+                                    sql.query(`SELECT * FROM tb_member WHERE email='${req.body.email}' AND password=N'${req.body.password}' AND ban_state='true'`,
+                                        (err, result) => {
+                                            if (err) {
+                                                return res.json({ message: 'error:' }, err);
+                                            }
+                                            else {
+                                                if (!result.recordset[0]) {
+                                                    return res.json({ message: 'this user has banned' });
+                                                } else {
+                                                    return res.json(result.recordset[0]);
+                                                    // const token = jwt.sign({ data: result.recordset[0] }, process.env.TOKEN_SECRET, { expiresIn: '90d' });
+                                                    // return res.json({ token })
+                                                }
+                                            }
+                                        });
+                                    if (result.recordset[0]) {
+
+                                    };
+
                                     // const token = jwt.sign({ data: result.recordset[0] }, process.env.TOKEN_SECRET, { expiresIn: '90d' });
                                     // return res.json({ token })
                                 }
