@@ -6,20 +6,20 @@ const mssql = require('mssql');
 const config = {
 
     // DB TO AWS
-    server: 'leethor.cbi9dad67xbo.ap-southeast-1.rds.amazonaws.com',
-    port: 1433,
-    user: 'admin',
-    password: '12345678',
-    database: 'db_nuol_research',
+    // server: 'leethor.cbi9dad67xbo.ap-southeast-1.rds.amazonaws.com',
+    // port: 1433,
+    // user: 'admin',
+    // password: '12345678',
+    // database: 'db_nuol_research',
 
     // _____________-------------------------______________-------------___________________
 
-    // server: 'localhost',
-    // user: 'sa',
-    // // // password: '12345',
-    // password: 'simple123',
-    // database: 'db_nuol_research',
-    // port: 1443,
+    server: 'localhost',
+    user: 'sa',
+    // // password: '12345',
+    password: 'simple123',
+    database: 'db_nuol_research',
+    port: 1443,
     options: {
         'encrypt': true,
         'enableArithAbort': true,
