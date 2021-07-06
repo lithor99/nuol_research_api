@@ -426,8 +426,8 @@ exports.confirmEmailWhenForgotPasswordEmployee = (req, res) => {
                     var mailOptions = {
                         from: 'nuoltest2021@gmail.com',
                         to: `${req.body.email}`,
-                        subject: 'Your password is',
-                        text: `${result.recordset[0].password}`
+                        subject: 'ບັນຊີເຂົ້າໃຊ້ລະບົບ RSM-NUoL ຂອງທ່ານຄື:',
+                        text: `ຊື່ຜູ້ໃຊ້: ${result.recordset[0].username} ເເລະ ລະຫັດຜ່ານ: ${result.recordset[0].password}`
                     };
                     transporter.sendMail(mailOptions, function (err, info) {
                         if (err) {
