@@ -33,11 +33,43 @@ router.put('/book/request/:id', bookModel.updateRequestBookById);
 router.get('/book/request/:id', bookModel.getRequestBookById);
 router.delete('/book/request/delete', bookModel.deleteSingleRequestBook);
 
+// unSelected Request Proposal
+router.put('/book/unselected_proposal/update', bookModel.updateUnselected_proposal);
+router.get('/book/unselected_proposals', bookModel.getAllUnselected_proposals);
+router.get('/book/unselected_proposal/:id', bookModel.getUnselectedRequestProposalById);
+
+
+
+
 // approve research  
-router.post('/book/approve/create', bookModel.createApproveResearchBook);
+router.put('/book/approve/create', bookModel.createApproveResearchBook);
 router.get('/book/approves', bookModel.getAllApproveResearchBook);
 router.get('/book/approve/:id', bookModel.getSingleApproveResearchById);
 router.put('/book/approve/cancel', bookModel.cancelApproveResearchBook);
+router.put('/book/approve/update', bookModel.updateApproveResearchBook);
+
+// /research_paper_navigation/procedure_0_50_percentage
+
+router.put('/book/procedure/create', bookModel.createApproveResearchBookProcedure_0_50_percentage);
+router.put('/book/procedure/cancel', bookModel.cancelApproveResearchBookProcedure_0_50_percentage);
+
+
+
+
+
+// /research_paper_navigation/procedure_0_70_percentage
+router.put('/book/approveSecondFase/cancel', bookModel.cancelApproveResearchSecondFaseBook);
+router.put('/book/procedureSecondFase/create', bookModel.createApproveResearchBookProcedure_50_70_percentage);
+router.get('/book/procedureTwos', bookModel.getAllApproveResearchBookProcedure_0_70_percentage);
+
+
+
+// /research_paper_navigation/procedure_70_100_percentage
+router.put('/book/approveThirdFase/cancel', bookModel.cancelApproveResearchThirdFaseBook);
+router.get('/book/procedureThree', bookModel.getAllApproveResearchBookProcedure_70_100_percentage);
+
+
+
 
 
 //report---------------------------------------------------------------------------

@@ -63,6 +63,19 @@ exports.getOneFund = (req, res) => {
     });
 }
 
+// getFundById  
+exports.getFundById = (req, res) => {
+    const _id = req.params.id
+    sql.query(`SELECT * FROM tb_fund WHERE fund_id=${_id}`, (err, result) => {
+        if (err) {
+            console.log('error:', err);
+            return res.json('error:', err);
+        } else {
+            res.send(result.recordset);
+        }
+    });
+}
+
 exports.getAllFund = async (req, res) => {
     try {
         const totalPage = await sql.query(`

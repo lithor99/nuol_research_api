@@ -10,11 +10,11 @@ router.get('/committees', commiteeModel.getAllCommitee);
 router.get('/committee/:id', commiteeModel.getOneCommitee);
 router.get('/committee/search', commiteeModel.searchCommitee);
 
-// tb_committee_group
+// tb_committee_Detail
 
-router.post('/committeeGroup/create', commiteeModel.createCommitteeGroup);
-router.get('/committeeGroup/:id', commiteeModel.getSingleCommiteeGroup);
-router.delete('/committeeGroup/delete', commiteeModel.deleteCommitteeGroup);
+router.post('/committeeDetail/create', commiteeModel.createCommitteeDetail);
+router.get('/committeeDetail/:id', commiteeModel.getSingleCommiteeDetail);
+router.delete('/committeeDetail/delete', commiteeModel.deleteCommitteeDetail);
 
 
 

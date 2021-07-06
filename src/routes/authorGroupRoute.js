@@ -4,10 +4,10 @@ const authorGroup = require('../models/authorGroupModel');
 
 
 
-router.post('/authorGroup/create', authorGroup.createAuthor_group);
-router.put('/authorGroup/update', authorGroup.updateAuthor_group);
-router.delete('/authorGroup/delete', authorGroup.deleteAuthor_group);
-router.get('/authorGroup/:id', authorGroup.getSingleAuthorGroup);
+router.post('/authorDetail/create', authorGroup.createAuthor_group);
+router.put('/authorDetail/update', authorGroup.updateAuthor_group);
+router.delete('/authorDetail/delete', authorGroup.deleteAuthor_group);
+router.get('/authorDetail/:id', authorGroup.getSingleAuthorGroup);
 
 
 

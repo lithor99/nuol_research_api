@@ -11,26 +11,18 @@ exports.createAuthor_group = (req, res) => {
     const book_id = req.body.book_id
 
     sql.query(`
-    INSERT INTO tb_author_group (book_id,author_id)  VALUES (N'${book_id}',${author_id});`)
-        .then((result) => {
-            if (res.status == 200) {
-                console.log("ssucessdfully: ", result)
+    INSERT INTO tb_author_detail (book_id,author_id)  VALUES (N'${book_id}',${author_id});`,
+        (err, result) => {
+            if (err) {
+                console.log('error while create author detail author_id by id', err);
+                res.send(err);
+            } else {
+                console.log('create author detail successfully author_id create');
+                // res.send(result.recordset); 
                 res.send({
-                    message: "delete successfully ", result
+                    message: result.recordset
                 })
             }
-            if (res.status >= 400) {
-                res.send({
-                    message: "delete error author.... ", result
-                })
-                console.log("error: ", result)
-            }
-        })
-        .catch((err) => {
-            res.send({
-                message: "delete error author id ", err
-            })
-            console.log("error leo: ", result)
         });
 }
 
@@ -39,7 +31,7 @@ exports.createAuthor_group = (req, res) => {
 // get all authorGroup
 exports.getSingleAuthorGroup = (req, res) => {
     const book_id = req.params.id
-    sql.query(`select author_id from tb_author_group where book_id=N'${book_id}';`,
+    sql.query(`select author_id from tb_author_detail where book_id=N'${book_id}';`,
         (err, result) => {
             if (err) {
                 console.log('error while fetching user by id', err);
@@ -57,15 +49,17 @@ exports.deleteAuthor_group = (req, res) => {
     try {
         const { book_id, author_id } = req.body;
 
-        sql.query(`DELETE FROM tb_author_group WHERE author_id=${author_id} and book_id=N'${book_id}'`,
+        sql.query(`DELETE FROM tb_author_detail WHERE author_id=${author_id} and book_id=N'${book_id}'`,
             (err, result) => {
                 if (err) {
-                    console.log('error while fetching author_id by id', err);
+                    console.log('error while delete author detail author_id by id', err);
                     res.send(err);
                 } else {
-                    console.log('get all successfully author_id delete');
-                    res.send(result.recordset);
-
+                    console.log('delete author detail successfully author_id delete');
+                    // res.send(result.recordset); 
+                    res.send({
+                        message: result.recordset
+                    })
                 }
             });
     } catch (error) {
@@ -81,7 +75,7 @@ exports.updateAuthor_group = (req, res) => {
     const author_id = req.body.author_id
     const book_id = req.body.book_id
 
-    sql.query(`UPDATE tb_author_group SET author_id=${author_id} WHERE book_id=N'${book_id}'`)
+    sql.query(`UPDATE tb_author_detail SET author_id=${author_id} WHERE book_id=N'${book_id}'`)
         .then((result) => {
             if (res.status == 200) {
                 console.log("ssucessdfully update: ", result)
