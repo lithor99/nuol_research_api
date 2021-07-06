@@ -1200,3 +1200,123 @@ exports.createApproveResearchBookProcedure_50_70_percentage = (req, res) => {
         })
 }
 
+
+
+
+// research book upload
+
+
+// createResearch_paper_upload
+
+exports.createResearch_paper_upload = (req, res) => {
+    const { book_id, book_file, upload_date, upload_state, upl_emp_id } = req.body;
+    sql.query(` 
+    UPDATE tb_book SET 
+dbo.tb_book.upl_emp_id=${upl_emp_id},
+dbo.tb_book.upload_date='${upload_date}',
+dbo.tb_book.upload_state=${upload_state},
+dbo.tb_book.book_file=N'${book_file}', 
+dbo.tb_book.research_state=5,
+dbo.tb_book.deleted=0
+WHERE dbo.tb_book.book_id=N'${book_id}' 
+    `,
+        (err, result) => {
+            if (err) {
+                res.send('error update:', err)
+                console.log("update approve resarch err")
+
+            } else {
+                console.log("update approve resarch success")
+
+                res.send(result);
+            }
+        })
+}
+
+
+// cancelResearch_paper_upload
+
+exports.cancelResearch_paper_upload = (req, res) => {
+    const { book_id } = req.body;
+    sql.query(` 
+    UPDATE tb_book SET 
+    dbo.tb_book.upl_emp_id=NULL,
+    dbo.tb_book.upload_date=NULL,
+    dbo.tb_book.upload_state=0,
+    dbo.tb_book.book_file='', 
+    dbo.tb_book.research_state=4,
+    dbo.tb_book.deleted=0
+    WHERE dbo.tb_book.book_id=N'${book_id}' 
+    `,
+        (err, result) => {
+            if (err) {
+                res.send('error update:', err)
+                console.log("cancel approve resarch err")
+
+            } else {
+                console.log("cancel approve resarch success")
+
+                res.send(result);
+            }
+        })
+}
+
+
+// getAllApproveResearchBookFile
+
+exports.getAllApproveResearchBookFile = (req, res) => {
+    sql.query(`select * from tb_book where research_state=5 and deleted=0;`,
+        (err, result) => {
+            if (err) {
+                res.send('error update:', err)
+            } else {
+                console.log("select getAllApproveResearchBookFile")
+                res.send(result.recordset);
+            }
+        })
+}
+
+// updateResearch_uploadState_false 
+exports.updateResearch_uploadState_false = (req, res) => {
+    const { book_id } = req.body;
+    sql.query(`
+    UPDATE tb_book SET
+    dbo.tb_book.upload_state=0,
+    dbo.tb_book.research_state=5,
+    dbo.tb_book.deleted=0
+    WHERE dbo.tb_book.book_id=N'${book_id}'`,
+        (err, result) => {
+            if (err) {
+                res.send('error update:', err)
+            } else {
+                console.log("updated update Research upload state false ")
+                res.send(result.recordset);
+            }
+        })
+}
+
+
+// updateResearch_uploadState_true 
+exports.updateResearch_uploadState_true = (req, res) => {
+    const { book_id } = req.body;
+    sql.query(`
+    UPDATE tb_book SET
+    dbo.tb_book.upload_state=1,
+    dbo.tb_book.research_state=5,
+    dbo.tb_book.deleted=0
+    WHERE dbo.tb_book.book_id=N'${book_id}'`,
+        (err, result) => {
+            if (err) {
+                res.send('error update:', err)
+            } else {
+                console.log("updated update Research upload state true ")
+                res.send(result.recordset);
+            }
+        })
+}
+
+
+
+
+
+
