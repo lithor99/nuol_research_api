@@ -12,5 +12,9 @@ router.get('/employee/:id', employeeModel.getOneEmployee);
 router.get('/employee/search', employeeModel.searchEmployee);
 // router.post('/employee/login', token, employeeModel.employeeLogin);
 router.post('/employee/login', employeeModel.employeeLogin);
+router.put('/employee/forgot_Password', employeeModel.forgotPasswordEmployee);
+router.put('/employee/comfirmed_Password_employee', employeeModel.confirmEmailWhenForgotPasswordEmployee);
+
+
 
 module.exports = router;
