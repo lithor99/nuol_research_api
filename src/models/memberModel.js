@@ -438,52 +438,52 @@ exports.searchMember = (req, res) => {
 //user login 
 exports.
 
-memberLogin = (req, res) => {
-    sql.query(`SELECT member_id, email FROM tb_member WHERE email='${req.body.email}'`,
-        (err, result) => {
-            if (err) {
-                return res.json({ message: 'error:' }, err);
-            } else {
-                if (!result.recordset[0]) {
-                    return res.json({ message: 'email not found' });
+    memberLogin = (req, res) => {
+        sql.query(`SELECT member_id, email FROM tb_member WHERE email='${req.body.email}'`,
+            (err, result) => {
+                if (err) {
+                    return res.json({ message: 'error:' }, err);
                 } else {
-                    sql.query(`SELECT * FROM tb_member WHERE email='${req.body.email}' AND password=N'${req.body.password}'`,
-                        (err, result) => {
-                            if (err) {
-                                return res.json({ message: 'error:' }, err);
-                            }
-                            else {
-                                if (!result.recordset[0]) {
-                                    return res.json({ message: 'password failed' });
-                                } else {
-                                    sql.query(`SELECT * FROM tb_member WHERE email='${req.body.email}' AND password=N'${req.body.password}' AND ban_state='true'`,
-                                        (err, result) => {
-                                            if (err) {
-                                                return res.json({ message: 'error:' }, err);
-                                            }
-                                            else {
-                                                if (!result.recordset[0]) {
-                                                    return res.json({ message: 'this user has banned' });
-                                                } else {
-                                                    return res.json(result.recordset[0]);
-                                                    // const token = jwt.sign({ data: result.recordset[0] }, process.env.TOKEN_SECRET, { expiresIn: '90d' });
-                                                    // return res.json({ token })
-                                                }
-                                            }
-                                        });
-                                    if (result.recordset[0]) {
-
-                                    };
-
-                                    // const token = jwt.sign({ data: result.recordset[0] }, process.env.TOKEN_SECRET, { expiresIn: '90d' });
-                                    // return res.json({ token })
+                    if (!result.recordset[0]) {
+                        return res.json({ message: 'email not found' });
+                    } else {
+                        sql.query(`SELECT * FROM tb_member WHERE email='${req.body.email}' AND password=N'${req.body.password}'`,
+                            (err, result) => {
+                                if (err) {
+                                    return res.json({ message: 'error:' }, err);
                                 }
-                            }
-                        });
+                                else {
+                                    if (!result.recordset[0]) {
+                                        return res.json({ message: 'password failed' });
+                                    } else {
+                                        sql.query(`SELECT * FROM tb_member WHERE email='${req.body.email}' AND password=N'${req.body.password}' AND ban_state='true'`,
+                                            (err, result) => {
+                                                if (err) {
+                                                    return res.json({ message: 'error:' }, err);
+                                                }
+                                                else {
+                                                    if (!result.recordset[0]) {
+                                                        return res.json({ message: 'this user has banned' });
+                                                    } else {
+                                                        return res.json(result.recordset[0]);
+                                                        // const token = jwt.sign({ data: result.recordset[0] }, process.env.TOKEN_SECRET, { expiresIn: '90d' });
+                                                        // return res.json({ token })
+                                                    }
+                                                }
+                                            });
+                                        if (result.recordset[0]) {
+
+                                        };
+
+                                        // const token = jwt.sign({ data: result.recordset[0] }, process.env.TOKEN_SECRET, { expiresIn: '90d' });
+                                        // return res.json({ token })
+                                    }
+                                }
+                            });
+                    }
                 }
-            }
-        });
-}
+            });
+    }
 
 // getSingleLike 
 
@@ -556,4 +556,69 @@ exports.deleteBookMark = (req, res) => {
     } catch (error) {
         console.log("ERORR: ", error)
     }
+}
+
+
+
+// CRUD Member
+
+// getMembers
+
+exports.getMembers = (req, res) => {
+    try {
+        sql.query('SELECT * FROM tb_member', (err, result) => {
+            if (err) {
+                return res.send(err);
+            } else {
+                res.send(result.recordset);
+            }
+        });
+    } catch (error) {
+        console.log("ERORR: ", error)
+        throw error
+    }
+}
+
+// get one MemberById  
+exports.getMemberById = (req, res) => {
+    let member_id = req.params.id
+    sql.query(`SELECT * FROM tb_member WHERE member_id=${member_id}`, (err, result) => {
+        if (err) {
+            console.log('error member_id:', err);
+            return res.send('error member_id:', err);
+        } else {
+            res.send(result.recordset);
+        }
+    });
+}
+
+//deleteMemberById
+exports.deleteMemberById = (req, res) => {
+    sql.query(`DELETE FROM tb_member WHERE member_id=${req.params.id}`),
+        (err, result) => {
+            if (err) {
+                res.send('error', err)
+                console.log(err)
+            } else {
+                console.log("delete Successs")
+                res.send(result);
+            }
+        }
+}
+
+
+// edit ban member
+exports.editMemberBan = (req, res) => {
+    let member_id = req.params.id
+    const { ban_state, username, email } = req.body
+    sql.query(`UPDATE tb_member SET ban_state=${ban_state},username='${username}',email='${email}' 
+    WHERE member_id='${member_id}'`),
+        (err, result) => {
+            if (err) {
+                res.send('error', err)
+                console.log(err)
+            } else {
+                return res.send(result);
+            }
+        }
 }

@@ -674,6 +674,30 @@ exports.updateApproveResearchBook = (req, res) => {
 
 
 
+exports.updateApproveResearchBook100 = (req, res) => {
+    const { book_id, book_name, book_group, proposal_file, fund_id, fund, appro_date, date_line, appro_emp_id, deleted, research_state, year_print } = req.body;
+    sql.query(`
+    UPDATE tb_book SET year_print='${year_print}',
+    book_name=N'${book_name}',book_group=N'${book_group}',proposal_file=N'${proposal_file}',fund_id=N'${fund_id}',
+    fund=N'${fund}', appro_date=N'${appro_date}',
+    date_line=N'${date_line}',appro_emp_id=N'${appro_emp_id}',deleted=N'${deleted}',research_state=N'${research_state}'
+    WHERE book_id=N'${book_id}'
+    `,
+        (err, result) => {
+            if (err) {
+                res.send('error update:', err)
+                console.log("update approve resarch err")
+
+            } else {
+                console.log("update approve resarch success")
+                res.send(result);
+            }
+        })
+}
+
+
+
+
 // createApproveResearchBookProcedure_0_50_percentage 
 
 exports.createApproveResearchBookProcedure_0_50_percentage = (req, res) => {
@@ -729,7 +753,7 @@ exports.getAllApproveResearchBookProcedure_0_70_percentage = (req, res) => {
 // getAllApproveResearchBookProcedure_70_100_percentage
 
 exports.getAllApproveResearchBookProcedure_70_100_percentage = (req, res) => {
-    sql.query(`select * from tb_book where research_state=4 and deleted=0;`,
+    sql.query(`select * from tb_book where research_state=4 and deleted=0 and book_file='unUpload';`,
         (err, result) => {
             if (err) {
                 res.send('error update:', err)
@@ -776,13 +800,15 @@ exports.cancelApproveResearchSecondFaseBook = (req, res) => {
 //////////////////////////////////////  Report  //////////////////////////////////////////////////
 // get author as book
 exports.getAuthorReport = (req, res) => {
-    sql.query(`SELECT (SELECT tb_author.name+' '+tb_author.surname+', '
+    const { book_id } = req.body
+    sql.query(`SELECT tb_book.book_id, (SELECT tb_author.name+' '+tb_author.surname+', '
 	FROM tb_book INNER JOIN tb_author_detail ON tb_book.book_id=tb_author_detail.book_id INNER JOIN tb_author 
 	ON tb_author_detail.author_id=tb_author.author_id
-	WHERE tb_book.book_id='${req.body.book_id}' FOR XML PATH(''))  AS author`,
+	WHERE tb_book.book_id='${book_id}' FOR XML PATH(''))  AS author
+    FROM tb_book INNER JOIN tb_author_detail ON tb_book.book_id=tb_author_detail.book_id
+    WHERE tb_author_detail.book_id='${book_id}'`,
         (err, result) => {
             if (err) {
-                console.log('get authors report error:' + err)
                 return res.json('get authors report error:' + err)
             } else {
                 return res.json(result.recordset[0])
@@ -794,55 +820,108 @@ exports.getAuthorReport = (req, res) => {
 
 // offer books report in one year-----------------------------------------------------
 // count offer books in one year
-exports.countOfferBookReportOneYear = (req, res) => {
-    sql.query(`SELECT COUNT(tb_book.book_name) AS allBooks,
-	    (SELECT COUNT(tb_book.book_group) FROM tb_book
-	    WHERE tb_book.book_group=N'ວິທະຍາສາດທຳມະຊາດ' AND Year(tb_book.offer_date) = '${req.body.report_year}' AND tb_book.research_state=1
-	    ) AS naturalBook,
-	    (SELECT COUNT(tb_book.book_group)
-	    FROM tb_book
-	    WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' AND Year(tb_book.offer_date) = '${req.body.report_year}' AND tb_book.research_state=1
-	    ) AS socialBook
-    FROM tb_book
-    WHERE Year(tb_book.offer_date) = '${req.body.report_year}' AND tb_book.research_state=1`,
-        (err, result) => {
-            if (err) {
-                console.log('count offer books error:' + err)
-                return res.json('count offer books error:' + err)
-            } else {
-                return res.json(result.recordset[0])
+exports.countOfferBookReportOneYear = async (req, res) => {
+    const { offer_year } = req.body
+    await sql.query(`
+   
+	SELECT COUNT(tb_book.book_name) as allBooks FROM tb_book WHERE Year(tb_book.offer_date)='${offer_year}' AND tb_book.research_state=1
+   `, function (err, data) {
+        if (err) {
+            console.log("Error @ Here: ", err)
+        } else {
+            if (data.recordset[0].allBooks <= 0) {
+                res.send("allBooks have no value");
+            } else if (data.recordset[0].allBooks > 0) {
+
+                sql.query(`
+                SELECT COUNT(tb_book.book_id) AS allBooks,
+
+                (SELECT COUNT(tb_book.book_group) FROM tb_book
+                WHERE tb_book.book_group=N'ວິທະຍາສາດທໍາມະຊາດ' AND Year(tb_book.offer_date) = '${offer_year}' AND tb_book.research_state=1) AS naturalBook,
+                (SELECT COUNT(tb_book.book_group) FROM tb_book
+                WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' AND Year(tb_book.offer_date) = '${offer_year}' AND tb_book.research_state=1) AS socialBook 
+
+            FROM tb_book
+            WHERE Year(tb_book.offer_date) = '${offer_year}' AND tb_book.research_state=1  
+                `,
+                    (err, result) => {
+                        if (err) {
+                            console.log('count offer books error:' + err)
+                            return res.json('count offer books error:' + err)
+                        } else {
+                            return res.json([result.recordset[0]])
+                        }
+                    })
             }
-        })
+
+        }
+    })
 }
 
 // select natural offer books in one year
-exports.naturalOfferBookReportOneYear = (req, res) => {
-    sql.query(`SELECT tb_book.book_name FROM tb_book
-    WHERE tb_book.book_group=N'ວິທະຍາສາດທຳມະຊາດ' 
-    AND Year(tb_book.offer_date) = '${req.body.report_year}' AND tb_book.research_state=1`,
-        (err, result) => {
-            if (err) {
-                console.log('select natural offer books error:' + err)
-                return res.json('select natural offer books error:' + err)
-            } else {
-                return res.json(result.recordset)
+exports.naturalOfferBookReportOneYear = async (req, res) => {
+    const { offer_year } = req.body;
+
+    return await sql.query(` 
+    SELECT COUNT (*) AS facCount FROM tb_book
+    WHERE tb_book.book_group=N'ວິທະຍາສາດທໍາມະຊາດ' 
+    AND Year(tb_book.offer_date)=N'${offer_year}' AND tb_book.research_state=1
+`, function (err, data) {
+        if (err) {
+            console.log("Error at naturalOfferBookReportOneYear: ", err);
+        } else {
+            if (data.recordset[0].facCount <= 0) {
+                res.send("Natural specific Year has no value");
+            } else if (data.recordset[0].facCount > 0) {
+                sql.query(`SELECT tb_book.book_name,tb_book.book_id FROM tb_book
+                WHERE tb_book.book_group=N'ວິທະຍາສາດທໍາມະຊາດ' 
+                AND Year(tb_book.offer_date)=N'${offer_year}' AND tb_book.research_state=1`,
+                    (err, result) => {
+                        if (err) {
+                            // console.log('select natural offer books error:' + err)
+                            res.send('select natural offer books error:' + err)
+                        } else {
+                            console.log("result ", result.recordset)
+                            res.send(result.recordset)
+                        }
+                    })
+
+
             }
-        })
+        }
+    }
+    );
 }
 
 // select social offer books in one year
 exports.socialOfferBookReportOneYear = (req, res) => {
-    sql.query(`SELECT tb_book.book_name FROM tb_book
-    WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' 
-    AND Year(tb_book.offer_date) = '${req.body.report_year}' AND tb_book.research_state=1`,
-        (err, result) => {
-            if (err) {
-                console.log('select social offer books error:' + err)
-                return res.json('select social offer books error:' + err)
-            } else {
-                return res.json(result.recordset)
+    const { offer_year } = req.body
+
+    sql.query(`
+   SELECT COUNT (*) AS socialCount FROM tb_book
+   WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' 
+   AND Year(tb_book.offer_date)=N'${offer_year}' AND tb_book.research_state=1
+   `, function (err, data) {
+        if (err) {
+            console.log("SOCIAL SPECIFIC YEAR ERROR. ", err)
+        } else {
+            if (data.recordset[0].socialCount <= 0) {
+                res.send("No Social Specific Year");
+            } else if (data.recordset[0].socialCount > 0) {
+                sql.query(`SELECT tb_book.book_name,tb_book.book_id FROM tb_book
+                WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' 
+                AND Year(tb_book.offer_date) = '${offer_year}' AND tb_book.research_state=1`,
+                    (err, result) => {
+                        if (err) {
+                            console.log('select social offer books error:' + err)
+                            return res.json('select social offer books error:' + err)
+                        } else {
+                            return res.json(result.recordset)
+                        }
+                    })
             }
-        })
+        }
+    })
 }
 
 
@@ -850,152 +929,265 @@ exports.socialOfferBookReportOneYear = (req, res) => {
 // offer books report between year---------------------------------------------
 // count offer books in between year
 exports.countOfferBookReportBetweenYear = (req, res) => {
-    sql.query(`SELECT COUNT(tb_book.book_name) AS allBooks,
-	    (SELECT COUNT(tb_book.book_group) FROM tb_book
-	    WHERE tb_book.book_group=N'ວິທະຍາສາດທຳມະຊາດ' 
-        AND (Year(tb_book.offer_date) BETWEEN '${req.body.from_year}' AND '${req.body.until_year}') 
-        AND tb_book.research_state=1
-	    ) AS naturalBook,
-	    (SELECT COUNT(tb_book.book_group)
-	    FROM tb_book
-	    WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' 
-        AND (Year(tb_book.offer_date) BETWEEN '${req.body.from_year}' AND '${req.body.until_year}') 
-        AND tb_book.research_state=1
-	    ) AS socialBook
-    FROM tb_book
-    WHERE (Year(tb_book.offer_date) BETWEEN '${req.body.from_year}' AND '${req.body.until_year}') AND tb_book.research_state=1`,
-        (err, result) => {
-            if (err) {
-                console.log('count offer books error:' + err)
-                return res.json('count offer books error:' + err)
-            } else {
-                return res.json(result.recordset[0])
+    const { from_year, until_year } = req.body
+
+    sql.query(`
+    SELECT COUNT(tb_book.book_id) AS BookCount from tb_book  
+	WHERE (Year(tb_book.offer_date) BETWEEN '${from_year}' AND '${until_year}') AND tb_book.research_state=1
+    `, function (err, data) {
+        if (err) {
+            console.log("Error ##here: ", err)
+        } else {
+            if (data.recordset[0].BookCount <= 0) {
+                res.send("all between book has no value")
+            } else if (data.recordset[0].BookCount > 0) {
+                sql.query(`SELECT COUNT(tb_book.book_name) AS allBooks,
+            (SELECT COUNT(tb_book.book_group) FROM tb_book
+            WHERE tb_book.book_group=N'ວິທະຍາສາດທໍາມະຊາດ' 
+            AND (Year(tb_book.offer_date) BETWEEN '${from_year}' AND '${until_year}') 
+            AND tb_book.research_state=1
+            ) AS naturalBook,
+            (SELECT COUNT(tb_book.book_group)
+            FROM tb_book
+            WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' 
+            AND (Year(tb_book.offer_date) BETWEEN '${from_year}' AND '${until_year}') 
+            AND tb_book.research_state=1
+            ) AS socialBook
+            FROM tb_book
+            WHERE (Year(tb_book.offer_date) BETWEEN '${from_year}' AND '${until_year}') AND tb_book.research_state=1`,
+                    (err, result) => {
+                        if (err) {
+                            console.log('count offer books error:' + err)
+                            return res.json('count offer books error:' + err)
+                        } else {
+                            return res.json([result.recordset[0]])
+                        }
+                    })
             }
-        })
+        }
+    })
 }
 
 // select natural offer books in between year
 exports.naturalOfferBookReportBetweenYear = (req, res) => {
-    sql.query(`SELECT tb_book.book_name FROM tb_book
-    WHERE tb_book.book_group=N'ວິທະຍາສາດທຳມະຊາດ' 
-    AND (Year(tb_book.offer_date) BETWEEN '${req.body.from_year}' AND '${req.body.until_year}') 
-    AND tb_book.research_state=1`,
-        (err, result) => {
-            if (err) {
-                console.log('select natural offer books error:' + err)
-                return res.json('select natural offer books error:' + err)
-            } else {
-                return res.json(result.recordset)
+    const { from_year, until_year } = req.body
+
+    sql.query(`SELECT COUNT(tb_book.book_id) AS NaturalBetweeenYear FROM tb_book
+    WHERE tb_book.book_group=N'ວິທະຍາສາດທໍາມະຊາດ' 
+    AND (Year(tb_book.offer_date) BETWEEN '${from_year}' AND '${until_year}') 
+    AND tb_book.research_state=1`, function (err, data) {
+        if (err) {
+            console.log("Error @ Here NaturalBetweenYear")
+        } else {
+            if (data.recordset[0].NaturalBetweeenYear <= 0) {
+                res.send("Natural Between Year has no value")
+            } else if (data.recordset[0].NaturalBetweeenYear > 0) {
+                sql.query(`SELECT tb_book.book_name,tb_book.book_id FROM tb_book
+                WHERE tb_book.book_group=N'ວິທະຍາສາດທໍາມະຊາດ' 
+                AND (Year(tb_book.offer_date) BETWEEN '${from_year}' AND '${until_year}') 
+                AND tb_book.research_state=1`,
+                    (err, result) => {
+                        if (err) {
+                            console.log('select natural offer books error:' + err)
+                            return res.json('select natural offer books error:' + err)
+                        } else {
+                            return res.json(result.recordset)
+                        }
+                    })
             }
-        })
+        }
+    })
 }
 
 // select social offer books in between year
 exports.socialOfferBookReportBetweenYear = (req, res) => {
-    sql.query(`SELECT tb_book.book_name FROM tb_book
-    WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' 
-    AND (Year(tb_book.offer_date) BETWEEN '${req.body.from_year}' AND '${req.body.until_year}')
-    AND tb_book.research_state=1`,
-        (err, result) => {
-            if (err) {
-                console.log('select social offer books error:' + err)
-                return res.json('select social offer books error:' + err)
-            } else {
-                return res.json(result.recordset)
+    const { from_year, until_year } = req.body
+
+    sql.query(`
+     SELECT COUNT(tb_book.book_id) AS SocialBetweenYear FROM tb_book
+     WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' 
+     AND (Year(tb_book.offer_date) BETWEEN '${from_year}' AND '${until_year}')
+     AND tb_book.research_state=1
+     `, function (err, data) {
+        if (err) {
+            console.log("Error @ Social Offer between year")
+        } else {
+            if (data.recordset[0].SocialBetweenYear <= 0) {
+                res.send("Social Between Year has no data")
+            } else if (data.recordset[0].SocialBetweenYear > 0) {
+                sql.query(`SELECT tb_book.book_name,tb_book.book_id FROM tb_book
+                WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' 
+                AND (Year(tb_book.offer_date) BETWEEN '${from_year}' AND '${until_year}')
+                AND tb_book.research_state=1`,
+                    (err, result) => {
+                        if (err) {
+                            return res.json('select social offer books error:' + err)
+                        } else {
+                            return res.json(result.recordset)
+                        }
+                    })
             }
-        })
+        }
+    })
 }
 
 
 
 // books report in one year-----------------------------------------------------------
 // count books in one year
-exports.countBookReportOneYear = (req, res) => {
-    sql.query(`SELECT COUNT(tb_book.book_name) AS allBooks,
-	    (SELECT COUNT(tb_book.book_group) FROM tb_book
-	    WHERE tb_book.book_group=N'ວິທະຍາສາດທຳມະຊາດ' AND Year(tb_book.offer_date) = '${req.body.report_year}' AND tb_book.research_state!=1
-	    ) AS naturalBook,
-	    (SELECT COUNT(tb_book.book_group)
-	    FROM tb_book
-	    WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' AND Year(tb_book.offer_date) = '${req.body.report_year}' AND tb_book.research_state!=1
-	    ) AS socialBook
-    FROM tb_book
-    WHERE Year(tb_book.offer_date) = '${req.body.report_year}' AND tb_book.research_state!=1`,
-        (err, result) => {
-            if (err) {
-                console.log('count offer books error:' + err)
-                return res.json('count offer books error:' + err)
-            } else {
-                return res.json(result.recordset[0])
+exports.countBookReportOneYear = async (req, res) => {
+
+    const { offer_year } = req.body;
+    await sql.query(`
+    SELECT COUNT(tb_book.book_id) as allBooks FROM tb_book WHERE Year(tb_book.offer_date)='${offer_year}' AND tb_book.research_state!=1
+    `, function (err, data) {
+        if (err) {
+            return console.log("Error @ Here")
+        } else {
+            if (data.recordset[0].allBooks <= 0) {
+                res.send("allBooks have no value");
+            } else if (data.recordset[0].allBooks > 0) {
+                sql.query(`SELECT COUNT(tb_book.book_name) AS allBooks,
+                    (SELECT COUNT(tb_book.book_group) FROM tb_book
+                    WHERE tb_book.book_group=N'ວິທະຍາສາດທໍາມະຊາດ' AND Year(tb_book.offer_date) = '${offer_year}' AND tb_book.research_state!=1
+                    ) AS naturalBook,
+                    (SELECT COUNT(tb_book.book_group)
+                    FROM tb_book
+                    WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' AND Year(tb_book.offer_date) = '${offer_year}' AND tb_book.research_state!=1
+                    ) AS socialBook
+                FROM tb_book
+                WHERE Year(tb_book.offer_date) = '${offer_year}' AND tb_book.research_state!=1`,
+                    (err, result) => {
+                        if (err) {
+                            console.log('count offer books error:' + err)
+                            return res.json('count offer books error:' + err)
+                        } else {
+                            return res.json([result.recordset[0]])
+                        }
+                    })
             }
-        })
+        }
+    })
 }
+
+
+
+
 
 // select natural books in one year
-exports.naturalBookReportOneYear = (req, res) => {
-    sql.query(`SELECT tb_book.book_name , tb_fund.fund_name
-    FROM tb_book INNER JOIN tb_fund ON tb_book.fund_id=tb_fund.fund_id
-    WHERE tb_book.book_group=N'ວິທະຍາສາດທຳມະຊາດ' 
-    AND Year(tb_book.offer_date) = '${req.body.report_year}' AND tb_book.research_state!=1`,
-        (err, result) => {
-            if (err) {
-                console.log('select natural offer books error:' + err)
-                return res.json('select natural offer books error:' + err)
-            } else {
-                return res.json(result.recordset)
+exports.naturalBookReportOneYear = async (req, res) => {
+    const { offer_year } = req.body;
+    return await sql.query(` 
+    SELECT COUNT (*) AS facCount FROM tb_book
+    WHERE tb_book.book_group=N'ວິທະຍາສາດທໍາມະຊາດ' 
+    AND Year(tb_book.offer_date)=N'${offer_year}' AND tb_book.research_state!=1
+`, function (err, data) {
+        if (err) {
+            console.log("Error ### Here I am error ", err)
+        } else {
+            if (data.recordset[0].facCount <= 0) {
+                res.send("Natural specific Year has no value");
+            } else if (data.recordset[0].facCount > 0) {
+                sql.query(`SELECT tb_book.book_name , tb_book.book_id
+                FROM tb_book INNER JOIN tb_fund ON tb_book.fund_id=tb_fund.fund_id
+                WHERE tb_book.book_group=N'ວິທະຍາສາດທໍາມະຊາດ' 
+                AND Year(tb_book.offer_date) = '${offer_year}' AND tb_book.research_state!=1`,
+                    (err, result) => {
+                        if (err) {
+                            console.log('select natural offer books error:' + err)
+                            return res.json('select natural offer books error:' + err)
+                        } else {
+                            return res.json(result.recordset)
+                        }
+                    })
             }
-        })
+        }
+    })
 }
 
+
+
 // select social books in one year
-exports.socialBookReportOneYear = (req, res) => {
-    sql.query(`SELECT tb_book.book_name , tb_fund.fund_name
+exports.socialBookReportOneYear = async (req, res) => {
+    const { offer_year } = req.body
+    return await sql.query(`
+    SELECT COUNT(*) AS socialCount
     FROM tb_book INNER JOIN tb_fund ON tb_book.fund_id=tb_fund.fund_id
     WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' 
-    AND Year(tb_book.offer_date) = '${req.body.report_year}' AND tb_book.research_state!=1`,
-        (err, result) => {
-            if (err) {
-                console.log('select social offer books error:' + err)
-                return res.json('select social offer books error:' + err)
-            } else {
-                return res.json(result.recordset)
+    AND Year(tb_book.offer_date) = '${offer_year}' AND tb_book.research_state!=1
+`, function (err, data) {
+        if (err) {
+            console.log("SOCIAL SPECIFIC YEAR ERROR. ", err)
+        } else {
+            if (data.recordset[0].socialCount <= 0) {
+                res.send("No Social Specific Year");
+            } else if (data.recordset[0].socialCount > 0) {
+                sql.query(`SELECT tb_book.book_name , book_id
+            FROM tb_book INNER JOIN tb_fund ON tb_book.fund_id=tb_fund.fund_id
+            WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' 
+            AND Year(tb_book.offer_date) = '${offer_year}' AND tb_book.research_state!=1`,
+                    (err, result) => {
+                        if (err) {
+                            console.log('select social offer books error:' + err)
+                            return res.json('select social offer books error:' + err)
+                        } else {
+                            return res.json(result.recordset)
+                        }
+                    })
             }
-        })
+        }
+    })
 }
 
 
 
 // books report between year------------------------------------------------
 // count books in between year
-exports.countBookReportBetweenYear = (req, res) => {
-    sql.query(`SELECT COUNT(tb_book.book_name) AS allBooks,
-	    (SELECT COUNT(tb_book.book_group) FROM tb_book
-	    WHERE tb_book.book_group=N'ວິທະຍາສາດທຳມະຊາດ' 
-        AND (Year(tb_book.offer_date) BETWEEN '${req.body.from_year}' AND '${req.body.until_year}') 
-        AND tb_book.research_state!=1
-	    ) AS naturalBook,
-	    (SELECT COUNT(tb_book.book_group)
-	    FROM tb_book
-	    WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' 
-        AND (Year(tb_book.offer_date) BETWEEN '${req.body.from_year}' AND '${req.body.until_year}') 
-        AND tb_book.research_state!=1
-	    ) AS socialBook
+exports.countBookReportBetweenYear = async (req, res) => {
+    const { from_year, until_year } = req.body
+
+    await sql.query(`
+    SELECT COUNT(*) AS BookCount FROM tb_book WHERE (Year(tb_book.offer_date) BETWEEN '${from_year}' AND '${until_year}') 
+    AND tb_book.research_state!=1
+    `, function (err, data) {
+        if (err) {
+            console.log("Error at here: ", err)
+        } else {
+            if (data.recordset[0].BookCount <= 0) {
+                res.send("all between book has no value")
+            } else if (data.recordset[0].BookCount > 0) {
+                sql.query(`SELECT COUNT(tb_book.book_name) AS allBooks,
+    (SELECT COUNT(tb_book.book_group) FROM tb_book
+    WHERE tb_book.book_group=N'ວິທະຍາສາດທໍາມະຊາດ' 
+    AND (Year(tb_book.offer_date) BETWEEN '${from_year}' AND '${until_year}') 
+    AND tb_book.research_state!=1
+    ) AS naturalBook,
+    (SELECT COUNT(tb_book.book_group)
     FROM tb_book
-    WHERE (Year(tb_book.offer_date) BETWEEN '${req.body.from_year}' AND '${req.body.until_year}') 
+    WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' 
+    AND (Year(tb_book.offer_date) BETWEEN '${from_year}' AND '${until_year}') 
+    AND tb_book.research_state!=1
+    ) AS socialBook
+    FROM tb_book
+    WHERE (Year(tb_book.offer_date) BETWEEN '${from_year}' AND '${until_year}') 
     AND tb_book.research_state!=1`,
-        (err, result) => {
-            if (err) {
-                console.log('count offer books error:' + err)
-                return res.json('count offer books error:' + err)
-            } else {
-                return res.json(result.recordset[0])
+                    (err, result) => {
+                        if (err) {
+                            console.log('count offer books error:' + err)
+                            return res.json('count offer books error:' + err)
+                        } else {
+                            return res.json([result.recordset[0]])
+                        }
+                    })
             }
-        })
+        }
+    })
+
 }
 exports.cancelApproveResearchThirdFaseBook = (req, res) => {
     const { book_id } = req.body;
     sql.query(`
-    UPDATE tb_book SET research_state=3,
+    UPDATE tb_book SET research_state=3,book_file=NULL,year_print=null,
     deleted=0 WHERE book_id=N'${book_id}'
     `,
         (err, result) => {
@@ -1013,42 +1205,75 @@ exports.cancelApproveResearchThirdFaseBook = (req, res) => {
 
 // select natural books in between year
 exports.naturalBookReportBetweenYear = (req, res) => {
-    sql.query(`SELECT tb_book.book_name , tb_fund.fund_name
+    const { from_year, until_year } = req.body
+    sql.query(`
+    SELECT COUNT(tb_book.book_id) AS NaturalBetweeenYear FROM tb_book
+    WHERE tb_book.book_group=N'ວິທະຍາສາດທໍາມະຊາດ' 
+    AND (Year(tb_book.offer_date) BETWEEN '${from_year}' AND '${until_year}')
+    AND tb_book.research_state!=1
+    `, function (err, data) {
+        if (err) {
+            console.log("Error at here: ", err)
+        } else {
+            if (data.recordset[0].NaturalBetweeenYear <= 0) {
+                res.send("Natural Between Year has no value")
+            } else if (data.recordset[0].NaturalBetweeenYear > 0) {
+                sql.query(`SELECT tb_book.book_name ,tb_book.book_id
     FROM tb_book INNER JOIN tb_fund ON tb_book.fund_id=tb_fund.fund_id
-    WHERE tb_book.book_group=N'ວິທະຍາສາດທຳມະຊາດ' 
-    AND (Year(tb_book.offer_date) BETWEEN '${req.body.from_year}' AND '${req.body.until_year}') 
+    WHERE tb_book.book_group=N'ວິທະຍາສາດທໍາມະຊາດ' 
+    AND (Year(tb_book.offer_date) BETWEEN '${from_year}' AND '${until_year}')
     AND tb_book.research_state!=1`,
-        (err, result) => {
-            if (err) {
-                console.log('select natural offer books error:' + err)
-                return res.json('select natural offer books error:' + err)
-            } else {
-                return res.json(result.recordset)
+                    (err, result) => {
+                        if (err) {
+                            console.log('select natural offer books error:' + err)
+                            return res.json('select natural offer books error:' + err)
+                        } else {
+                            return res.json(result.recordset)
+                        }
+                    })
             }
-        })
+        }
+    })
 }
 
 // select social books in between year
 exports.socialBookReportBetweenYear = (req, res) => {
-    sql.query(`SELECT tb_book.book_name, tb_fund.fund_name
-    FROM tb_book INNER JOIN tb_fund ON tb_book.fund_id=tb_fund.fund_id
-    WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' 
-    AND (Year(tb_book.offer_date) BETWEEN '${req.body.from_year}' AND '${req.body.until_year}')
-    AND tb_book.research_state!=1`,
-        (err, result) => {
-            if (err) {
-                console.log('select social offer books error:' + err)
-                return res.json('select social offer books error:' + err)
-            } else {
-                return res.json(result.recordset)
+    const { from_year, until_year } = req.body
+
+    sql.query(` 
+	 SELECT COUNT(tb_book.book_id) AS NaturalBetweeenYear FROM tb_book
+     WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' 
+     AND (Year(tb_book.offer_date) BETWEEN '${from_year}' AND '${until_year}')
+     AND tb_book.research_state!=1
+     `, function (err, data) {
+        if (err) {
+            console.log("Error sending value at Here: ", err)
+        } else {
+            if (data.recordset[0].NaturalBetweeenYear <= 0) {
+                res.send("Social Between Year has no data")
+            } else if (data.recordset[0].NaturalBetweeenYear > 0) {
+                sql.query(`SELECT tb_book.book_name,tb_book.book_id
+                FROM tb_book INNER JOIN tb_fund ON tb_book.fund_id=tb_fund.fund_id
+                WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' 
+                AND (Year(tb_book.offer_date) BETWEEN '${from_year}' AND '${until_year}')
+                AND tb_book.research_state!=1`,
+                    (err, result) => {
+                        if (err) {
+                            console.log('select social offer books error:' + err)
+                            return res.json('select social offer books error:' + err)
+                        } else {
+                            return res.json(result.recordset)
+                        }
+                    })
             }
-        })
+        }
+    })
 }
 
 
 ////////////////////////////// approved books report ///////////////////////////////////
 exports.approvedBookReport = (req, res) => {
-    sql.query(`SELECT tb_book.book_name, tb_book.book_group, tb_fund.fund_name, 
+    sql.query(`SELECT tb_book.book_name, tb_book.book_group, tb_fund.fund_name, tb_book.book_id,
     tb_book.fund, tb_book.appro_date, tb_book.date_line
     FROM tb_book INNER JOIN tb_fund ON tb_book.fund_id=tb_fund.fund_id
     WHERE tb_book.research_state BETWEEN 2 AND 3`,
@@ -1062,24 +1287,24 @@ exports.approvedBookReport = (req, res) => {
         })
 }
 // cancelApproveResearchThirdFaseBook
-exports.cancelApproveResearchThirdFaseBook = (req, res) => {
-    const { book_id } = req.body;
-    sql.query(`
-    UPDATE tb_book SET research_state=3,
-    deleted=0 WHERE book_id=N'${book_id}'
-    `,
-        (err, result) => {
-            if (err) {
-                res.send('error update:', err)
-                console.log("cancel approve resarch err")
+// exports.cancelApproveResearchThirdFaseBook = (req, res) => {
+//     const { book_id } = req.body;
+//     sql.query(`
+//     UPDATE tb_book SET research_state=3,
+//     deleted=0 WHERE book_id=N'${book_id}'
+//     `,
+//         (err, result) => {
+//             if (err) {
+//                 res.send('error update:', err)
+//                 console.log("cancel approve resarch err")
 
-            } else {
-                console.log("cancel approve resarch success")
+//             } else {
+//                 console.log("cancel approve resarch success")
 
-                res.send(result);
-            }
-        })
-}
+//                 res.send(result);
+//             }
+//         })
+// }
 
 
 ////////////////////////////// unapprove books report ///////////////////////////////////
@@ -1185,8 +1410,8 @@ exports.completeBookReportBetweenYear = (req, res) => {
 }
 
 exports.createApproveResearchBookProcedure_50_70_percentage = (req, res) => {
-    const { book_id } = req.body
-    sql.query(`UPDATE tb_book SET research_state=4,deleted=0 WHERE book_id=N'${book_id}';`,
+    const { book_id, year_print } = req.body
+    sql.query(`UPDATE tb_book SET research_state=4,deleted=0,book_file='unUpload',year_print='${year_print}' WHERE book_id=N'${book_id}';`,
         (err, result) => {
             if (err) {
                 res.send('error update:', err)
@@ -1216,18 +1441,14 @@ dbo.tb_book.upl_emp_id=${upl_emp_id},
 dbo.tb_book.upload_date='${upload_date}',
 dbo.tb_book.upload_state=${upload_state},
 dbo.tb_book.book_file=N'${book_file}', 
-dbo.tb_book.research_state=5,
+dbo.tb_book.research_state=4,
 dbo.tb_book.deleted=0
 WHERE dbo.tb_book.book_id=N'${book_id}' 
     `,
         (err, result) => {
             if (err) {
-                res.send('error update:', err)
-                console.log("update approve resarch err")
-
+                res.send('error update:', err);
             } else {
-                console.log("update approve resarch success")
-
                 res.send(result);
             }
         })
@@ -1243,7 +1464,7 @@ exports.cancelResearch_paper_upload = (req, res) => {
     dbo.tb_book.upl_emp_id=NULL,
     dbo.tb_book.upload_date=NULL,
     dbo.tb_book.upload_state=0,
-    dbo.tb_book.book_file='', 
+    dbo.tb_book.book_file='unUpload', 
     dbo.tb_book.research_state=4,
     dbo.tb_book.deleted=0
     WHERE dbo.tb_book.book_id=N'${book_id}' 
@@ -1265,7 +1486,7 @@ exports.cancelResearch_paper_upload = (req, res) => {
 // getAllApproveResearchBookFile
 
 exports.getAllApproveResearchBookFile = (req, res) => {
-    sql.query(`select * from tb_book where research_state=5 and deleted=0;`,
+    sql.query(`select * from tb_book where research_state=4 and deleted=0 and book_file !='unUpload';`,
         (err, result) => {
             if (err) {
                 res.send('error update:', err)

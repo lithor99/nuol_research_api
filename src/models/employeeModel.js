@@ -1,85 +1,59 @@
 const sql = require('../config/dbConfig');
 const jwt = require('jsonwebtoken');
-const { createEmployeeValidation, loginValidation } = require('../middleware/Employee.validation');
-const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 
-// create employee
+
+
 exports.createEmployee = (req, res) => {
-    let { name, surname, _username, password, gender, birth_date, tel, email, supper_admin, ban_state } = req.body;
-    // const myUsername = sql.query(`SELECT username FROM tb_employee where username=${username}` );
-
+    let { name, surname, username, password, gender, birth_date, tel, email, supper_admin, ban_state } = req.body;
     sql.query(`
-    INSERT INTO tb_employee VALUES(N'${name}',N'${surname}',N'${_username}',N'${password}',N'${gender}',N'${birth_date}',N'${tel}', N'${email}',${supper_admin},${ban_state})
-`,
-        (err, result) => {
-            if (err) {
-                res.send('error', err)
-                console.log(err)
+    SELECT 
+	COUNT (*) AS countUsername
+    FROM
+    dbo.tb_employee 
+    where dbo.tb_employee.username='${username}'`, function (err, data) {
+        if (err) {
+            console.log("Errror at dubplicate username values: ", err)
+        } else {
+            if (data.recordset[0].countUsername > 0) {
+                // Already exist username
+                res.send("username already exist");
             } else {
-                res.send(result);
+                sql.query(`
+                SELECT 
+                COUNT (*) AS countUsername
+                FROM
+                dbo.tb_employee 
+                where dbo.tb_employee.email='${email}'
+    `,
+                    (err, data) => {
+                        if (err) {
+                            console.log("Errror at dubplicate email values: ", err)
+                        } else {
+                            // Already exist email
+                            if (data.recordset[0].countUsername > 0) {
+                                res.send("email already exist");
+                            } else {
+                                // Insert unique username, email to tb_employee
+                                sql.query(`
+                                INSERT INTO tb_employee VALUES(N'${name}',N'${surname}',N'${username}',N'${password}',N'${gender}',N'${birth_date}',N'${tel}', N'${email}',${supper_admin},${ban_state})
+                            `,
+                                    (err, result) => {
+                                        if (err) {
+                                            res.send('error at insert data: ', err)
+                                            console.log(err)
+                                        } else {
+                                            res.send(result);
+                                        }
+                                    })
+                            }
+                        }
+                    });
             }
-        })
-    // if (myUsername.recordset[0].username === username) {
-    //         sql.query(`
-    //         INSERT INTO tb_employee VALUES(N'${name}',N'${surname}',N'${username}',N'${password}',N'${gender}',N'${birth_date}',N'${tel}', N'${email}',${supper_admin},${ban_state})
-    //     `,
-    //             (err, result) => {
-    //                 if (err) {
-    //                     res.send('error', err)
-    //                     console.log(err)
-    //                 } else {
-    //                     res.send(result);
-    //                 }
-    //             })
+        }
 
-    //     console.log("username is equl")
-    // } else {
-    //     console.log("Cannot create Employee due to username is dubpicate: ", myUsername);
-    //     res.send("Cannot create Employee due to username is dubpicate: ", myUsername);
-    // }
+    });
 }
-
-
-
-// exports.createEmployee = async (req, res, next) => {
-
-//     // check validation employee
-//     const { username, password, email, supper_admin, ban_state, tel, name, birth_date, gender, surname } = req.body;
-//     const data = { username, password, email, supper_admin, ban_state, tel, name, birth_date, gender, surname }
-
-//     const { error } = createEmployeeValidation(data);
-//     if (error) {
-//         console.log("Error on validate: ", error)
-//         return res.status(400).send({ error: error.details[0].message });
-//     }
-
-//     // checking if the employee is already in the database
-
-//     const emailExist = await sql.query(`select email from tb_employee where email='${req.body.email}'`);
-//     // if (emailExist) return res.status(400).send("Email is aready exist!!");
-//     if (emailExist.recordset[0]) {
-//         console.log("Email is already exist")
-//         return res.status(409).send({ message: "Email is aready exist!!" });
-//     }
-
-//     // HASH Password
-//     const salt = await bcrypt.genSalt(10);
-//     const hashPassword = await bcrypt.hash(req.body.password, salt);
-
-//     sql.query(`
-//     INSERT INTO tb_employee VALUES(N'${name}',N'${surname}',N'${username}',N'${hashPassword}',N'${gender}',N'${birth_date}',N'${tel}', N'${email}',${supper_admin},${ban_state})
-//     `,
-//         (err, result) => {
-//             if (err) {
-//                 res.status(500).send({ error: "Cannot register employee at the moment" })
-//                 console.log(err)
-//             } else {
-//                 res.status(200).json({ result: result, message: "Thanks you registering" });
-//             }
-
-//         })
-// }
 
 
 
@@ -155,186 +129,93 @@ exports.searchEmployee = (req, res) => {
     });
 }
 
-//user login 
-// exports.employeeLogin = (req, res) => {
-//     sql.query(`SELECT emp_id, username, password FROM tb_employee WHERE username='${req.body.username}'`,
-//         (err, result) => {
-//             if (err) {
-//                 return res.json({ message: 'error:' }, err);
-//             } else {
-//                 if (!result.recordset[0]) {
-//                     console.log('username not found');
-//                     return res.json({ message: 'username not found' });
-//                 } else {
-//                     sql.query(`SELECT emp_id, username, password, FROM tb_employee WHERE username='${req.body.username}' 
-//                         AND password='${req.body.password}'`,
-//                         (err, result) => {
-//                             if (err) {
-//                                 return res.json({ message: 'error:' }, err);
-//                             }
-//                             else {
-//                                 if (!result.recordset[0]) {
-//                                     console.log('password failed', err);
-//                                     return res.json({ message: 'password failed' });
-//                                 } else {
-//                                     console.log('login successful');
-//                                     const token = jwt.sign({ data: result.recordset[0] }, process.env.TOKEN_SECRET);
-//                                     res.send({ token })
-//                                 }
-//                             }
-//                         });
-//                 }
-//             }
-//         });
-// }
-
 
 exports.employeeLogin = async (req, res) => {
-
-    // LETS Validate the data before we a employee
-
-    // const { error } = loginValidation(req.body)
-    // if (error) {
-    //     console.log(error.details[0].message)
-    //     return res.status(400).send(error.details[0].message);
-
-    // }
-
-
-    // // checking if the username is already in the database 
-    // const employee = await sql.query(`select * from tb_employee where username='${req.body.username}'`)
-    // if (!employee) {
-    //     console.log("username isn't found....")
-    //     return res.status(400).send("username isn't found");
-    // };
-
-    // // password is correct
-
-    // const _employeeData = await sql.query(`select password,emp_id,ban_state,supper_admin from tb_employee where username='${req.body.username}'`)
-    // const validPass = await bcrypt.compare(req.body.password, _employeeData.recordset[0].password);
-
-    // if (validPass !== true) {
-    //     console.log("Password invalid....")
-    //     return res.status(400).send({ password: "Invalid password" });
-    // }
-
-    // // console.log('validPass: ', validPass)
-
-    // if (_employeeData.recordset[0].ban_state === 1) {
-    //     console.log("Your account is baned isn't found....")
-    //     return res.status(403).send({ login_account: "Your login account is banned" })
-    // };
-
-    // // Create and assign a token 
-    // const token = jwt.sign({ emp_id: _employeeData.recordset[0].emp_id }, process.env.TOKEN_SECRET, { expiresIn: '30d' });
-    // res.header('Authorization', token).send({
-    //     emp_id: _employeeData.recordset[0].emp_id,
-    //     supper_admin: _employeeData.recordset[0].supper_admin,
-    //     ban_state: _employeeData.recordset[0].ban_state,
-    //     token: token
-
-    // });
-
-
-
-
-
-    // console.log("Token is sent : ", token) 
-
     const { username, password } = req.body;
-
-    sql.query(`SELECT emp_id, username, password,ban_state FROM tb_employee WHERE username='${username}' AND password='${password}'`,
-        (err, result) => {
+    sql.query(`SELECT emp_id, username, password,ban_state,supper_admin FROM tb_employee WHERE username='${username}' AND password='${password}'`,
+        (err, data) => {
             if (err) {
-                return res.json({ message: 'error:' }, err);
+                console.log("Error while login to system: ", err)
+                return res.send({ message: "Error while login to system: ", err })
             } else {
-                if (result.recordset[0].ban_state === 1 || result.recordset[0].ban_state === true) {
-                    console.log("Your account is baned isn't found....")
-                    return res.status(403).send({ login_account: "Your login account is banned" })
-                };
-
-                // // Create and assign a token 
-                const token = jwt.sign({ emp_id: result.recordset[0].emp_id }, process.env.TOKEN_SECRET, { expiresIn: '30d' });
-                res.header('Authorization', token).send({
-                    emp_id: result.recordset[0].emp_id,
-                    supper_admin: result.recordset[0].supper_admin,
-                    ban_state: result.recordset[0].ban_state,
-                    token: token
-
-                });
+                // username or password is incorrected
+                if (!data.recordset[0]) {
+                    console.log("Your username or password is incorrected")
+                    return res.send({ message: "Your username or password is incorrected" })
+                } else {
+                    // check account ban_state
+                    if (data.recordset[0].ban_state === 1 || data.recordset[0].ban_state === true) {
+                        console.log("Your login account is banned")
+                        return res.send({ login_account_banned: "Your login account is banned" })
+                    } else if (data.recordset[0].ban_state === 0 || data.recordset[0].ban_state === false) {
+                        // success  
+                        const token = jwt.sign({ emp_id: data.recordset[0].emp_id }, process.env.TOKEN_SECRET, { expiresIn: '30d' });
+                        res.header('Authorization', token).send({
+                            emp_id: data.recordset[0].emp_id,
+                            supper_admin: data.recordset[0].supper_admin,
+                            ban_state: data.recordset[0].ban_state,
+                            token: token
+                        });
+                        // return res.send({ success: "login success" })
+                    }
+                }
             }
         });
-
-
-
 }
+
 
 // getEmployeesPagination
 
-const getPagination = (page, size) => {
-    const limit = size ? +size : 3;
-    const offset = page ? page * limit : 0;
+// const getPagination = (page, size) => {
+//     const limit = size ? +size : 3;
+//     const offset = page ? page * limit : 0;
 
-    return { limit, offset };
-};
+//     return { limit, offset };
+// };
 
-exports.getEmployeesPagination = async (req, res) => {
-    try {
+// exports.getEmployeesPagination = async (req, res) => {
+//     try {
 
-        const { page, size } = req.query;
-        const { limit, offset } = getPagination(page, size);
-
-
-        // const limit = 10;
-        // const page = 10;
-
-        const totalPage = await sql.query(`
-                    SELECT  count(DISTINCT(emp_id)) AS count FROM tb_employee
-                    `)
-
-        await sql.query(
-            `  
-        SELECT * 
-        FROM tb_employee
-        ORDER BY emp_id 
-        OFFSET (${offset} - 1)*${limit} ROWS
-        FETCH NEXT ${limit} ROWS ONLY`
-        )
-            .then(data => {
-                const totalPages = Math.ceil(totalPage.recordset[0].count / limit);
-                const response = {
-                    data: {
-                        "totalItems": totalPage.recordset[0].count,
-                        "totalPages": totalPages,
-                        // "limit": limit,
-                        "currentPages": page + 1 - page,
-                        // "currentPageSize": data.recordset.length,
-                        "employees": data.recordset
-                    }
-                };
-                res.send(response);
-            });
-
-    } catch (error) {
-        res.status(500).send({
-            message: "Error -> Can NOT complete a paging request!",
-            error: error.message,
-        });
-    }
-}
-
-// exports.getEmployeesPagination = async (req, res) => { 
+//         const { page, size } = req.query;
+//         const { limit, offset } = getPagination(page, size);
 
 
-//     sql.query('SELECT * FROM tb_employee', (err, result) => {
-//         if (err) {
-//             console.log('error while get all employees:', err);
-//             return res.json(err);
-//         } else {
-//             console.log('get all employees');
-//             res.send(result.recordset);
-//         }
-//     });
+//         // const limit = 10;
+//         // const page = 10;
+
+//         const totalPage = await sql.query(`
+//                     SELECT  count(DISTINCT(emp_id)) AS count FROM tb_employee
+//                     `)
+
+//         await sql.query(
+//             `  
+//         SELECT * 
+//         FROM tb_employee
+//         ORDER BY emp_id 
+//         OFFSET (${offset} - 1)*${limit} ROWS
+//         FETCH NEXT ${limit} ROWS ONLY`
+//         )
+//             .then(data => {
+//                 const totalPages = Math.ceil(totalPage.recordset[0].count / limit);
+//                 const response = {
+//                     data: {
+//                         "totalItems": totalPage.recordset[0].count,
+//                         "totalPages": totalPages,
+//                         // "limit": limit,
+//                         "currentPages": page + 1 - page,
+//                         // "currentPageSize": data.recordset.length,
+//                         "employees": data.recordset
+//                     }
+//                 };
+//                 res.send(response);
+//             });
+
+//     } catch (error) {
+//         res.status(500).send({
+//             message: "Error -> Can NOT complete a paging request!",
+//             error: error.message,
+//         });
+//     }
 // }
 
 
@@ -366,79 +247,90 @@ exports.forgotPasswordEmployee = (req, res) => {
     };
 
 
-    sql.query(`UPDATE tb_employee SET password='${conf_num}' WHERE email='${req.body.email}'`,
-        (err, result) => {
+    // check email already exist:
+
+    sql.query(`SELECT email FROM tb_employee WHERE email='${req.body.email}'`,
+        (err, data) => {
             if (err) {
-                res.send('error:', err)
-                console.log(err)
+                return res.send({ message: "error while email: ", err })
             } else {
-                transporter.sendMail(mailOptions, function (err, info) {
-                    if (err) {
-                        console.log({ message: 'send mail error:' }, err);
-                    } else {
-                        console.log(`Your confirm password is ${conf_num}`);
-                        return res.json({ message: 'check your email please' });
-                    }
-                })
-            }
-        })
+                if (!data.recordset[0]) {
+                    console.log("Email is invalidate in the system");
+                    return res.send({ message: "failed" })
+                } else {
 
-    // sql.query(`UPDATE tb_member SET conf_num='${conf_num}' WHERE email='${req.body.email}'`,
-    //     (err, result) => {
-    //         if (err) {
-    //             res.send('error:', err)
-    //             console.log(err)
-    //         } else {
-    //             transporter.sendMail(mailOptions, function (err, info) {
-    //                 if (err) {
-    //                     console.log({ message: 'send mail error:' }, err);
-    //                 } else {
-    //                     console.log(`Your confirm password is ${conf_num}`);
-    //                     return res.json({ message: 'check your email please' });
-    //                 }
-    //             })
-    //         }
-    //     })
-}
-
-
-//confirm email when forgot password
-exports.confirmEmailWhenForgotPasswordEmployee = (req, res) => {
-    sql.query(`SELECT username, password FROM tb_employee WHERE email='${req.body.email}'`,
-        (err, result) => {
-            if (err) {
-                res.send('error:', err)
-                console.log(err)
-            } else {
-                if (result.recordset[0]) {
-                    var transporter = nodemailer.createTransport({
-                        service: 'gmail',
-                        host: 'smtp.gmail.com',
-                        port: 534,
-                        secure: false,
-                        // requireTLS: true,
-                        auth: {
-                            user: 'nuoltest2021@gmail.com',
-                            pass: '@lee&khamla'
-                        }
-                    });
-
-                    var mailOptions = {
-                        from: 'nuoltest2021@gmail.com',
-                        to: `${req.body.email}`,
-                        subject: 'Your password is',
-                        text: `${result.recordset[0].password}`
-                    };
-                    transporter.sendMail(mailOptions, function (err, info) {
-                        if (err) {
-                            console.log({ message: 'send mail error:' }, err);
-                        } else {
-                            console.log('password:' + result.recordset[0].password)
-                            return res.json({ message: 'check your email please' });
-                        }
-                    })
+                    // sent to email 
+                    sql.query(`UPDATE tb_employee SET password='${conf_num}' WHERE email='${req.body.email}'`,
+                        (err, result) => {
+                            if (err) {
+                                return res.send('error:', err)
+                            } else {
+                                transporter.sendMail(mailOptions, function (err, info) {
+                                    if (err) {
+                                        console.log({ message: 'send mail error:' }, err);
+                                    } else {
+                                        console.log(`Your confirm password is ${conf_num}`);
+                                        return res.send({ message: 'success' });
+                                    }
+                                });
+                            }
+                        })
                 }
             }
-        })
+
+        });
 }
 
+exports.employeeSignUp = async (req, res) => {
+    let { name, surname, username, password, gender, birth_date, tel, email } = req.body;
+    return await sql.query(`
+        SELECT 
+        COUNT (*) AS countUsername
+        FROM
+        dbo.tb_employee 
+        where dbo.tb_employee.username='${username}'`, function (err, data) {
+        if (err) {
+            console.log("Errror at dubplicate username values: ", err)
+        } else {
+            if (data.recordset[0].countUsername > 0) {
+                // Already exist username
+                res.send("username already exist");
+            } else {
+                sql.query(`
+                    SELECT 
+                    COUNT (*) AS countUsername
+                    FROM
+                    dbo.tb_employee 
+                    where dbo.tb_employee.email='${email}'
+                    `,
+                    (err, data) => {
+                        if (err) {
+                            console.log("Errror at dubplicate email values: ", err)
+                        } else {
+                            // Already exist email
+                            if (data.recordset[0].countUsername > 0) {
+                                res.send("email already exist");
+                            } else {
+                                // Insert unique username, email to tb_employee
+                                sql.query(`
+                                INSERT INTO tb_employee (name, surname, username, password, gender, birth_date, tel, email,ban_state,supper_admin) 
+                                VALUES('${name}', '${surname}', '${username}', '${password}', '${gender}', '${birth_date}', '${tel}', '${email}',1,1)
+                                
+                                `,
+                                    (err, result) => {
+                                        if (err) {
+                                            res.send('error at insert data: ', err)
+                                            console.log(err)
+                                        } else {
+                                            res.send(result);
+                                        }
+                                    })
+                            }
+                        }
+                    });
+            }
+        }
+    });
+
+
+}

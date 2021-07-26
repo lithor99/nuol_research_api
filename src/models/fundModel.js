@@ -66,6 +66,7 @@ exports.getOneFund = (req, res) => {
 // getFundById  
 exports.getFundById = (req, res) => {
     const _id = req.params.id
+
     sql.query(`SELECT * FROM tb_fund WHERE fund_id=${_id}`, (err, result) => {
         if (err) {
             console.log('error:', err);
