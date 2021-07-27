@@ -1400,7 +1400,7 @@ exports.nearlyDatelineBookReport = (req, res) => {
             if (result.recordset[0].countNearDealine <= 0) {
                 res.send("Near deadlined has no value")
             } else if (result.recordset[0].countNearDealine > 0) {
-                sql.query(`SELECT tb_book.book_name, tb_book.book_group, 
+                sql.query(`SELECT tb_book.book_name, tb_book.book_group,tb_book.book_id,
                 CASE WHEN tb_book.research_state=2 THEN '50%' ELSE '70%' END  AS complete, tb_book.appro_date, 
                 tb_book.date_line, (DATEDIFF(DAY, GETDATE(), tb_book.date_line)) AS time_left 
                 FROM tb_book
@@ -1434,11 +1434,9 @@ exports.overDatelineBookReport = (req, res) => {
             console.log("Error syntax countOverDeadline: ", err)
         } else {
             if (result.recordset[0].countOverDeadline <= 0) {
-                console.log("countOverDeadline has no value")
                 res.send("countOverDeadline has no value")
             } else if (result.recordset[0].countOverDeadline > 0) {
-                console.log("countOverDeadline has value")
-                sql.query(`SELECT tb_book.book_name, tb_book.book_group,
+                sql.query(`SELECT tb_book.book_name, tb_book.book_group,tb_book.book_id,
                 CASE WHEN tb_book.research_state=2 THEN '50%' ELSE '70%' END  AS complete, tb_book.appro_date, 
                 tb_book.date_line, (DATEDIFF(DAY, GETDATE(), tb_book.date_line)) AS time_left 
                 FROM tb_book
@@ -1446,7 +1444,6 @@ exports.overDatelineBookReport = (req, res) => {
                 AND  FORMAT(tb_book.date_line,'yyyy-MM') <= FORMAT(GETDATE(),'yyyy-MM')`,
                     (err, result) => {
                         if (err) {
-                            console.log('query over dateline book error:' + err)
                             return res.json('query over dateline book error:' + err)
                         } else {
                             return res.json(result.recordset)
@@ -1467,7 +1464,7 @@ exports.completeBookReportOneYear = (req, res) => {
     sql.query(` 
 	SELECT COUNT(*) AS countCompleteBookOneYear
     FROM tb_book
-    WHERE tb_book.research_state=4 AND (Year(tb_book.offer_date)='${offer_year}')
+    WHERE tb_book.research_state=4 AND tb_book.year_print='${offer_year}'
     `, function (err, result) {
         if (err) {
             console.log("Error syntax countCompleteBookOneYear: ", err)
@@ -1477,9 +1474,9 @@ exports.completeBookReportOneYear = (req, res) => {
                 res.send("countCompleteBookOneYear has no value")
             } else if (result.recordset[0].countCompleteBookOneYear > 0) {
                 console.log("countCompleteBookOneYear has value")
-                sql.query(`SELECT tb_book.book_name, tb_book.book_group, tb_book.year_print, tb_book.appro_date, tb_book.date_line
+                sql.query(`SELECT tb_book.book_name, tb_book.book_group, tb_book.year_print, tb_book.appro_date, tb_book.date_line,tb_book.book_id
                 FROM tb_book
-                WHERE tb_book.research_state=4 AND (Year(tb_book.offer_date)='${offer_year}')`,
+                WHERE tb_book.research_state=4 AND tb_book.year_print='${offer_year}'`,
                     (err, result) => {
                         if (err) {
                             console.log('query complete book in year error:' + err)
@@ -1495,35 +1492,37 @@ exports.completeBookReportOneYear = (req, res) => {
     })
 }
 
+
 // complete books report between year
 exports.completeBookReportBetweenYear = (req, res) => {
     const { offer_year, until_year } = req.body;
-
-    sql.query(` 
+    sql.query(`
     SELECT COUNT(*) AS countCompleteBookBetweenYear 
     FROM tb_book
     WHERE tb_book.research_state=4 
-    AND (Year(tb_book.offer_date) BETWEEN '2021' AND '2030')
+    AND tb_book.year_print BETWEEN '${offer_year}' AND '${until_year}' 
+    
     `, function (err, result) {
         if (err) {
-            console.log("Error syntax countCompleteBookBetweenYear: ", err)
+            console.log("Error Syntax countCompleteBookBetweenYear: ", err)
         } else {
             if (result.recordset[0].countCompleteBookBetweenYear <= 0) {
-                console.log("countCompleteBookBetweenYear has no value")
+                console.log("Has no value");
                 res.send("countCompleteBookBetweenYear has no value")
             } else if (result.recordset[0].countCompleteBookBetweenYear > 0) {
-                sql.query(`SELECT tb_book.book_name, tb_book.book_group, tb_book.year_print, tb_book.appro_date, tb_book.date_line
+                console.log("has value")
+                sql.query(`
+                SELECT tb_book.book_name, tb_book.book_group, tb_book.year_print, tb_book.appro_date, tb_book.date_line,tb_book.book_id
                 FROM tb_book
                 WHERE tb_book.research_state=4 
-                AND (Year(tb_book.offer_date) BETWEEN '${offer_year}' AND '${until_year}')`,
-                    (err, result) => {
-                        if (err) {
-                            console.log('query complete book between year error:' + err)
-                            return res.json('query complete book between year error:' + err)
-                        } else {
-                            return res.json(result.recordset)
-                        }
-                    })
+                AND tb_book.year_print BETWEEN '${offer_year}' AND '${until_year}' 
+                `, function (err, result) {
+                    if (err) {
+                        console.log("Error syntax select CompleteBookBetweenYear : ", err)
+                    } else {
+                        res.json(result.recordset)
+                    }
+                })
             } else {
 
             }
