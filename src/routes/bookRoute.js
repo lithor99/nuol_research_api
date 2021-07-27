@@ -101,22 +101,20 @@ router.post('/book/report/social_book_between_year', bookModel.socialBookReportB
 
 // approved Research
 
-router.put('/book/report/approved_book', bookModel.approvedBookReport);
+router.post('/book/report/approved_book', bookModel.approvedBookReport);
+router.post('/book/report/unapprove_book_one_year', bookModel.unapproveBookReportOneYear);
+router.post('/book/report/unapprove_book_between_year', bookModel.unapproveBookReportBetweenYear);
 
 
 
-router.put('/book/report/unapprove_book_one_year', bookModel.unapproveBookReportOneYear);
-router.put('/book/report/unapprove_book_between_year', bookModel.unapproveBookReportBetweenYear);
-
-router.put('/book/report/nearly_dateline_book', bookModel.nearlyDatelineBookReport);
-
-router.put('/book/report/over_dateline_book', bookModel.overDatelineBookReport);
+router.post('/book/report/nearly_dateline_book', bookModel.nearlyDatelineBookReport);
+router.get('/book/report/over_dateline_book', bookModel.overDatelineBookReport);
 
 
 // report_research_complete_to_book
 
-router.put('/book/report/complete_book_one_year', bookModel.completeBookReportOneYear);
-router.put('/book/report/complete_book_between_year', bookModel.completeBookReportBetweenYear);
+router.post('/book/report/complete_book_one_year', bookModel.completeBookReportOneYear);
+router.post('/book/report/complete_book_between_year', bookModel.completeBookReportBetweenYear);
 
 
 
