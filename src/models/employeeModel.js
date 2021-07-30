@@ -80,16 +80,31 @@ exports.editEmployee = (req, res) => {
 
 
 // delete employee
-exports.deleteEmployee = (req, res) => {
-    sql.query(`DELETE FROM tb_employee WHERE emp_id=${req.params.id}`),
-        (err, result) => {
+exports.deleteEmployee = async (req, res) => {
+    const id = req.params.id;
+
+
+    await sql.query(`SELECT COUNT(*) AS countEmployee FROM tb_employee WHERE emp_id=${id}`,
+        function (err, data) {
             if (err) {
-                res.send('error', err)
-                console.log(err)
+                res.send("Syntax error validate countEmployee : ", err)
             } else {
-                res.send(result);
+                if (data.recordset[0].countEmployee <= 0) {
+                    res.send("countEmployee has no value")
+                } else if (data.recordset[0].countEmployee > 0) {
+
+                    sql.query(`DELETE FROM tb_employee WHERE emp_id=${id}`,
+                        function (err, data) {
+                            if (err) {
+                                res.send("Syntax Delete")
+                            } else if (data) {
+                                res.send("success")
+                            }
+                        })
+
+                }
             }
-        }
+        })
 }
 
 // get all employee  
