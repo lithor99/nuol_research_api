@@ -11,7 +11,7 @@ exports.createEmployee = (req, res) => {
 	COUNT (*) AS countUsername
     FROM
     dbo.tb_employee 
-    where dbo.tb_employee.username='${username}'`, function (err, data) {
+    where dbo.tb_employee.username=N'${username}'`, function (err, data) {
         if (err) {
             console.log("Syntax count username Error: ", err)
         } else {
@@ -24,7 +24,7 @@ exports.createEmployee = (req, res) => {
                 COUNT (*) AS countUsername
                 FROM
                 dbo.tb_employee 
-                where dbo.tb_employee.email='${email}'
+                where dbo.tb_employee.email=N'${email}'
     `,
                     (err, data) => {
                         if (err) {
@@ -60,22 +60,35 @@ exports.createEmployee = (req, res) => {
 
 // edit employee
 exports.editEmployee = (req, res) => {
-    let emp_id = req.params.id
+    let emp_id = req.params.id;
     let { name, surname, username, password, gender, birth_date, tel, email, supper_admin, ban_state } = req.body;
-    sql.query(`UPDATE tb_employee SET name=N'${name}',surname=N'${surname}',
-    username=N'${username}',password=N'${password}',
-    gender=N'${gender}',birth_date=N'${birth_date}',
-    tel=N'${tel}',email=N'${email}',supper_admin=${supper_admin}, 
-    ban_state=${ban_state} WHERE emp_id=${emp_id}`),
-        (err, result) => {
+
+
+    sql.query(`SELECT COUNT(*) AS countEmployee FROM tb_employee WHERE emp_id=${emp_id}`,
+        function (err, data) {
             if (err) {
-                res.send('error', err)
-                console.log(err)
-            } else {
-                // res.send(req.body.emp_id);
-                return res.json(result);
+                res.send("Syntax countEmployee Error: ", err);
+            } else if (data) {
+                if (data.recordset[0].countEmployee <= 0) {
+                    res.send("countEmployee has no value");
+                } else if (data.recordset[0].countEmployee > 0) {
+                    sql.query(`UPDATE tb_employee SET name=N'${name}',surname=N'${surname}',
+                username=N'${username}',password=N'${password}',
+                gender=N'${gender}',birth_date=N'${birth_date}',
+                tel=N'${tel}',email=N'${email}',supper_admin=${supper_admin}, 
+                ban_state=${ban_state} WHERE emp_id=${emp_id}`,
+                        (err, result) => {
+                            if (err) {
+                                res.send("employee is used")
+                            } else {
+                                res.send("success");
+                            }
+                        })
+
+
+                }
             }
-        }
+        });
 }
 
 
