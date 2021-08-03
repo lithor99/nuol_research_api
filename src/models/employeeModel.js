@@ -11,24 +11,24 @@ exports.createEmployee = (req, res) => {
 	COUNT (*) AS countUsername
     FROM
     dbo.tb_employee 
-    where dbo.tb_employee.username='${username}'`, function (err, data) {
+    where dbo.tb_employee.username=N'${username}'`, function (err, data) {
         if (err) {
-            console.log("Errror at dubplicate username values: ", err)
+            console.log("Syntax count username Error: ", err)
         } else {
             if (data.recordset[0].countUsername > 0) {
                 // Already exist username
-                res.send("username already exist");
+                return res.send("username already exist");
             } else {
                 sql.query(`
                 SELECT 
                 COUNT (*) AS countUsername
                 FROM
                 dbo.tb_employee 
-                where dbo.tb_employee.email='${email}'
+                where dbo.tb_employee.email=N'${email}'
     `,
                     (err, data) => {
                         if (err) {
-                            console.log("Errror at dubplicate email values: ", err)
+                            console.log("Syntax count email error: ", err)
                         } else {
                             // Already exist email
                             if (data.recordset[0].countUsername > 0) {
@@ -57,38 +57,67 @@ exports.createEmployee = (req, res) => {
 
 
 
+
 // edit employee
 exports.editEmployee = (req, res) => {
-    let emp_id = req.params.id
+    let emp_id = req.params.id;
     let { name, surname, username, password, gender, birth_date, tel, email, supper_admin, ban_state } = req.body;
-    sql.query(`UPDATE tb_employee SET name=N'${name}',surname=N'${surname}',
-    username=N'${username}',password=N'${password}',
-    gender=N'${gender}',birth_date=N'${birth_date}',
-    tel=N'${tel}',email=N'${email}',supper_admin=${supper_admin}, 
-    ban_state=${ban_state} WHERE emp_id=${emp_id}`),
-        (err, result) => {
+
+
+    sql.query(`SELECT COUNT(*) AS countEmployee FROM tb_employee WHERE emp_id=${emp_id}`,
+        function (err, data) {
             if (err) {
-                res.send('error', err)
-                console.log(err)
-            } else {
-                // res.send(req.body.emp_id);
-                return res.json(result);
+                res.send("Syntax countEmployee Error: ", err);
+            } else if (data) {
+                if (data.recordset[0].countEmployee <= 0) {
+                    res.send("countEmployee has no value");
+                } else if (data.recordset[0].countEmployee > 0) {
+                    sql.query(`UPDATE tb_employee SET name=N'${name}',surname=N'${surname}',
+                username=N'${username}',password=N'${password}',
+                gender=N'${gender}',birth_date=N'${birth_date}',
+                tel=N'${tel}',email=N'${email}',supper_admin=${supper_admin}, 
+                ban_state=${ban_state} WHERE emp_id=${emp_id}`,
+                        (err, result) => {
+                            if (err) {
+                                res.send("employee is used")
+                            } else {
+                                res.send("success");
+                            }
+                        })
+
+
+                }
             }
-        }
+        });
 }
 
 
 // delete employee
-exports.deleteEmployee = (req, res) => {
-    sql.query(`DELETE FROM tb_employee WHERE emp_id=${req.params.id}`),
-        (err, result) => {
+exports.deleteEmployee = async (req, res) => {
+    const id = req.params.id;
+
+
+    await sql.query(`SELECT COUNT(*) AS countEmployee FROM tb_employee WHERE emp_id=${id}`,
+        function (err, data) {
             if (err) {
-                res.send('error', err)
-                console.log(err)
+                res.send("Syntax error validate countEmployee : ", err)
             } else {
-                res.send(result);
+                if (data.recordset[0].countEmployee <= 0) {
+                    res.send("countEmployee has no value")
+                } else if (data.recordset[0].countEmployee > 0) {
+
+                    sql.query(`DELETE FROM tb_employee WHERE emp_id=${id}`,
+                        function (err, data) {
+                            if (err) {
+                                res.send("Syntax Delete")
+                            } else if (data) {
+                                res.send("success")
+                            }
+                        })
+
+                }
             }
-        }
+        })
 }
 
 // get all employee  
@@ -132,15 +161,14 @@ exports.searchEmployee = (req, res) => {
 
 exports.employeeLogin = async (req, res) => {
     const { username, password } = req.body;
+
     sql.query(`SELECT emp_id, username, password,ban_state,supper_admin FROM tb_employee WHERE username='${username}' AND password='${password}'`,
         (err, data) => {
             if (err) {
-                console.log("Error while login to system: ", err)
-                return res.send({ message: "Error while login to system: ", err })
+                return res.send("Syntax employeeLogin Error: ", err)
             } else {
                 // username or password is incorrected
                 if (!data.recordset[0]) {
-                    console.log("Your username or password is incorrected")
                     return res.send({ message: "Your username or password is incorrected" })
                 } else {
                     // check account ban_state
@@ -156,7 +184,6 @@ exports.employeeLogin = async (req, res) => {
                             ban_state: data.recordset[0].ban_state,
                             token: token
                         });
-                        // return res.send({ success: "login success" })
                     }
                 }
             }
@@ -164,64 +191,10 @@ exports.employeeLogin = async (req, res) => {
 }
 
 
-// getEmployeesPagination
-
-// const getPagination = (page, size) => {
-//     const limit = size ? +size : 3;
-//     const offset = page ? page * limit : 0;
-
-//     return { limit, offset };
-// };
-
-// exports.getEmployeesPagination = async (req, res) => {
-//     try {
-
-//         const { page, size } = req.query;
-//         const { limit, offset } = getPagination(page, size);
-
-
-//         // const limit = 10;
-//         // const page = 10;
-
-//         const totalPage = await sql.query(`
-//                     SELECT  count(DISTINCT(emp_id)) AS count FROM tb_employee
-//                     `)
-
-//         await sql.query(
-//             `  
-//         SELECT * 
-//         FROM tb_employee
-//         ORDER BY emp_id 
-//         OFFSET (${offset} - 1)*${limit} ROWS
-//         FETCH NEXT ${limit} ROWS ONLY`
-//         )
-//             .then(data => {
-//                 const totalPages = Math.ceil(totalPage.recordset[0].count / limit);
-//                 const response = {
-//                     data: {
-//                         "totalItems": totalPage.recordset[0].count,
-//                         "totalPages": totalPages,
-//                         // "limit": limit,
-//                         "currentPages": page + 1 - page,
-//                         // "currentPageSize": data.recordset.length,
-//                         "employees": data.recordset
-//                     }
-//                 };
-//                 res.send(response);
-//             });
-
-//     } catch (error) {
-//         res.status(500).send({
-//             message: "Error -> Can NOT complete a paging request!",
-//             error: error.message,
-//         });
-//     }
-// }
-
-
 
 //forgot password
 exports.forgotPasswordEmployee = (req, res) => {
+    const { email } = req.body;
     function between(min, max) {
         return Math.floor(Math.random() * (max - min));
     }
@@ -241,44 +214,37 @@ exports.forgotPasswordEmployee = (req, res) => {
 
     var mailOptions = {
         from: 'nuoltest2021@gmail.com',
-        to: `${req.body.email}`,
+        to: `${email}`,
         subject: 'Your confirm number is',
         text: `${conf_num}`
     };
 
-
-    // check email already exist:
-
-    sql.query(`SELECT email FROM tb_employee WHERE email='${req.body.email}'`,
-        (err, data) => {
+    sql.query(`	SELECT COUNT(*) AS countEmail FROM tb_employee WHERE email=N'${email}'`,
+        function (err, data) {
             if (err) {
-                return res.send({ message: "error while email: ", err })
+                console.log("Error Syntax countEmail: ", err)
             } else {
-                if (!data.recordset[0]) {
-                    console.log("Email is invalidate in the system");
-                    return res.send({ message: "failed" })
-                } else {
-
-                    // sent to email 
+                if (data.recordset[0].countEmail <= 0) {
+                    res.send({ message: "failed" })
+                } else if (data.recordset[0].countEmail > 0) {
                     sql.query(`UPDATE tb_employee SET password='${conf_num}' WHERE email='${req.body.email}'`,
                         (err, result) => {
                             if (err) {
-                                return res.send('error:', err)
+                                return res.send('Syntax Update Email Error:', err)
                             } else {
                                 transporter.sendMail(mailOptions, function (err, info) {
                                     if (err) {
-                                        console.log({ message: 'send mail error:' }, err);
+                                        console.log({ message: 'Send Email error:' }, err);
                                     } else {
-                                        console.log(`Your confirm password is ${conf_num}`);
-                                        return res.send({ message: 'success' });
+                                        console.log("success sent email")
+                                        return res.send(info);
                                     }
                                 });
                             }
                         })
                 }
             }
-
-        });
+        })
 }
 
 exports.employeeSignUp = async (req, res) => {
@@ -311,7 +277,6 @@ exports.employeeSignUp = async (req, res) => {
                             if (data.recordset[0].countUsername > 0) {
                                 res.send("email already exist");
                             } else {
-                                // Insert unique username, email to tb_employee
                                 sql.query(`
                                 INSERT INTO tb_employee (name, surname, username, password, gender, birth_date, tel, email,ban_state,supper_admin) 
                                 VALUES('${name}', '${surname}', '${username}', '${password}', '${gender}', '${birth_date}', '${tel}', '${email}',1,1)
@@ -331,6 +296,4 @@ exports.employeeSignUp = async (req, res) => {
             }
         }
     });
-
-
 }
