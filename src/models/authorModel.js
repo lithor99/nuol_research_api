@@ -33,74 +33,17 @@ exports.editAuthor = async (req, res) => {
     const { name, surname, gender, birth_date, tel, email, depart_id } = req.body;
     const author_id = req.params.id;
 
-
-    sql.query(`SELECT COUNT(*) AS countAuthorId FROM tb_author WHERE author_id=${author_id}`
-        , function (err, response) {
+    sql.query(`UPDATE tb_author SET name=N'${name}',surname=N'${surname}',
+    gender=N'${gender}',birth_date=N'${birth_date}',
+    tel=N'${tel}',email=N'${email}', 
+    depart_id=${depart_id} WHERE author_id=${author_id}`,
+        function (err, response) {
             if (err) {
-                res.send("syntax countAuthorId error")
+                res.send("syntax update author error")
             } else {
-                if (response.recordset[0].countAuthorId < 0) {
-                    res.send("countAuthorId do not exist");
-                } else if (response.recordset[0].countAuthorId > 0) {
-                    sql.query(`SELECT COUNT(*) AS countEmailAuthor FROM tb_author WHERE email=N'${email}'`
-                        , function (err, response) {
-                            if (err) {
-                                res.send("syntax countEmailAuthor error")
-                            } else {
-                                if (response.recordset[0].countEmailAuthor > 0) {
-                                    res.send("countEmailAuthor already exist")
-                                } else if (response.recordset[0].countEmailAuthor === 0) {
-                                    sql.query(`UPDATE tb_author SET name=N'${name}',surname=N'${surname}',
-                                    gender=N'${gender}',birth_date=N'${birth_date}',
-                                    tel=N'${tel}',email=N'${email}', 
-                                    depart_id=${depart_id} WHERE author_id=${author_id}`,
-                                        function (err, response) {
-                                            if (err) {
-                                                res.send("syntax update author error")
-                                            } else {
-                                                res.send("success")
-                                            }
-                                        })
-
-
-                                }
-                            }
-
-                        })
-
-                }
+                res.send("success")
             }
         })
-
-
-    // if (response.recordset[0].countAuthor > 0) {
-    //     res.send("countAuthor already exist")
-    // } else if (response.recordset[0].countAuthor <= 0) {
-    //     sql.query(`SELECT COUNT(*) AS countEmailAuthor FROM tb_author WHERE email=N'${email}'`, function (err, response) {
-    //         if (err) {
-    //             res.send("syntax countEmailAuthor error")
-    //         } else {
-    //             if (response.recordset[0].countEmailAuthor > 0) {
-    //                 res.send("countEmailAuthor already exist")
-    //             } else if (response.recordset[0].countEmailAuthor <= 0) {
-    // sql.query(`UPDATE tb_author SET name=N'${name}',surname=N'${surname}',
-    // gender=N'${gender}',birth_date=N'${birth_date}',
-    // tel=N'${tel}',email=N'${email}', 
-    // depart_id=${depart_id} WHERE author_id=N${author_id}`),
-    //                     (err, result) => {
-    //                         if (err) {
-    //                             res.send('syntax update author error:', err);
-    //                         } else {
-    //                             res.send("success");
-    //                         }
-    //                     }
-    //             }
-    //         }
-    //     })
-    // }
-
-
-
 }
 
 // delete author

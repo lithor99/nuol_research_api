@@ -3,16 +3,26 @@ const sql = require('../config/dbConfig');
 // create commitee
 exports.createCommitee = async (req, res) => {
     const { name, surname, gender, tel, email } = req.body;
-    sql.query(
-        `
-            INSERT INTO tb_commitee (name,surname, gender, tel, email) VALUES (N'${name}',N'${surname}', N'${gender}',${tel} ,N'${email}')`,
-        (err, result) => {
+
+    sql.query(`SELECT COUNT(*) AS countEmail FROM tb_commitee WHERE email=N'${email}'`,
+        function (err, response) {
             if (err) {
-                res.send('error', err)
-                console.log(err)
+                res.send("countEmail syntax error")
             } else {
-                res.send(result);
+                if (response.recordset[0].countEmail > 0) {
+                    res.send("countEmail already exist")
+                } else if (response.recordset[0].countEmail <= 0) {
+                    sql.query(`INSERT INTO tb_commitee (name,surname, gender, tel, email) VALUES (N'${name}',N'${surname}', N'${gender}',${tel} ,N'${email}')`,
+                        function (err, result) {
+                            if (err) {
+                                res.send("insert committee syntax error")
+                            } else {
+                                res.send("success")
+                            }
+                        })
+                }
             }
+
         })
 }
 
@@ -22,45 +32,44 @@ exports.editCommitee = async (req, res) => {
     const _id = req.params.id;
 
     sql.query(`
-    UPDATE tb_commitee SET name,surname=N'${name}',N'${surname}',
+    UPDATE tb_commitee SET name=N'${name}',surname=N'${surname}',
     gender=N'${gender}',tel=${tel},email=N'${email}'
     WHERE commit_id=${_id}
     `,
         (err, result) => {
             if (err) {
-                res.send('error', err)
-                console.log(err)
+                res.send('syntax update committee error')
             } else {
-                res.send({
-                    message: `Committee is edited successfully. result: ${result}`
-                });
+                res.send("success");
             }
         });
-
 }
 
 // delete commitee
-exports.deleteCommitee = (req, res) => {
-    const _id = req.params.id
-    sql.query(`DELETE FROM tb_commitee WHERE commit_id=${_id}`)
-        .then((result) => {
-            if (res.status == 200) {
-                res.send({
-                    message: "tb_commitee successfully statua 200 ", result
-                })
-            }
-            if (res.status >= 400) {
-                res.send({
-                    message: "tb_commitee error department status 400) ", result
-                })
+exports.deleteCommitee = async (req, res) => {
+    const _id = req.params.id;
+
+    await sql.query(`SELECT COUNT(*) AS countCommitId FROM tb_commitee WHERE commit_id=${_id}`,
+        function (err, response) {
+            if (err) {
+                res.send("countCommitId syntax error")
+            } else {
+                if (response.recordset[0].countCommitId <= 0) {
+                    res.send("countCommitId do not exist")
+                } else if (response.recordset[0].countCommitId > 0) {
+                    sql.query(`DELETE FROM tb_commitee WHERE commit_id=${_id}`,
+                        function (err, result) {
+                            if (err) {
+                                res.send("countCommitId working")
+                            } else {
+                                res.send("success")
+                            }
+                        })
+
+                }
+
             }
         })
-        .catch((err) => {
-            res.send({
-                message: `tb_commitee error author id ${_id}. ${err}`
-            })
-
-        });
 }
 
 // get all commitee  

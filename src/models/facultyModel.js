@@ -1,16 +1,32 @@
 const sql = require('../config/dbConfig');
 
 // create faculty
-exports.createFaculty = (req, res) => {
-    sql.query(`INSERT INTO tb_faculty VALUES(N'${req.body.faculty_name}')`,
-        (err, result) => {
+exports.createFaculty = async (req, res) => {
+
+    const faculty_name = req.body
+
+    await sql.query(`SELECT COUNT(*) AS countFundName FROM tb_faculty WHERE faculty_name=N'${faculty_name}'`,
+        function (err, response) {
             if (err) {
-                res.send('error', err)
-                console.log(err)
+                res.send("faculty syntax error")
             } else {
-                res.send(result);
+                if (response.recordset[0].countFundName > 0) {
+                    res.send("countFundName already exist")
+                } else if (response.recordset[0].countFundName <= 0) {
+                    sql.query(`INSERT INTO tb_faculty VALUES(N'${faculty_name}')`,
+                        (err, result) => {
+                            if (err) {
+                                console.log("faculty syntax error")
+                            } else {
+                                res.send("success");
+                            }
+                        })
+                }
             }
+
         })
+
+
 }
 
 // edit faculty_
@@ -38,13 +54,9 @@ exports.deleteFaculty = (req, res) => {
     sql.query(`DELETE FROM tb_faculty WHERE faculty_id=${_id}`,
         (err, result) => {
             if (err) {
-                res.send({
-                    message: `'error', ${err}`
-                })
+                res.send("faculty working")
             } else {
-                res.send({
-                    message: `delete faculty with id= ${_id} sccessfully. result= ${result}`
-                });
+                res.send("success");
             }
         });
 }
