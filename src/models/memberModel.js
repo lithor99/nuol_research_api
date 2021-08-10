@@ -612,7 +612,7 @@ exports.editMemberBan = (req, res) => {
     let member_id = req.params.id
     const { ban_state, username, email } = req.body
     sql.query(`UPDATE tb_member SET ban_state=${ban_state},username='${username}',email='${email}' 
-    WHERE member_id='${member_id}'`),
+    WHERE member_id=${member_id}`),
         (err, result) => {
             if (err) {
                 res.send('error', err)
@@ -621,4 +621,20 @@ exports.editMemberBan = (req, res) => {
                 return res.send(result);
             }
         }
+}
+
+// editMemberBanAdmin
+exports.editMemberBanAdmin = (req, res) => {
+    let member_id = req.params.id
+    const { ban_state, username, email } = req.body
+    sql.query(`
+    UPDATE tb_member SET username='${username}', email='${email}',ban_state=${ban_state} WHERE member_id=${member_id}
+    `,
+        (err, result) => {
+            if (err) {
+                res.send('syntax updateMember error')
+            } else {
+                return res.send("success");
+            }
+        })
 }

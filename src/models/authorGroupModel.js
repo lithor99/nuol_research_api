@@ -14,14 +14,9 @@ exports.createAuthor_group = (req, res) => {
     INSERT INTO tb_author_detail (book_id,author_id)  VALUES (N'${book_id}',${author_id});`,
         (err, result) => {
             if (err) {
-                console.log('error while create author detail author_id by id', err);
-                res.send(err);
+                res.send("syntax author detail error");
             } else {
-                console.log('create author detail successfully author_id create');
-                // res.send(result.recordset); 
-                res.send({
-                    message: result.recordset
-                })
+                res.send("success");
             }
         });
 }

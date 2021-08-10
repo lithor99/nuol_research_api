@@ -3,30 +3,29 @@ const sql = require('../config/dbConfig');
 // create faculty
 exports.createFaculty = async (req, res) => {
 
-    const faculty_name = req.body
+    const faculty_name = req.body.faculty_name;
 
-    await sql.query(`SELECT COUNT(*) AS countFundName FROM tb_faculty WHERE faculty_name=N'${faculty_name}'`,
+    await sql.query(`SELECT COUNT(*) AS countFacultyName FROM tb_faculty WHERE faculty_name=N'${faculty_name}'`,
         function (err, response) {
             if (err) {
-                res.send("faculty syntax error")
+                res.send("syntax countFacultyName error");
             } else {
-                if (response.recordset[0].countFundName > 0) {
-                    res.send("countFundName already exist")
-                } else if (response.recordset[0].countFundName <= 0) {
+                if (response.recordset[0].countFacultyName > 0) {
+                    res.send("countFacultyName already exist")
+                } else {
                     sql.query(`INSERT INTO tb_faculty VALUES(N'${faculty_name}')`,
-                        (err, result) => {
+                        function (err, result) {
                             if (err) {
-                                console.log("faculty syntax error")
+                                res.send("syntax faculty insert error")
                             } else {
-                                res.send("success");
+                                res.send("success")
                             }
                         })
+
                 }
+
             }
-
         })
-
-
 }
 
 // edit faculty_
@@ -34,16 +33,14 @@ exports.editFaculty = (req, res) => {
     const _id = req.params.id
     const faculty_name = req.body.faculty_name
 
+
     sql.query(`UPDATE tb_faculty SET faculty_name=N'${faculty_name}'
     WHERE faculty_id=${_id}`,
         (err, result) => {
             if (err) {
-                res.send('error', err)
-                console.log(err)
+                res.send('syntax faculty_name error')
             } else {
-                res.send({
-                    message: `Faculty is edited successfully. result: ${result}`
-                });
+                res.send("success");
             }
         });
 }

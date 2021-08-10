@@ -450,13 +450,33 @@ exports.createBookRequest = async (req, res) => {
     INSERT INTO tb_book (book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id, research_state,total_load,total_view,deleted)  VALUES(N'${book_id}',N'${book_name}',N'${book_group}',N'${proposal_file}','${offer_date}',${offer_emp_id},${research_state},${total_load}, ${total_view}, ${deleted});`,
         (err, result) => {
             if (err) {
-                res.send('error:', err)
-                console.log(err)
-
+                res.send("syntax book request error")
             } else {
-                res.send(result);
+                res.send("success");
             }
         })
+}
+
+exports.book_total_like = (req, res) => {
+    const book_id = req.body;
+    sql.query(`
+    SELECT COUNT(tb_book.book_id) as total_like 
+    FROM tb_like 
+    INNER JOIN tb_book
+    ON tb_book.book_id = tb_like.book_id
+    WHERE tb_book.book_id=N'${book_id}'
+    `,
+        (err, result) => {
+            if (err) {
+                res.send("error syntax")
+            } else {
+                if (result.recordset[0].total_like <= 0) {
+                    res.send("none")
+                } else if (result.recordset[0].total_like > 0) {
+                    res.send(result.recordset[0].total_like);
+                }
+            }
+        });
 }
 
 
@@ -497,12 +517,9 @@ exports.updateRequestBookById = (req, res) => {
     UPDATE tb_book SET book_name=N'${book_name}', book_group=N'${book_group}', proposal_file=N'${proposal_file}', offer_date='${offer_date}', offer_emp_id=${offer_emp_id},research_state=1,deleted=0 WHERE book_id=N'${book_id}'
     `, (err, result) => {
         if (err) {
-            res.send('  UPDATE tb_book error', err)
-            console.log(err)
+            console.log("syntax update book error")
         } else {
-            res.send({
-                message: ` UPDATE tb_book is edited successfully. result: ${result}`
-            });
+            res.send("success");
         }
     });
 }
@@ -517,12 +534,9 @@ exports.updateUnselected_proposal = (req, res) => {
     UPDATE tb_book SET research_state=1, deleted='${deleted}' WHERE book_id=N'${book_id}'
     `, (err, result) => {
         if (err) {
-            res.send('  UPDATE on status of delelte tb_book error', err)
-            console.log(err)
+            res.send("syntax update error")
         } else {
-            res.send({
-                message: ` UPDATE on status of delelte tb_book is edited successfully. result: ${result}`
-            });
+            res.send("success");
         }
     });
 }
@@ -582,16 +596,12 @@ exports.getRequestBookById = (req, res) => {
 
 exports.createApproveResearchBook = (req, res) => {
     const { appro_date, appro_emp_id, book_id, date_line, fund, fund_id, research_state, deleted } = req.body
-    sql.query(`UPDATE tb_book SET appro_date='${appro_date}',appro_emp_id='${appro_emp_id}',date_line='${date_line}',fund=${fund},fund_id=${fund_id},research_state=${research_state},deleted=${deleted} WHERE book_id=N'${book_id}';`,
+    sql.query(`UPDATE tb_book SET appro_date='${appro_date}',appro_emp_id='${appro_emp_id}',date_line='${date_line}',fund=${fund},fund_id=${fund_id},research_state=${research_state},deleted=${deleted},year_print='none' WHERE book_id=N'${book_id}';`,
         (err, result) => {
             if (err) {
-                res.send('error update:', err)
-                console.log("create approve resarch err")
-
+                res.send('error syntax update')
             } else {
-                console.log("create approve resarch success")
-
-                res.send(result);
+                res.send("success");
             }
         })
 }
@@ -637,17 +647,13 @@ exports.cancelApproveResearchBook = (req, res) => {
     sql.query(`
     UPDATE tb_book SET appro_date='',appro_emp_id=null,
     date_line='',fund=null,fund_id=null,research_state=1,
-    deleted=0 WHERE book_id=N'${book_id}'
+    deleted=1 WHERE book_id=N'${book_id}'
     `,
         (err, result) => {
             if (err) {
-                res.send('error update:', err)
-                console.log("cancel approve resarch err")
-
+                res.send('error sytanx update approve')
             } else {
-                console.log("cancel approve resarch success")
-
-                res.send(result);
+                res.send("success");
             }
         })
 }
@@ -663,12 +669,9 @@ exports.updateApproveResearchBook = (req, res) => {
     `,
         (err, result) => {
             if (err) {
-                res.send('error update:', err)
-                console.log("update approve resarch err")
-
+                res.send("syntax update book error")
             } else {
-                console.log("update approve resarch success")
-                res.send(result);
+                res.send("success");
             }
         })
 }
@@ -686,12 +689,9 @@ exports.updateApproveResearchBook100 = (req, res) => {
     `,
         (err, result) => {
             if (err) {
-                res.send('error update:', err)
-                console.log("update approve resarch err")
-
+                res.send('error syntax update book')
             } else {
-                console.log("update approve resarch success")
-                res.send(result);
+                res.send('success');
             }
         })
 }
@@ -706,13 +706,9 @@ exports.createApproveResearchBookProcedure_0_50_percentage = (req, res) => {
     sql.query(`UPDATE tb_book SET research_state=3,deleted=0 WHERE book_id=N'${book_id}';`,
         (err, result) => {
             if (err) {
-                res.send('error update:', err)
-                console.log("create approve resarch 50% err")
-
+                res.send("syntax book error")
             } else {
-                console.log("create approve resarch 50% success")
-
-                res.send(result);
+                res.send("success");
             }
         })
 }
@@ -724,13 +720,9 @@ exports.cancelApproveResearchBookProcedure_0_50_percentage = (req, res) => {
     sql.query(`UPDATE tb_book SET research_state=1,deleted=0 WHERE book_id=N'${book_id}';`,
         (err, result) => {
             if (err) {
-                res.send('error update:', err)
-                console.log("create approve resarch 50% err")
-
+                res.send("syntax book error")
             } else {
-                console.log("create approve resarch 50% success")
-
-                res.send(result);
+                res.send("success");
             }
         })
 }
@@ -774,13 +766,9 @@ exports.cancelApproveResearchSecondFaseBook = (req, res) => {
     `,
         (err, result) => {
             if (err) {
-                res.send('error update:', err)
-                console.log("cancel approve resarch err")
-
+                res.send('error book update')
             } else {
-                console.log("cancel approve resarch success")
-
-                res.send(result);
+                res.send("success");
             }
         })
 }
@@ -1188,18 +1176,14 @@ exports.countBookReportBetweenYear = async (req, res) => {
 exports.cancelApproveResearchThirdFaseBook = (req, res) => {
     const { book_id } = req.body;
     sql.query(`
-    UPDATE tb_book SET research_state=3,book_file=NULL,year_print=null,
+    UPDATE tb_book SET research_state=3,book_file=NULL,year_print='none',
     deleted=0 WHERE book_id=N'${book_id}'
     `,
         (err, result) => {
             if (err) {
-                res.send('error update:', err)
-                console.log("cancel approve resarch err")
-
+                res.send('error update book syntax')
             } else {
-                console.log("cancel approve resarch success")
-
-                res.send(result);
+                res.send("success");
             }
         })
 }
@@ -1535,13 +1519,9 @@ exports.createApproveResearchBookProcedure_50_70_percentage = (req, res) => {
     sql.query(`UPDATE tb_book SET research_state=4,deleted=0,book_file='unUpload',year_print='${year_print}' WHERE book_id=N'${book_id}';`,
         (err, result) => {
             if (err) {
-                res.send('error update:', err)
-                console.log("create approve resarch 70% err")
-
+                res.send("syntax book error")
             } else {
-                console.log("create approve resarch 70% success")
-
-                res.send(result);
+                res.send("success");
             }
         })
 }
@@ -1568,9 +1548,27 @@ WHERE dbo.tb_book.book_id=N'${book_id}'
     `,
         (err, result) => {
             if (err) {
-                res.send('error update:', err);
+                res.send('error update update book file');
             } else {
-                res.send(result);
+                res.send("success");
+            }
+        })
+}
+
+exports.updateResearch_paper_upload = (req, res) => {
+    const { book_id, book_name, book_group, proposal_file, fund_id, fund, appro_date, date_line, appro_emp_id, deleted, research_state, year_print, upload_state } = req.body;
+    sql.query(`
+    UPDATE tb_book SET year_print='${year_print}',
+    book_name=N'${book_name}',book_group=N'${book_group}',proposal_file=N'${proposal_file}',fund_id=${fund_id},
+    fund=N'${fund}', appro_date=N'${appro_date}',
+    date_line=N'${date_line}',appro_emp_id=${appro_emp_id},deleted=${deleted},research_state=${research_state},upload_state=${upload_state}
+    WHERE book_id=N'${book_id}'
+    `,
+        (err, result) => {
+            if (err) {
+                res.send('error syntax update book')
+            } else {
+                res.send('success');
             }
         })
 }
@@ -1584,21 +1582,17 @@ exports.cancelResearch_paper_upload = (req, res) => {
     UPDATE tb_book SET 
     dbo.tb_book.upl_emp_id=NULL,
     dbo.tb_book.upload_date=NULL,
-    dbo.tb_book.upload_state=0,
+    dbo.tb_book.upload_state=1,
     dbo.tb_book.book_file='unUpload', 
     dbo.tb_book.research_state=4,
     dbo.tb_book.deleted=0
-    WHERE dbo.tb_book.book_id=N'${book_id}' 
+    WHERE dbo.tb_book.book_id=N'${book_id}'
     `,
         (err, result) => {
             if (err) {
-                res.send('error update:', err)
-                console.log("cancel approve resarch err")
-
+                res.send('error update update book file')
             } else {
-                console.log("cancel approve resarch success")
-
-                res.send(result);
+                res.send("success");
             }
         })
 }

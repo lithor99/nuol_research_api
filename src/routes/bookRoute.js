@@ -39,8 +39,6 @@ router.get('/book/unselected_proposals', bookModel.getAllUnselected_proposals);
 router.get('/book/unselected_proposal/:id', bookModel.getUnselectedRequestProposalById);
 
 
-
-
 // approve research  
 router.put('/book/approve/create', bookModel.createApproveResearchBook);
 router.get('/book/approves', bookModel.getAllApproveResearchBook);
@@ -64,6 +62,7 @@ router.put('/book/approveThirdFase/cancel', bookModel.cancelApproveResearchThird
 router.get('/book/procedureThree', bookModel.getAllApproveResearchBookProcedure_70_100_percentage);
 
 // // research_paper_upload
+router.put('/research_paper_upload/edit', bookModel.updateResearch_paper_upload);
 router.put('/research_paper_upload', bookModel.createResearch_paper_upload);
 router.put('/research_paper_upload/cancel', bookModel.cancelResearch_paper_upload);
 router.get('/research_paper_uploads', bookModel.getAllApproveResearchBookFile);
@@ -117,6 +116,9 @@ router.post('/book/report/complete_book_one_year', bookModel.completeBookReportO
 
 
 router.post('/book/report/complete_book_between_year', bookModel.completeBookReportBetweenYear);
+
+router.post('/book/total_like', bookModel.book_total_like);
+
 
 
 

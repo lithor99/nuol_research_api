@@ -43,6 +43,8 @@ router.get('/member/:id', memberModel.getMemberById);
 router.delete(`/member/delete/:id`, memberModel.deleteMemberById)
 router.put('/member/update/:id', memberModel.editMemberBan)
 
+router.put('/member/updateWeb/:id', memberModel.editMemberBanAdmin)
+
 
 
 
