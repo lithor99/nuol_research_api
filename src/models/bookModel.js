@@ -458,23 +458,15 @@ exports.createBookRequest = async (req, res) => {
 }
 
 exports.book_total_like = (req, res) => {
-    const book_id = req.body;
     sql.query(`
-    SELECT COUNT(tb_book.book_id) as total_like 
-    FROM tb_like 
-    INNER JOIN tb_book
-    ON tb_book.book_id = tb_like.book_id
-    WHERE tb_book.book_id=N'${book_id}'
+    SELECT book_id, count(*) as book_total_like
+    FROM tb_like GROUP BY book_id
     `,
         (err, result) => {
             if (err) {
-                res.send("error syntax")
+                res.send("error syntax");
             } else {
-                if (result.recordset[0].total_like <= 0) {
-                    res.send("none")
-                } else if (result.recordset[0].total_like > 0) {
-                    res.send(result.recordset[0].total_like);
-                }
+                res.send(result.recordset[0]);
             }
         });
 }
