@@ -1659,7 +1659,18 @@ exports.updateResearch_uploadState_true = (req, res) => {
 }
 
 
-
+exports.getSuccessUploadBook = (req, res) => {
+    sql.query(`
+    select * from tb_book where research_state=4 and deleted=0 and upload_state=1
+    `,
+        (err, result) => {
+            if (err) {
+                res.send('error select syntax')
+            } else {
+                res.send(result.recordset);
+            }
+        })
+}
 
 
 

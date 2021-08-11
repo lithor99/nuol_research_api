@@ -122,6 +122,13 @@ router.get('/book/total_like', bookModel.getAllTotalLike);
 router.get('/book/total_like/:id', bookModel.getTotalLikeById);
 
 
+// success upload book getSuccessUploadBook
+
+router.get('/success/upload/book', bookModel.getSuccessUploadBook);
+
+
+
+
 
 
 
