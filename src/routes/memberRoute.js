@@ -37,6 +37,16 @@ router.get('/GroupBookMark/:id', memberModel.getSingleBookMark);
 router.delete('/GroupBookMark/delete', memberModel.deleteBookMark);
 
 
+// CRUD-Admin
+router.get('/members', memberModel.getMembers);
+router.get('/member/:id', memberModel.getMemberById);
+router.delete(`/member/delete/:id`, memberModel.deleteMemberById)
+router.put('/member/update/:id', memberModel.editMemberBan)
+
+router.put('/member/updateWeb/:id', memberModel.editMemberBanAdmin)
+
+
+
 
 
 module.exports = router;

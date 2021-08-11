@@ -1,24 +1,35 @@
 const sql = require('../config/dbConfig');
 
 // create department
-exports.createDepartment = (req, res) => {
-    sql.query(`INSERT INTO tb_department VALUES(N'${req.body.depart_name}', ${req.body.faculty_id})`,
-        (err, result) => {
+exports.createDepartment = async (req, res) => {
+    const { depart_name, faculty_id } = req.body;
+
+    await sql.query(`SELECT COUNT(*) AS countDepartName FROM tb_department WHERE depart_name=N'${depart_name}'`,
+        function (err, response) {
             if (err) {
-                res.send('error', err)
-                console.log(err)
-            } else {
-                res.send(result);
+                res.send("syntax countDepartName error")
+            } else if (response.recordset[0].countDepartName > 0) {
+                res.send("countDepartName already exist")
+            } else if (response.recordset[0].countDepartName <= 0) {
+                sql.query(`INSERT INTO tb_department VALUES(N'${depart_name}', ${faculty_id})`,
+                    (err, result) => {
+                        if (err) {
+                            res.send("syntax insert departmetn error")
+                        } else if (result) {
+                            res.send("success");
+                        }
+                    })
             }
         })
 }
 
 // edit department
-exports.editDepartment = (req, res) => {
+exports.editDepartment = async (req, res) => {
     try {
         const _id = req.params.id
         const depart_name = req.body.depart_name
-        const faculty_id = req.body.faculty_id
+        const faculty_id = req.body.faculty_id;
+
         sql.query(`
         UPDATE tb_department
         SET   
@@ -27,25 +38,13 @@ exports.editDepartment = (req, res) => {
         FROM  tb_department
         LEFT JOIN tb_faculty ON tb_faculty.faculty_id = tb_department.faculty_id
         Where tb_department.depart_id =${_id}
-        `)
-            .then((result) => {
-                if (res.status == 200) {
-                    res.send({
-                        message: "update successfully statua 200 ", result
-                    })
-                }
-                if (res.status >= 400) {
-                    res.send({
-                        message: "update error department status 400) ", result
-                    })
-                }
-            })
-            .catch((err) => {
-                res.send({
-                    message: `update error author id ${_id}. ${err}`
-                })
-
-            });
+        `, function (err, result) {
+            if (err) {
+                res.send("syntax update department error")
+            } else {
+                res.send("success")
+            }
+        })
     } catch (error) {
         console.log("error: ", error)
     }
@@ -57,25 +56,14 @@ exports.deleteDepartment = (req, res) => {
         const _id = req.params.id
         sql.query(`
     delete tb_department from tb_department left join tb_faculty on tb_faculty.faculty_id = tb_department.depart_id 
-    where tb_department.depart_id=${_id}`)
-            .then((result) => {
-                if (res.status == 200) {
-                    res.send({
-                        message: "delete successfully ", result
-                    })
-                }
-                if (res.status >= 400) {
-                    res.send({
-                        message: "delete successfully author ", result
-                    })
+    where tb_department.depart_id=${_id}`,
+            function (err, response) {
+                if (err) {
+                    res.send("department working")
+                } else if (response) {
+                    res.send("success")
                 }
             })
-            .catch((err) => {
-                res.send({
-                    message: "delete successfully author id ", err
-                })
-
-            });
     } catch (error) {
         console.log("error: ", error)
     }
@@ -100,7 +88,7 @@ exports.getAllDepartment = (req, res) => {
 // get one department  
 exports.getOneDepartment = (req, res) => {
     const _id = req.params.id;
-    sql.query(`SELECT depart_id, depart_name, faculty_name from tb_department inner join
+    sql.query(`SELECT depart_id, depart_name, faculty_name,tb_department.faculty_id from tb_department inner join
 	tb_faculty on tb_department.faculty_id=tb_faculty.faculty_id 
     WHERE depart_id=${_id}`, (err, result) => {
         if (err) {

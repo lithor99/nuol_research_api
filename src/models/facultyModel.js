@@ -1,14 +1,29 @@
 const sql = require('../config/dbConfig');
 
 // create faculty
-exports.createFaculty = (req, res) => {
-    sql.query(`INSERT INTO tb_faculty VALUES(N'${req.body.faculty_name}')`,
-        (err, result) => {
+exports.createFaculty = async (req, res) => {
+
+    const faculty_name = req.body.faculty_name;
+
+    await sql.query(`SELECT COUNT(*) AS countFacultyName FROM tb_faculty WHERE faculty_name=N'${faculty_name}'`,
+        function (err, response) {
             if (err) {
-                res.send('error', err)
-                console.log(err)
+                res.send("syntax countFacultyName error");
             } else {
-                res.send(result);
+                if (response.recordset[0].countFacultyName > 0) {
+                    res.send("countFacultyName already exist")
+                } else {
+                    sql.query(`INSERT INTO tb_faculty VALUES(N'${faculty_name}')`,
+                        function (err, result) {
+                            if (err) {
+                                res.send("syntax faculty insert error")
+                            } else {
+                                res.send("success")
+                            }
+                        })
+
+                }
+
             }
         })
 }
@@ -18,16 +33,14 @@ exports.editFaculty = (req, res) => {
     const _id = req.params.id
     const faculty_name = req.body.faculty_name
 
+
     sql.query(`UPDATE tb_faculty SET faculty_name=N'${faculty_name}'
     WHERE faculty_id=${_id}`,
         (err, result) => {
             if (err) {
-                res.send('error', err)
-                console.log(err)
+                res.send('syntax faculty_name error')
             } else {
-                res.send({
-                    message: `Faculty is edited successfully. result: ${result}`
-                });
+                res.send("success");
             }
         });
 }
@@ -38,13 +51,9 @@ exports.deleteFaculty = (req, res) => {
     sql.query(`DELETE FROM tb_faculty WHERE faculty_id=${_id}`,
         (err, result) => {
             if (err) {
-                res.send({
-                    message: `'error', ${err}`
-                })
+                res.send("faculty working")
             } else {
-                res.send({
-                    message: `delete faculty with id= ${_id} sccessfully. result= ${result}`
-                });
+                res.send("success");
             }
         });
 }

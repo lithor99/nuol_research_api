@@ -39,14 +39,14 @@ router.get('/book/unselected_proposals', bookModel.getAllUnselected_proposals);
 router.get('/book/unselected_proposal/:id', bookModel.getUnselectedRequestProposalById);
 
 
-
-
 // approve research  
 router.put('/book/approve/create', bookModel.createApproveResearchBook);
 router.get('/book/approves', bookModel.getAllApproveResearchBook);
 router.get('/book/approve/:id', bookModel.getSingleApproveResearchById);
 router.put('/book/approve/cancel', bookModel.cancelApproveResearchBook);
 router.put('/book/approve/update', bookModel.updateApproveResearchBook);
+
+router.put('/book/approveNavigation100/update', bookModel.updateApproveResearchBook100);
 
 // /research_paper_navigation/procedure_0_50_percentage 
 router.put('/book/procedure/create', bookModel.createApproveResearchBookProcedure_0_50_percentage);
@@ -62,6 +62,7 @@ router.put('/book/approveThirdFase/cancel', bookModel.cancelApproveResearchThird
 router.get('/book/procedureThree', bookModel.getAllApproveResearchBookProcedure_70_100_percentage);
 
 // // research_paper_upload
+router.put('/research_paper_upload/edit', bookModel.updateResearch_paper_upload);
 router.put('/research_paper_upload', bookModel.createResearch_paper_upload);
 router.put('/research_paper_upload/cancel', bookModel.cancelResearch_paper_upload);
 router.get('/research_paper_uploads', bookModel.getAllApproveResearchBookFile);
@@ -76,28 +77,48 @@ router.put('/research_paper_upload_state/true', bookModel.updateResearch_uploadS
 
 
 //report---------------------------------------------------------------------------
-router.put('/book/report/getAuthor', bookModel.getAuthorReport);
-router.put('/book/report/count_offer_book_one_year', bookModel.countOfferBookReportOneYear);
-router.put('/book/report/netural_offer_book_one_year', bookModel.naturalOfferBookReportOneYear);
-router.put('/book/report/social_offer_book_one_year', bookModel.socialOfferBookReportOneYear);
-router.put('/book/report/count_offer_book_between_year', bookModel.countOfferBookReportBetweenYear);
-router.put('/book/report/netural_offer_book_between_year', bookModel.naturalOfferBookReportBetweenYear);
-router.put('/book/report/social_offer_book_between_year', bookModel.socialOfferBookReportBetweenYear);
+router.post('/book/report/getAuthor', bookModel.getAuthorReport);
 
-router.put('/book/report/count_book_one_year', bookModel.countBookReportOneYear);
-router.put('/book/report/netural_book_one_year', bookModel.naturalBookReportOneYear);
-router.put('/book/report/social_book_one_year', bookModel.socialBookReportOneYear);
-router.put('/book/report/count_book_between_year', bookModel.countBookReportBetweenYear);
-router.put('/book/report/netural_book_between_year', bookModel.naturalBookReportBetweenYear);
-router.put('/book/report/social_book_between_year', bookModel.socialBookReportBetweenYear);
+// report_Offer_research ລາຍງານບົດສະເໜີຄົ້ນຄວ້າ
 
-router.put('/book/report/approved_book', bookModel.approvedBookReport);
-router.put('/book/report/unapprove_book_one_year', bookModel.unapproveBookReportOneYear);
-router.put('/book/report/unapprove_book_between_year', bookModel.unapproveBookReportBetweenYear);
-router.put('/book/report/nearly_dateline_book', bookModel.nearlyDatelineBookReport);
-router.put('/book/report/over_dateline_book', bookModel.overDatelineBookReport);
-router.put('/book/report/complete_book_one_year', bookModel.completeBookReportOneYear);
-router.put('/book/report/complete_book_between_year', bookModel.completeBookReportBetweenYear);
+router.post('/book/report/count_offer_book_one_year', bookModel.countOfferBookReportOneYear);
+router.post('/book/report/count_offer_book_between_year', bookModel.countOfferBookReportBetweenYear);
+router.post('/book/report/netural_offer_book_one_year', bookModel.naturalOfferBookReportOneYear);
+router.post('/book/report/netural_offer_book_between_year', bookModel.naturalOfferBookReportBetweenYear);
+router.post('/book/report/social_offer_book_one_year', bookModel.socialOfferBookReportOneYear);
+router.post('/book/report/social_offer_book_between_year', bookModel.socialOfferBookReportBetweenYear);
+
+// report_research ລາຍງານບົດຄົ້ນຄວ້າ
+
+router.post('/book/report/count_book_one_year', bookModel.countBookReportOneYear);
+router.post('/book/report/netural_book_one_year', bookModel.naturalBookReportOneYear);
+router.post('/book/report/social_book_one_year', bookModel.socialBookReportOneYear);
+router.post('/book/report/count_book_between_year', bookModel.countBookReportBetweenYear);
+router.post('/book/report/netural_book_between_year', bookModel.naturalBookReportBetweenYear);
+router.post('/book/report/social_book_between_year', bookModel.socialBookReportBetweenYear);
+
+
+// approved Research
+
+router.post('/book/report/approved_book', bookModel.approvedBookReport);
+
+router.post('/book/report/unapprove_book_one_year', bookModel.unapproveBookReportOneYear);
+router.post('/book/report/unapprove_book_between_year', bookModel.unapproveBookReportBetweenYear);
+
+router.post('/book/report/nearly_dateline_book', bookModel.nearlyDatelineBookReport);
+
+router.get('/book/report/over_dateline_book', bookModel.overDatelineBookReport);
+
+
+// report_research_complete_to_book
+
+router.post('/book/report/complete_book_one_year', bookModel.completeBookReportOneYear);
+
+
+router.post('/book/report/complete_book_between_year', bookModel.completeBookReportBetweenYear);
+
+router.post('/book/total_like', bookModel.book_total_like);
+
 
 
 
