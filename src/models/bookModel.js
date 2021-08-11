@@ -514,10 +514,10 @@ exports.updateRequestBookById = (req, res) => {
     const { book_name, book_group, proposal_file, offer_date, offer_emp_id } = req.body;
 
     sql.query(`
-    UPDATE tb_book SET book_name=N'${book_name}', book_group=N'${book_group}', proposal_file=N'${proposal_file}', offer_date='${offer_date}', offer_emp_id=${offer_emp_id},research_state=1,deleted=0 WHERE book_id=N'${book_id}'
+    UPDATE tb_book SET appro_emp_id=NULL, book_name=N'${book_name}', book_group=N'${book_group}', proposal_file=N'${proposal_file}', offer_date='${offer_date}', offer_emp_id=${offer_emp_id},research_state=1,deleted=0 WHERE book_id=N'${book_id}'
     `, (err, result) => {
         if (err) {
-            console.log("syntax update book error")
+            res.send("syntax update book error")
         } else {
             res.send("success");
         }
@@ -531,7 +531,7 @@ exports.updateUnselected_proposal = (req, res) => {
     const { deleted, book_id } = req.body;
 
     sql.query(`
-    UPDATE tb_book SET research_state=1, deleted='${deleted}' WHERE book_id=N'${book_id}'
+    UPDATE tb_book SET research_state=1,appro_emp_id=NULL, deleted='${deleted}' WHERE book_id=N'${book_id}'
     `, (err, result) => {
         if (err) {
             res.send("syntax update error")
@@ -596,7 +596,7 @@ exports.getRequestBookById = (req, res) => {
 
 exports.createApproveResearchBook = (req, res) => {
     const { appro_date, appro_emp_id, book_id, date_line, fund, fund_id, research_state, deleted } = req.body
-    sql.query(`UPDATE tb_book SET appro_date='${appro_date}',appro_emp_id='${appro_emp_id}',date_line='${date_line}',fund=${fund},fund_id=${fund_id},research_state=${research_state},deleted=${deleted},year_print='none' WHERE book_id=N'${book_id}';`,
+    sql.query(`UPDATE tb_book SET appro_date='${appro_date}',appro_emp_id='${appro_emp_id}',date_line='${date_line}',fund=${fund},fund_id=${fund_id},research_state=${research_state},deleted=${deleted},year_print=NULL WHERE book_id=N'${book_id}';`,
         (err, result) => {
             if (err) {
                 res.send('error syntax update')
@@ -645,8 +645,8 @@ exports.getSingleApproveResearchById = (req, res) => {
 exports.cancelApproveResearchBook = (req, res) => {
     const { book_id } = req.body;
     sql.query(`
-    UPDATE tb_book SET appro_date='',appro_emp_id=null,
-    date_line='',fund=null,fund_id=null,research_state=1,
+    UPDATE tb_book SET appro_date=NULL,appro_emp_id=NULL,
+    date_line=NULL,fund=NULL,fund_id=NULL,research_state=1,
     deleted=1 WHERE book_id=N'${book_id}'
     `,
         (err, result) => {
@@ -717,7 +717,7 @@ exports.createApproveResearchBookProcedure_0_50_percentage = (req, res) => {
 
 exports.cancelApproveResearchBookProcedure_0_50_percentage = (req, res) => {
     const { book_id } = req.body
-    sql.query(`UPDATE tb_book SET research_state=1,deleted=0 WHERE book_id=N'${book_id}';`,
+    sql.query(`UPDATE tb_book SET research_state=1,deleted=0,appro_emp_id=NULL,appro_date=NULL,date_line=NULL,fund=NULL,fund_id=NULL WHERE book_id=N'${book_id}';`,
         (err, result) => {
             if (err) {
                 res.send("syntax book error")
