@@ -117,7 +117,9 @@ router.post('/book/report/complete_book_one_year', bookModel.completeBookReportO
 
 router.post('/book/report/complete_book_between_year', bookModel.completeBookReportBetweenYear);
 
-router.get('/book/total_like', bookModel.book_total_like);
+router.get('/book/total_like', bookModel.getAllTotalLike);
+
+router.get('/book/total_like/:id', bookModel.getTotalLikeById);
 
 
 

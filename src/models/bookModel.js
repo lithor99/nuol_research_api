@@ -457,11 +457,26 @@ exports.createBookRequest = async (req, res) => {
         })
 }
 
-exports.book_total_like = (req, res) => {
+exports.getAllTotalLike = (req, res) => {
     sql.query(`
-    SELECT tb_like.book_id, count(tb_like.book_id) as total_like
-    FROM tb_like 
-    GROUP BY tb_like.book_id `,
+    SELECT book_id, count(*) as total_like
+    FROM tb_like GROUP BY book_id
+    `,
+        (err, result) => {
+            if (err) {
+                res.send("error syntax");
+            } else {
+                res.send(result.recordset);
+            }
+        });
+}
+
+exports.getTotalLikeById = (req, res) => {
+    const _book_id = req.params.id
+    sql.query(`
+    SELECT book_id, count(*) as total_like
+    FROM tb_like WHERE tb_like.book_id='3' GROUP BY book_id
+    `,
         (err, result) => {
             if (err) {
                 res.send("error syntax");
@@ -1574,10 +1589,10 @@ exports.cancelResearch_paper_upload = (req, res) => {
     UPDATE tb_book SET 
     dbo.tb_book.upl_emp_id=NULL,
     dbo.tb_book.upload_date=NULL,
-    dbo.tb_book.upload_state=1,
+    dbo.tb_book.upload_state=0,
     dbo.tb_book.book_file='unUpload', 
     dbo.tb_book.research_state=4,
-    dbo.tb_book.deleted=0
+    dbo.tb_book.deleted=0, 
     WHERE dbo.tb_book.book_id=N'${book_id}'
     `,
         (err, result) => {
