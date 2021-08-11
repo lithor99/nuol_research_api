@@ -14,7 +14,8 @@ const config = {
 
     // _____________-------------------------______________-------------___________________
 
-    server: 'localhost',
+    // server: 'localhost',
+    server: '192.168.43.191',
     user: 'sa',
     password: '12345',
     // password: 'simple123',
