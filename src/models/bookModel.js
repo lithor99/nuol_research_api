@@ -459,14 +459,14 @@ exports.createBookRequest = async (req, res) => {
 
 exports.book_total_like = (req, res) => {
     sql.query(`
-    SELECT book_id, count(*) as book_total_like
-    FROM tb_like GROUP BY book_id
-    `,
+    SELECT tb_like.book_id, count(tb_like.book_id) as total_like
+    FROM tb_like 
+    GROUP BY tb_like.book_id `,
         (err, result) => {
             if (err) {
                 res.send("error syntax");
             } else {
-                res.send(result.recordset[0]);
+                res.send(result.recordset);
             }
         });
 }
