@@ -1212,14 +1212,13 @@ exports.createResearch_paper_upload = (req, res) => {
     const { book_id, book_file, upload_date, upload_state, upl_emp_id } = req.body;
     sql.query(` 
     UPDATE tb_book SET 
-dbo.tb_book.upl_emp_id=${upl_emp_id},
-dbo.tb_book.upload_date='${upload_date}',
-dbo.tb_book.upload_state=${upload_state},
-dbo.tb_book.book_file=N'${book_file}', 
-dbo.tb_book.research_state=5,
-dbo.tb_book.deleted=0
-WHERE dbo.tb_book.book_id=N'${book_id}' 
-    `,
+    dbo.tb_book.upl_emp_id=${upl_emp_id},
+    dbo.tb_book.upload_date='${upload_date}',
+    dbo.tb_book.upload_state=${upload_state},
+    dbo.tb_book.book_file=N'${book_file}', 
+    dbo.tb_book.research_state=5,
+    dbo.tb_book.deleted=0
+    WHERE dbo.tb_book.book_id=N'${book_id}'`,
         (err, result) => {
             if (err) {
                 res.send('error update:', err)
