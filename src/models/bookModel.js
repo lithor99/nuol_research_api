@@ -472,9 +472,10 @@ exports.getAllTotalLike = (req, res) => {
 
 exports.getTotalLikeById = (req, res) => {
     const _book_id = req.params.id
-    sql.query(`
-    SELECT book_id, count(*) as total_like
-    FROM tb_like WHERE tb_like.book_id='3' GROUP BY book_id`,
+    sql.query(`SELECT tb_book.book_id, COUNT(tb_like.book_id) as total_like
+    FROM tb_book FULL OUTER JOIN tb_like ON tb_book.book_id=tb_like.book_id
+    WHERE tb_book.book_id='${_book_id}'
+    GROUP BY tb_book.book_id,tb_like.book_id`,
         (err, result) => {
             if (err) {
                 res.send("error syntax");
