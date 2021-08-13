@@ -172,10 +172,10 @@ exports.employeeLogin = async (req, res) => {
                     return res.send({ message: "Your username or password is incorrected" })
                 } else {
                     // check account ban_state
-                    if (data.recordset[0].ban_state === 1 || data.recordset[0].ban_state === true) {
+                    if (data.recordset[0].ban_state === 1 || data.recordset[0].ban_state === false) {
                         console.log("Your login account is banned")
                         return res.send({ login_account_banned: "Your login account is banned" })
-                    } else if (data.recordset[0].ban_state === 0 || data.recordset[0].ban_state === false) {
+                    } else if (data.recordset[0].ban_state === 0 || data.recordset[0].ban_state === true) {
                         // success  
                         const token = jwt.sign({ emp_id: data.recordset[0].emp_id }, process.env.TOKEN_SECRET, { expiresIn: '30d' });
                         res.header('Authorization', token).send({
