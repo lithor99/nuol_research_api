@@ -248,7 +248,7 @@ exports.forgotPasswordEmployee = (req, res) => {
 }
 
 exports.employeeSignUp = async (req, res) => {
-    let { name, surname, username, password, gender, birth_date, tel, email, supper_admin } = req.body;
+    let { name, surname, username, password, gender, birth_date, tel, email, supper_admin, ban_state } = req.body;
 
     sql.query(`SELECT COUNT(supper_admin) as countSupperAdmin FROM tb_employee WHERE supper_admin=${supper_admin}`,
         function (err, response) {
@@ -288,11 +288,11 @@ exports.employeeSignUp = async (req, res) => {
                                         if (data.recordset[0].countUsername > 0) {
                                             res.send("email already exist");
                                         } else {
-                                            sql.query(`
-                                        INSERT INTO tb_employee (name, surname, username, password, gender, birth_date, tel, email,ban_state,supper_admin) 
-                                        VALUES('${name}', '${surname}', '${username}', '${password}', '${gender}', '${birth_date}', '${tel}', '${email}',1,1)
 
-                                        `,
+                                            sql.query(`
+                                                INSERT INTO tb_employee (name, surname, username, password, gender, birth_date, tel, email,ban_state,supper_admin) 
+                                                VALUES('${name}', '${surname}', '${username}', '${password}', '${gender}', '${birth_date}', '${tel}', '${email}',${ban_state},${supper_admin})
+                                                `,
                                                 (err, result) => {
                                                     if (err) {
                                                         res.send('error at insert data: ', err)
@@ -300,7 +300,9 @@ exports.employeeSignUp = async (req, res) => {
                                                     } else {
                                                         res.send("success");
                                                     }
-                                                })
+                                                });
+
+
                                         }
                                     }
                                 });
