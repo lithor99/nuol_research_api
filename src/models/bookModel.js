@@ -1379,11 +1379,12 @@ exports.unapproveBookReportBetweenYear = (req, res) => {
 exports.nearlyDatelineBookReport = (req, res) => {
     const { total_month } = req.body
 
-    sql.query(`
-    SELECT COUNT(*) AS countNearDealine FROM tb_book WHERE tb_book.research_state BETWEEN 2 AND 3  
-    AND  FORMAT(tb_book.date_line,'yyyy-MM') BETWEEN FORMAT(DATEADD(month, 0, (GETDATE())),'yyyy-MM') 
+    sql.query(`SELECT COUNT(*) AS countNearDealine FROM tb_book 
+    WHERE tb_book.research_state BETWEEN 2 AND 3  
+    AND FORMAT(tb_book.date_line,'yyyy-MM') BETWEEN FORMAT(DATEADD(month, 0, (GETDATE())),'yyyy-MM')     
     AND FORMAT(DATEADD(month,${total_month},(GETDATE())),'yyyy-MM')
-    `, function (err, result) {
+    AND FORMAT(tb_book.date_line,'yyyy-MM-dd') > FORMAT(GETDATE(),'yyyy-MM-dd')`
+    , function (err, result) {
         if (err) {
             console.log("Error Syntax count countNearDealine: ", err)
         } else {
@@ -1396,7 +1397,8 @@ exports.nearlyDatelineBookReport = (req, res) => {
                 FROM tb_book
                 WHERE tb_book.research_state BETWEEN 2 AND 3  
                 AND  FORMAT(tb_book.date_line,'yyyy-MM') BETWEEN FORMAT(DATEADD(month, 0, (GETDATE())),'yyyy-MM') 
-                AND FORMAT(DATEADD(month, ${total_month}, (GETDATE())),'yyyy-MM')`,
+                AND FORMAT(DATEADD(month, ${total_month}, (GETDATE())),'yyyy-MM')
+                AND FORMAT(tb_book.date_line,'yyyy-MM-dd') > FORMAT(GETDATE(),'yyyy-MM-dd')`,
                     (err, result) => {
                         if (err) {
                             console.log('query nearly dateline book error:' + err)
