@@ -97,7 +97,6 @@ exports.editEmployee = (req, res) => {
 exports.deleteEmployee = async (req, res) => {
     const id = req.params.id;
 
-
     await sql.query(`SELECT COUNT(*) AS countEmployee FROM tb_employee WHERE emp_id=${id}`,
         function (err, data) {
             if (err) {
@@ -260,6 +259,7 @@ exports.employeeSignUp = async (req, res) => {
                 res.send(`supper admin is full`)
             }
             else if (response.recordset[0].countSupperAdmin < 2) {
+
                 sql.query(`
                 SELECT 
                 COUNT (*) AS countUsername
@@ -298,7 +298,7 @@ exports.employeeSignUp = async (req, res) => {
                                                         res.send('error at insert data: ', err)
                                                         console.log(err)
                                                     } else {
-                                                        res.send(result);
+                                                        res.send("success");
                                                     }
                                                 })
                                         }
