@@ -290,8 +290,7 @@ exports.employeeSignUp = async (req, res) => {
                                         } else {
                                             sql.query(`
                                         INSERT INTO tb_employee (name, surname, username, password, gender, birth_date, tel, email,ban_state,supper_admin) 
-                                        VALUES('${name}', '${surname}', '${username}', '${password}', '${gender}', '${birth_date}', '${tel}', '${email}',1,1)
-
+                                        VALUES('${name}', '${surname}', '${username}', '${password}', '${gender}', '${birth_date}', '${tel}', '${email}',1,${supper_admin})
                                         `,
                                                 (err, result) => {
                                                     if (err) {
