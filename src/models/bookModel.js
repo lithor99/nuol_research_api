@@ -447,7 +447,7 @@ exports.addDownload = (req, res) => {
 exports.createBookRequest = async (req, res) => {
     const { book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id, research_state, total_load, total_view, deleted } = req.body
     sql.query(`
-    INSERT INTO tb_book (book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id, research_state,total_load,total_view,deleted)  VALUES(N'${book_id}',N'${book_name}',N'${book_group}',N'${proposal_file}','${offer_date}',${offer_emp_id},${research_state},${total_load}, ${total_view}, ${deleted});`,
+    INSERT INTO tb_book (book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id, research_state,total_load,total_view,deleted)  VALUES(N'${book_id}',N'${book_name}',N'${book_group}',N'${proposal_file}','${offer_date}',${offer_emp_id},${research_state},${total_load}, ${total_view}, ${deleted})`,
         (err, result) => {
             if (err) {
                 res.send("syntax book request error")

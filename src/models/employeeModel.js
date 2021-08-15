@@ -72,6 +72,7 @@ exports.editEmployee = (req, res) => {
                 if (data.recordset[0].countEmployee <= 0) {
                     res.send("countEmployee has no value");
                 } else if (data.recordset[0].countEmployee > 0) {
+
                     sql.query(`UPDATE tb_employee SET name=N'${name}',surname=N'${surname}',
                 username=N'${username}',password=N'${password}',
                 gender=N'${gender}',birth_date=N'${birth_date}',
@@ -248,52 +249,70 @@ exports.forgotPasswordEmployee = (req, res) => {
 }
 
 exports.employeeSignUp = async (req, res) => {
-    let { name, surname, username, password, gender, birth_date, tel, email } = req.body;
-    return await sql.query(`
-        SELECT 
-        COUNT (*) AS countUsername
-        FROM
-        dbo.tb_employee 
-        where dbo.tb_employee.username='${username}'`, function (err, data) {
-        if (err) {
-            console.log("Errror at dubplicate username values: ", err)
-        } else {
-            if (data.recordset[0].countUsername > 0) {
-                // Already exist username
-                res.send("username already exist");
-            } else {
-                sql.query(`
-                    SELECT 
-                    COUNT (*) AS countUsername
-                    FROM
-                    dbo.tb_employee 
-                    where dbo.tb_employee.email='${email}'
-                    `,
-                    (err, data) => {
-                        if (err) {
-                            console.log("Errror at dubplicate email values: ", err)
-                        } else {
-                            // Already exist email
-                            if (data.recordset[0].countUsername > 0) {
-                                res.send("email already exist");
-                            } else {
-                                sql.query(`
-                                INSERT INTO tb_employee (name, surname, username, password, gender, birth_date, tel, email,ban_state,supper_admin) 
-                                VALUES('${name}', '${surname}', '${username}', '${password}', '${gender}', '${birth_date}', '${tel}', '${email}',1,1)
-                                
-                                `,
-                                    (err, result) => {
-                                        if (err) {
-                                            res.send('error at insert data: ', err)
-                                            console.log(err)
-                                        } else {
-                                            res.send(result);
-                                        }
-                                    })
-                            }
-                        }
-                    });
+    let { name, surname, username, password, gender, birth_date, tel, email, supper_admin } = req.body;
+
+    sql.query(`SELECT COUNT(supper_admin) as countSupperAdmin FROM tb_employee WHERE supper_admin=${supper_admin}`,
+        function (err, response) {
+            if (err) {
+                console.log("ERROR syntax countSupperAdmin")
             }
-        }
-    });
+            else if (response.recordset[0].countSupperAdmin >= 2) {
+                res.send(`supper admin is full`)
+            }
+            else if (response.recordset[0].countSupperAdmin < 2) {
+                sql.query(`
+                SELECT 
+                COUNT (*) AS countUsername
+                FROM
+                dbo.tb_employee 
+                where dbo.tb_employee.username='${username}'`, function (err, data) {
+                    if (err) {
+                        console.log("Errror at dubplicate username values: ", err)
+                    } else {
+                        if (data.recordset[0].countUsername > 0) {
+                            // Already exist username
+                            res.send("username already exist");
+                        } else {
+                            sql.query(`
+                            SELECT 
+                            COUNT (*) AS countUsername
+                            FROM
+                            dbo.tb_employee 
+                            where dbo.tb_employee.email='${email}'
+                            `,
+                                (err, data) => {
+                                    if (err) {
+                                        console.log("Errror at dubplicate email values: ", err)
+                                    } else {
+                                        // Already exist email
+                                        if (data.recordset[0].countUsername > 0) {
+                                            res.send("email already exist");
+                                        } else {
+                                            sql.query(`
+                                        INSERT INTO tb_employee (name, surname, username, password, gender, birth_date, tel, email,ban_state,supper_admin) 
+                                        VALUES('${name}', '${surname}', '${username}', '${password}', '${gender}', '${birth_date}', '${tel}', '${email}',1,1)
+
+                                        `,
+                                                (err, result) => {
+                                                    if (err) {
+                                                        res.send('error at insert data: ', err)
+                                                        console.log(err)
+                                                    } else {
+                                                        res.send(result);
+                                                    }
+                                                })
+                                        }
+                                    }
+                                });
+                        }
+                    }
+                });
+
+            }
+
+
+        });
+
+
+
 }
