@@ -1598,7 +1598,7 @@ exports.cancelResearch_paper_upload = (req, res) => {
     `,
         (err, result) => {
             if (err) {
-                res.send('error update update book file')
+                res.send('error cancel book file')
             } else {
                 res.send("success");
             }
