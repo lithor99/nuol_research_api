@@ -1591,12 +1591,12 @@ exports.cancelResearch_paper_upload = (req, res) => {
     dbo.tb_book.upload_state=0,
     dbo.tb_book.book_file='unUpload', 
     dbo.tb_book.research_state=4,
-    dbo.tb_book.deleted=0, 
+    dbo.tb_book.deleted=0
     WHERE dbo.tb_book.book_id=N'${book_id}'
     `,
         (err, result) => {
             if (err) {
-                res.send('error update update book file')
+                res.send('error cancel book file')
             } else {
                 res.send("success");
             }
