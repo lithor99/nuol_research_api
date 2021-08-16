@@ -126,6 +126,8 @@ router.get('/book/total_like/:id', bookModel.getTotalLikeById);
 
 router.get('/success/upload/book', bookModel.getSuccessUploadBook);
 
+router.post('/book/check_dateline', bookModel.checkDateline);
+
 
 
 

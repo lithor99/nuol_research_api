@@ -1593,7 +1593,7 @@ exports.cancelResearch_paper_upload = (req, res) => {
     dbo.tb_book.upload_state=0,
     dbo.tb_book.book_file='unUpload', 
     dbo.tb_book.research_state=4,
-    dbo.tb_book.deleted=0, 
+    dbo.tb_book.deleted=0
     WHERE dbo.tb_book.book_id=N'${book_id}'
     `,
         (err, result) => {
@@ -1669,6 +1669,27 @@ exports.getSuccessUploadBook = (req, res) => {
                 res.send('error select syntax')
             } else {
                 res.send(result.recordset);
+            }
+        })
+}
+
+exports.checkDateline = (req, res) => {
+    const { book_id, date_line } = req.body;
+    sql.query(`
+    SELECT tb_book.book_name FROM tb_book WHERE tb_book.book_id= '${book_id}' 
+    AND CAST('${date_line}' AS DATE) > FORMAT(tb_book.offer_date,'yyyy-MM-dd')
+    `,
+        (err, result) => {
+            if (err) {
+                res.send('error select syntax')
+            } else {
+                // res.send(result.recordset)
+                console.log(result.recordset[0])
+                if(result.recordset[0]>0){
+                    res.send('allow');
+                }else{
+                    res.send('no data');
+                }
             }
         })
 }

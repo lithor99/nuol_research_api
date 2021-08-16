@@ -248,50 +248,89 @@ exports.forgotPasswordEmployee = (req, res) => {
 }
 
 exports.employeeSignUp = async (req, res) => {
-    let { name, surname, username, password, gender, birth_date, tel, email, supper_admin, ban_state } = req.body;
+    let { name, surname, username, password, gender, birth_date, tel, email, ban_state, supper_admin } = req.body;
 
-    sql.query(`SELECT COUNT(supper_admin) as countSupperAdmin FROM tb_employee WHERE supper_admin=${supper_admin}`,
+    sql.query(`SELECT COUNT(tb_employee.supper_admin) as countSupperAdmin FROM tb_employee WHERE tb_employee.supper_admin=${supper_admin}`,
         function (err, response) {
             if (err) {
                 console.log("ERROR syntax countSupperAdmin")
             }
             else if (response.recordset[0].countSupperAdmin >= 2) {
-                res.send(`supper admin is full`)
-            }
-            else if (response.recordset[0].countSupperAdmin < 2) {
-
                 sql.query(`
-                SELECT 
-                COUNT (*) AS countUsername
-                FROM
-                dbo.tb_employee 
-                where dbo.tb_employee.username='${username}'`, function (err, data) {
+                SELECT tb_employee.username
+                FROM tb_employee 
+                WHERE tb_employee.username='${username}'`, function (err, data) {
                     if (err) {
                         console.log("Errror at dubplicate username values: ", err)
                     } else {
-                        if (data.recordset[0].countUsername > 0) {
+                        if (data.recordset[0] > 0) {
                             // Already exist username
                             res.send("username already exist");
                         } else {
                             sql.query(`
-                            SELECT 
-                            COUNT (*) AS countUsername
-                            FROM
-                            dbo.tb_employee 
-                            where dbo.tb_employee.email='${email}'
+                            SELECT tb_employee.username
+                            FROM tb_employee 
+                            WHERE tb_employee.email='${email}'
                             `,
                                 (err, data) => {
                                     if (err) {
                                         console.log("Errror at dubplicate email values: ", err)
                                     } else {
                                         // Already exist email
-                                        if (data.recordset[0].countUsername > 0) {
+                                        if (data.recordset[0]> 0) {
                                             res.send("email already exist");
                                         } else {
 
                                             sql.query(`
                                                 INSERT INTO tb_employee (name, surname, username, password, gender, birth_date, tel, email,ban_state,supper_admin) 
-                                                VALUES('${name}', '${surname}', '${username}', '${password}', '${gender}', '${birth_date}', '${tel}', '${email}',${ban_state},${supper_admin})
+                                                VALUES(N'${name}', N'${surname}', N'${username}', N'${password}', N'${gender}', N'${birth_date}', N'${tel}', N'${email}', 0, 0)
+                                                `,
+                                                (err, result) => {
+                                                    if (err) {
+                                                        res.send('error at insert data: ', err)
+                                                        console.log(err)
+                                                    } else {
+                                                        res.send("success only admin");
+                                                    }
+                                                });
+                                        }
+                                    }
+                                });
+                        }
+                    }
+                });
+                // res.send(`supper admin is full`)
+            }
+            else if (response.recordset[0].countSupperAdmin < 2) {
+
+                sql.query(`
+                SELECT tb_employee.username
+                FROM tb_employee 
+                WHERE tb_employee.username='${username}'`, function (err, data) {
+                    if (err) {
+                        console.log("Errror at dubplicate username values: ", err)
+                    } else {
+                        if (data.recordset[0] > 0) {
+                            // Already exist username
+                            res.send("username already exist");
+                        } else {
+                            sql.query(`
+                            SELECT tb_employee.username
+                            FROM tb_employee 
+                            WHERE tb_employee.email='${email}'
+                            `,
+                                (err, data) => {
+                                    if (err) {
+                                        console.log("Errror at dubplicate email values: ", err)
+                                    } else {
+                                        // Already exist email
+                                        if (data.recordset[0] > 0) {
+                                            res.send("email already exist");
+                                        } else {
+
+                                            sql.query(`
+                                                INSERT INTO tb_employee (name, surname, username, password, gender, birth_date, tel, email,ban_state,supper_admin) 
+                                                VALUES(N'${name}', N'${surname}', N'${username}', N'${password}', N'${gender}', N'${birth_date}', N'${tel}', '${email}',${ban_state},${supper_admin})
                                                 `,
                                                 (err, result) => {
                                                     if (err) {
@@ -301,8 +340,6 @@ exports.employeeSignUp = async (req, res) => {
                                                         res.send("success");
                                                     }
                                                 });
-
-
                                         }
                                     }
                                 });
