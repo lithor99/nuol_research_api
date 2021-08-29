@@ -11,7 +11,7 @@ exports.createAuthor_group = (req, res) => {
     const book_id = req.body.book_id
 
     sql.query(`
-    INSERT INTO tb_author_detail (book_id,author_id)  VALUES (N'${book_id}',${author_id});`,
+    INSERT INTO tb_author_detail (book_id,author_id)  VALUES (N'${book_id}',${author_id})`,
         (err, result) => {
             if (err) {
                 res.send("syntax author detail error");
@@ -26,7 +26,7 @@ exports.createAuthor_group = (req, res) => {
 // get all authorGroup
 exports.getSingleAuthorGroup = (req, res) => {
     const book_id = req.params.id
-    sql.query(`select author_id from tb_author_detail where book_id=N'${book_id}';`,
+    sql.query(`select author_id from tb_author_detail where book_id=N'${book_id}'`,
         (err, result) => {
             if (err) {
                 console.log('error while fetching user by id', err);
