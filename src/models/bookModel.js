@@ -1,28 +1,5 @@
-const sql = require('../config/dbConfig');
-const nodemailer = require('nodemailer');
-const upload = require('../middleware/upload');
-const jwt = require('jsonwebtoken');
-const fileupload = require('express-fileupload');
-const path = require('path');
-const http = require('http');
-const fs = require('fs');
-const { json } = require('body-parser');
-const { dirname } = require('path');
-const { DateTime } = require('../config/dbConfig');
-const e = require('express');
+const sql = require('../config/dbConfig')
 
-// const { param } = require('../routes/memberRoute');
-// const fileupload = require('express-fileupload');
-// const util = require('util');
-// const morgan = require('morgan');
-// const _ = require('lodash');
-// app.use(fileupload());
-// app.use(morgan('dev'));
-
-
-
-
-//..........................................................................................
 //view book as all
 exports.viewBookAsAll = (req, res) => {
     sql.query(`SELECT tb_book.book_id, tb_book.book_name, tb_book.book_group, tb_book.year_print, 
@@ -147,11 +124,11 @@ exports.getAuthor = (req, res) => {
     WHERE tb_author_detail.book_id = N'${req.body.book_id}' AND tb_book.upload_state = 'true'`,
         (err, result) => {
             if (err) {
-                return res.json('error');
+                return res.json('error')
             } else {
-                return res.json(result.recordset);
+                return res.json(result.recordset)
             }
-        });
+        })
 }
 
 //get book file from database
@@ -160,12 +137,12 @@ exports.getBookFile = (req, res) => {
         AND upload_state = 'true'`,
         (err, result) => {
             if (err) {
-                return res.json('error');
+                return res.json('error')
             } else {
-                return res.json(result.recordset[0]);
+                return res.json(result.recordset[0])
             }
         })
-};
+}
 
 //add view 
 exports.addView = (req, res) => {
@@ -173,23 +150,23 @@ exports.addView = (req, res) => {
         WHERE book_id = N'${req.body.book_id}'`,
         (err, result) => {
             if (err) {
-                return res.json('error');
+                return res.json('error')
             } else {
-                return res.json(result.recordset);
+                return res.json(result.recordset)
             }
-        });
-};
+        })
+}
 
 //like
 exports.like = (req, res) => {
     sql.query(`INSERT INTO tb_like VALUES(${req.body.member_id}, N'${req.body.book_id}')`,
         (err, result) => {
             if (err) {
-                return res.json('error');
+                return res.json('error')
             } else {
-                res.send(result.recordset);
+                res.send(result.recordset)
             }
-        });
+        })
 }
 
 //get like
@@ -198,11 +175,11 @@ exports.getLike = (req, res) => {
         WHERE tb_like.member_id = ${req.body.member_id} AND tb_book.upload_state = 'true'`,
         (err, result) => {
             if (err) {
-                return res.json('error');
+                return res.json('error')
             } else {
-                res.send(result.recordset);
+                res.send(result.recordset)
             }
-        });
+        })
 }
 
 //dislike
@@ -211,11 +188,11 @@ exports.dislike = (req, res) => {
     AND tb_like.book_id = N'${req.body.book_id}'`,
         (err, result) => {
             if (err) {
-                return res.json('error');
+                return res.json('error')
             } else {
-                res.send(result.recordset);
+                res.send(result.recordset)
             }
-        });
+        })
 }
 
 //bookmark
@@ -223,11 +200,11 @@ exports.bookmark = (req, res) => {
     sql.query(`INSERT INTO tb_bookmark VALUES(${req.body.member_id}, N'${req.body.book_id}')`,
         (err, result) => {
             if (err) {
-                return res.json('error');
+                return res.json('error')
             } else {
-                res.send(result.recordset);
+                res.send(result.recordset)
             }
-        });
+        })
 }
 
 //get bookmark
@@ -237,11 +214,11 @@ exports.getBookmark = (req, res) => {
         WHERE tb_bookmark.member_id = ${req.body.member_id} AND tb_book.upload_state = 'true'`,
         (err, result) => {
             if (err) {
-                return res.json('error');
+                return res.json('error')
             } else {
-                res.send(result.recordset);
+                res.send(result.recordset)
             }
-        });
+        })
 }
 
 //unbookmark
@@ -250,11 +227,11 @@ exports.unbookmark = (req, res) => {
     AND tb_bookmark.book_id = N'${req.body.book_id}'`,
         (err, result) => {
             if (err) {
-                return res.json('error');
+                return res.json('error')
             } else {
-                res.send(result.recordset);
+                res.send(result.recordset)
             }
-        });
+        })
 }
 
 //upload proposal file
@@ -263,12 +240,12 @@ exports.uploadProposalFile = (req, res) => {
         WHERE book_id = N'${req.body.book_id}'`,
         (err, result) => {
             if (err) {
-                console.log('error:', err);
-                return res.json('error:', err);
+                console.log('error:', err)
+                return res.json('error:', err)
             } else {
-                return res.json('upload complete');
+                return res.json('upload complete')
             }
-        });
+        })
 }
 
 //upload book file
@@ -277,12 +254,12 @@ exports.uploadBookFile = (req, res) => {
         WHERE book_id = N'${req.body.book_id}'`,
         (err, result) => {
             if (err) {
-                console.log('error:', err);
-                return res.json('error:', err);
+                console.log('error:', err)
+                return res.json('error:', err)
             } else {
-                return res.json('upload complete');
+                return res.json('upload complete')
             }
-        });
+        })
 }
 
 //download book file
@@ -291,156 +268,12 @@ exports.addDownload = (req, res) => {
         WHERE book_id = N'${req.body.book_id}'`,
         (err, result) => {
             if (err) {
-                return res.json('error');
+                return res.json('error')
             } else {
-                return res.json('download complete');
+                return res.json('download complete')
             }
-        });
+        })
 }
-
-//https://bezkoder.com/node-js-express-file-upload/
-
-////upload proposal file
-// exports.uploadProposalFile = async (req, res) => {
-//     try {
-//         var bookId = req.body.book_id;
-//         await upload(req, res);
-//         if (req.files) {
-//             let file = req.files.file;
-//             var filePath = path.join(__dirname, '..', '..', 'public', 'proposalFiles', file.name).toString();
-//             file.mv('./public/proposalFiles/' + file.name);
-//             sql.query(`UPDATE tb_book SET proposal_file = N'${filePath}' WHERE book_id = N'${bookId}'`,
-//                 (err, result) => {
-//                     if (err) {
-//                         return res.json('error');
-//                     } else {
-//                         return res.json({
-//                             message: 'File has uploaded',
-//                             data: {
-//                                 name: file.name,
-//                                 mimetype: file.mimetype,
-//                                 size: file.size,
-//                                 url: filePath,
-//                             },
-//                         });
-//                     }
-//                 });
-//         } else {
-//             return res.json({
-//                 status: false,
-//                 message: "Please choose file for upload!"
-//             });
-//         }
-//     } catch (err) {
-//         if (err.code == "LIMIT_FILE_SIZE") {
-//             return res.status(500).send({
-//                 message: "File size cannot be larger than 1000MB!",
-//             });
-//         }
-//         res.status(500).send({
-//             message: `Could not upload the file: ${req.file.originalname}. ${err}`,
-//         });
-//     }
-// };
-
-////upload book file
-// exports.uploadBookFile = async (req, res) => {
-//     try {
-//         var bookId = req.body.book_id;
-//         var empId = req.body.emp_id;
-//         var date = new Date().toLocaleString().split(',')[0];
-//         await upload(req, res);
-//         if (req.files) {
-//             let file = req.files.file;
-//             var filePath = path.join(__dirname, '..', '..', 'public', 'bookFiles', file.name).toString();
-//             file.mv('./public/bookFiles/' + file.name);
-//             sql.query(`UPDATE tb_book SET book_file = N'${filePath}', upload_date = '${date}', 
-//                 upl_emp_id = N'${empId}', upload_state = 'true'
-//                 WHERE book_id = N'${bookId}'`,
-//                 (err, result) => {
-//                     console.log(bookId);
-//                     if (err) {
-//                         return res.json('error');
-//                     } else {
-//                         return res.json({
-//                             message: 'File has uploaded',
-//                             data: {
-//                                 name: file.name,
-//                                 mimetype: file.mimetype,
-//                                 size: file.size,
-//                                 url: filePath,
-//                             },
-//                         });
-//                     }
-//                 });
-//         } else {
-//             return res.json({
-//                 status: false,
-//                 message: "Please choose file for upload!"
-//             });
-//         }
-//     } catch (err) {
-//         if (err.code == "LIMIT_FILE_SIZE") {
-//             return res.status(500).send({
-//                 message: "File size cannot be larger than 1000MB!",
-//             });
-//         }
-//         res.status(500).send({
-//             message: `Could not upload the file: ${req.file.originalname}. ${err}`,
-//         });
-//     }
-// };
-
-// exports.getFile = (req, res) => {
-//     // const directoryPath = 'D:\\Final Project\\nuol_research_api\\public\\uploads\\';
-//     // const dirPath = path.join(__dirname + '../../../public/uploads/');
-//     const dirPath = path.join(__dirname, '..', '..', 'public', 'uploads');
-//     fs.readdir(dirPath, function (err, files) {
-//         if (err) {
-//             return res.status(500).send({
-//                 message: "Unable to scan files!",
-//                 err,
-//             });
-//         } else {
-//             let fileInfo = [];
-//             files.forEach((file) => {
-//                 fileInfo.push({
-//                     name: file,
-//                     url: path.join(__dirname, '..', '..', 'public', 'uploads', file),
-//                 });
-//             });
-//             return res.json(fileInfo);
-//         }
-//     });
-// };
-
-// const downloadFile = (req, res) => {
-//     // const fileName = req.params.file;
-//     // const dirPath = path.join(__dirname, '..', '..', 'public', 'uploads');
-
-//     // res.downloadFile(dirPath + fileName, (err, result) => {
-//     //     if (err) {
-//     //         res.status(500).send({
-//     //             message: "Could not download the file. " + err,
-//     //         });
-//     //     }
-//     // });
-// };
-
-// // down load file (get url from database)
-// exports.downloadBookFile = (req, res) => {
-//     sql.query(`SELECT book_file FROM tb_book WHERE book_id = N'${req.body.book_id}'`,
-//         (err, result) => {
-//             if (err) {
-//                 return res.json('error');
-//             } else {
-//                 return res.json(result.recordset[0]);
-//             }
-//         });
-// };
-
-
-
 
 // Create book request add:
 
@@ -452,7 +285,7 @@ exports.createBookRequest = async (req, res) => {
             if (err) {
                 res.send("syntax book request error")
             } else {
-                res.send("success");
+                res.send("success")
             }
         })
 }
@@ -463,11 +296,11 @@ exports.getAllTotalLike = (req, res) => {
     GROUP BY tb_book.book_id,tb_like.book_id `,
         (err, result) => {
             if (err) {
-                res.send("error syntax");
+                res.send("error syntax")
             } else {
-                res.send(result.recordset);
+                res.send(result.recordset)
             }
-        });
+        })
 }
 
 exports.getTotalLikeById = (req, res) => {
@@ -478,31 +311,31 @@ exports.getTotalLikeById = (req, res) => {
     GROUP BY tb_book.book_id,tb_like.book_id`,
         (err, result) => {
             if (err) {
-                res.send("error syntax");
+                res.send("error syntax")
             } else {
-                res.send(result.recordset);
+                res.send(result.recordset)
             }
-        });
+        })
 }
 
 
 // get all getAllRequestBook
 exports.getAllRequestBook = (req, res) => {
-    sql.query(`select book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id from tb_book where research_state=1 and deleted=0  ORDER BY book_name ASC;`,
+    sql.query(`select book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id from tb_book where research_state=1 and deleted=0  ORDER BY book_name ASC`,
         (err, result) => {
             if (err) {
-                console.log('error while fetching user by id', err);
-                return res.json(err);
+                console.log('error while fetching user by id', err)
+                return res.json(err)
             } else {
-                console.log('get all author_group');
-                res.send(result.recordset);
+                console.log('get all author_group')
+                res.send(result.recordset)
             }
-        });
+        })
 }
 
 exports.deleteSingleRequestBook = (req, res) => {
     const { book_id } = req.body
-    sql.query(`delete from tb_book where book_id = N'${book_id}';`,
+    sql.query(`delete from tb_book where book_id = N'${book_id}'`,
         (err, result) => {
             if (err) {
                 console.log(err)
@@ -517,7 +350,7 @@ exports.updateRequestBookById = (req, res) => {
 
     const book_id = req.params.id
 
-    const { book_name, book_group, proposal_file, offer_date, offer_emp_id } = req.body;
+    const { book_name, book_group, proposal_file, offer_date, offer_emp_id } = req.body
 
     sql.query(`
     UPDATE tb_book SET appro_emp_id=NULL, book_name=N'${book_name}', book_group=N'${book_group}', proposal_file=N'${proposal_file}', offer_date='${offer_date}', offer_emp_id=${offer_emp_id},research_state=1,deleted=0 WHERE book_id=N'${book_id}'
@@ -525,16 +358,16 @@ exports.updateRequestBookById = (req, res) => {
         if (err) {
             res.send("syntax update book error")
         } else {
-            res.send("success");
+            res.send("success")
         }
-    });
+    })
 }
 
 
 // updateUnselected_proposal
 exports.updateUnselected_proposal = (req, res) => {
 
-    const { deleted, book_id } = req.body;
+    const { deleted, book_id } = req.body
 
     sql.query(`
     UPDATE tb_book SET research_state=1,appro_emp_id=NULL, deleted='${deleted}' WHERE book_id=N'${book_id}'
@@ -542,24 +375,24 @@ exports.updateUnselected_proposal = (req, res) => {
         if (err) {
             res.send("syntax update error")
         } else {
-            res.send("success");
+            res.send("success")
         }
-    });
+    })
 }
 
 // getAllUnselected_proposals
 
 exports.getAllUnselected_proposals = (req, res) => {
-    sql.query(`select deleted,book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id from tb_book where deleted=1 and research_state=1  ORDER BY book_name ASC;`,
+    sql.query(`select deleted,book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id from tb_book where deleted=1 and research_state=1  ORDER BY book_name ASC`,
         (err, result) => {
             if (err) {
-                console.log('error while fetching user by id', err);
-                return res.json(err);
+                console.log('error while fetching user by id', err)
+                return res.json(err)
             } else {
-                console.log('get all book');
-                res.send(result.recordset);
+                console.log('get all book')
+                res.send(result.recordset)
             }
-        });
+        })
 }
 
 // 
@@ -570,13 +403,13 @@ exports.getUnselectedRequestProposalById = (req, res) => {
     select deleted, book_name, book_group, proposal_file, offer_date, offer_emp_id  from tb_book where book_id=N'${book_id}'
     `, (err, result) => {
         if (err) {
-            console.log('error tb_book:', err);
-            return res.json('error tb_book:', err);
+            console.log('error tb_book:', err)
+            return res.json('error tb_book:', err)
         } else {
-            console.log('successfully fetch book request by Id tb_book:');
-            res.send(result.recordset);
+            console.log('successfully fetch book request by Id tb_book:')
+            res.send(result.recordset)
         }
-    });
+    })
 }
 
 
@@ -585,16 +418,16 @@ exports.getRequestBookById = (req, res) => {
     const book_id = req.params.id
 
     sql.query(`
-    select book_name, book_group, proposal_file, offer_date, offer_emp_id  from tb_book where book_id=N'${book_id}'
+    select book_id, book_name, book_group, proposal_file, offer_date, offer_emp_id  from tb_book where book_id=N'${book_id}'
     `, (err, result) => {
         if (err) {
-            console.log('error tb_book:', err);
-            return res.json('error tb_book:', err);
+            console.log('error tb_book:', err)
+            return res.json('error tb_book:', err)
         } else {
-            console.log('successfully fetcj book request by Id tb_book:');
-            res.send(result.recordset);
+            console.log('successfully fetcj book request by Id tb_book:')
+            res.send(result.recordset)
         }
-    });
+    })
 }
 
 
@@ -602,12 +435,12 @@ exports.getRequestBookById = (req, res) => {
 
 exports.createApproveResearchBook = (req, res) => {
     const { appro_date, appro_emp_id, book_id, date_line, fund, fund_id, research_state, deleted } = req.body
-    sql.query(`UPDATE tb_book SET appro_date='${appro_date}',appro_emp_id='${appro_emp_id}',date_line='${date_line}',fund=${fund},fund_id=${fund_id},research_state=${research_state},deleted=${deleted},year_print=NULL WHERE book_id=N'${book_id}';`,
+    sql.query(`UPDATE tb_book SET appro_date='${appro_date}',appro_emp_id='${appro_emp_id}',date_line='${date_line}',fund=${fund},fund_id=${fund_id},research_state=${research_state},deleted=${deleted},year_print=NULL WHERE book_id=N'${book_id}'`,
         (err, result) => {
             if (err) {
                 res.send('error syntax update')
             } else {
-                res.send("success");
+                res.send("success")
             }
         })
 }
@@ -616,16 +449,16 @@ exports.createApproveResearchBook = (req, res) => {
 // query all getAllApproveResearchBook
 
 exports.getAllApproveResearchBook = (req, res) => {
-    sql.query(`select *  from tb_book where research_state=2 and deleted=0  ORDER BY book_name ASC;`,
+    sql.query(`select *  from tb_book where research_state=2 and deleted=0  ORDER BY book_name ASC`,
         (err, result) => {
             if (err) {
-                console.log('error getAllApproveResearchBook', err);
-                return res.json(err);
+                console.log('error getAllApproveResearchBook', err)
+                return res.json(err)
             } else {
-                console.log('get all getAllApproveResearchBook');
-                res.send(result.recordset);
+                console.log('get all getAllApproveResearchBook')
+                res.send(result.recordset)
             }
-        });
+        })
 }
 
 // getSingleApproveResearchById
@@ -637,19 +470,19 @@ exports.getSingleApproveResearchById = (req, res) => {
     select * from tb_book where book_id=N'${book_id}'
     `, (err, result) => {
         if (err) {
-            console.log('error getSingleApproveResearchById:', err);
-            return res.json('error getSingleApproveResearchById:', err);
+            console.log('error getSingleApproveResearchById:', err)
+            return res.json('error getSingleApproveResearchById:', err)
         } else {
-            console.log('successfully getSingleApproveResearchById: ');
-            res.status(200).json(result.recordset);
+            console.log('successfully getSingleApproveResearchById: ')
+            res.status(200).json(result.recordset)
         }
-    });
+    })
 }
 
 
 
 exports.cancelApproveResearchBook = (req, res) => {
-    const { book_id } = req.body;
+    const { book_id } = req.body
     sql.query(`
     UPDATE tb_book SET appro_date=NULL,appro_emp_id=NULL,
     date_line=NULL,fund=NULL,fund_id=NULL,research_state=1,
@@ -659,13 +492,13 @@ exports.cancelApproveResearchBook = (req, res) => {
             if (err) {
                 res.send('error sytanx update approve')
             } else {
-                res.send("success");
+                res.send("success")
             }
         })
 }
 
 exports.updateApproveResearchBook = (req, res) => {
-    const { book_id, book_name, book_group, proposal_file, fund_id, fund, appro_date, date_line, appro_emp_id, deleted, research_state } = req.body;
+    const { book_id, book_name, book_group, proposal_file, fund_id, fund, appro_date, date_line, appro_emp_id, deleted, research_state } = req.body
     sql.query(`
     UPDATE tb_book SET 
     book_name=N'${book_name}',book_group=N'${book_group}',proposal_file=N'${proposal_file}',fund_id=N'${fund_id}',
@@ -677,7 +510,7 @@ exports.updateApproveResearchBook = (req, res) => {
             if (err) {
                 res.send("syntax update book error")
             } else {
-                res.send("success");
+                res.send("success")
             }
         })
 }
@@ -685,7 +518,7 @@ exports.updateApproveResearchBook = (req, res) => {
 
 
 exports.updateApproveResearchBook100 = (req, res) => {
-    const { book_id, book_name, book_group, proposal_file, fund_id, fund, appro_date, date_line, appro_emp_id, deleted, research_state, year_print } = req.body;
+    const { book_id, book_name, book_group, proposal_file, fund_id, fund, appro_date, date_line, appro_emp_id, deleted, research_state, year_print } = req.body
     sql.query(`
     UPDATE tb_book SET year_print='${year_print}',
     book_name=N'${book_name}',book_group=N'${book_group}',proposal_file=N'${proposal_file}',fund_id=N'${fund_id}',
@@ -697,24 +530,21 @@ exports.updateApproveResearchBook100 = (req, res) => {
             if (err) {
                 res.send('error syntax update book')
             } else {
-                res.send('success');
+                res.send('success')
             }
         })
 }
-
-
-
 
 // createApproveResearchBookProcedure_0_50_percentage 
 
 exports.createApproveResearchBookProcedure_0_50_percentage = (req, res) => {
     const { book_id } = req.body
-    sql.query(`UPDATE tb_book SET research_state=3,deleted=0 WHERE book_id=N'${book_id}';`,
+    sql.query(`UPDATE tb_book SET research_state=3,deleted=0 WHERE book_id=N'${book_id}'`,
         (err, result) => {
             if (err) {
                 res.send("syntax book error")
             } else {
-                res.send("success");
+                res.send("success")
             }
         })
 }
@@ -723,12 +553,12 @@ exports.createApproveResearchBookProcedure_0_50_percentage = (req, res) => {
 
 exports.cancelApproveResearchBookProcedure_0_50_percentage = (req, res) => {
     const { book_id } = req.body
-    sql.query(`UPDATE tb_book SET research_state=1,deleted=0,appro_emp_id=NULL,appro_date=NULL,date_line=NULL,fund=NULL,fund_id=NULL WHERE book_id=N'${book_id}';`,
+    sql.query(`UPDATE tb_book SET research_state=1,deleted=0,appro_emp_id=NULL,appro_date=NULL,date_line=NULL,fund=NULL,fund_id=NULL WHERE book_id=N'${book_id}'`,
         (err, result) => {
             if (err) {
                 res.send("syntax book error")
             } else {
-                res.send("success");
+                res.send("success")
             }
         })
 }
@@ -738,13 +568,13 @@ exports.cancelApproveResearchBookProcedure_0_50_percentage = (req, res) => {
 
 
 exports.getAllApproveResearchBookProcedure_0_70_percentage = (req, res) => {
-    sql.query(`select * from tb_book where research_state=3 and deleted=0;`,
+    sql.query(`select * from tb_book where research_state=3 and deleted=0`,
         (err, result) => {
             if (err) {
                 res.send('error update:', err)
             } else {
                 console.log("create approve resarch 50% success")
-                res.send(result.recordset);
+                res.send(result.recordset)
             }
         })
 }
@@ -752,20 +582,20 @@ exports.getAllApproveResearchBookProcedure_0_70_percentage = (req, res) => {
 // getAllApproveResearchBookProcedure_70_100_percentage
 
 exports.getAllApproveResearchBookProcedure_70_100_percentage = (req, res) => {
-    sql.query(`select * from tb_book where research_state=4 and deleted=0 and book_file='unUpload';`,
+    sql.query(`select * from tb_book where research_state=4 and deleted=0 and book_file='unUpload'`,
         (err, result) => {
             if (err) {
                 res.send('error update:', err)
             } else {
                 console.log("create approve resarch 50% success")
-                res.send(result.recordset);
+                res.send(result.recordset)
             }
         })
 }
 
 
 exports.cancelApproveResearchSecondFaseBook = (req, res) => {
-    const { book_id } = req.body;
+    const { book_id } = req.body
     sql.query(`
     UPDATE tb_book SET research_state=2,
     deleted=0 WHERE book_id=N'${book_id}'
@@ -774,7 +604,7 @@ exports.cancelApproveResearchSecondFaseBook = (req, res) => {
             if (err) {
                 res.send('error book update')
             } else {
-                res.send("success");
+                res.send("success")
             }
         })
 }
@@ -825,7 +655,7 @@ exports.countOfferBookReportOneYear = async (req, res) => {
             console.log("Error @ Here: ", err)
         } else {
             if (data.recordset[0].allBooks <= 0) {
-                res.send("allBooks have no value");
+                res.send("allBooks have no value")
             } else if (data.recordset[0].allBooks > 0) {
 
                 sql.query(`
@@ -855,7 +685,7 @@ exports.countOfferBookReportOneYear = async (req, res) => {
 
 // select natural offer books in one year
 exports.naturalOfferBookReportOneYear = async (req, res) => {
-    const { offer_year } = req.body;
+    const { offer_year } = req.body
 
     return await sql.query(` 
     SELECT COUNT (*) AS facCount FROM tb_book
@@ -863,10 +693,10 @@ exports.naturalOfferBookReportOneYear = async (req, res) => {
     AND Year(tb_book.offer_date)=N'${offer_year}' AND tb_book.research_state=1
 `, function (err, data) {
         if (err) {
-            console.log("Error at naturalOfferBookReportOneYear: ", err);
+            console.log("Error at naturalOfferBookReportOneYear: ", err)
         } else {
             if (data.recordset[0].facCount <= 0) {
-                res.send("Natural specific Year has no value");
+                res.send("Natural specific Year has no value")
             } else if (data.recordset[0].facCount > 0) {
                 sql.query(`SELECT tb_book.book_name,tb_book.book_id FROM tb_book
                 WHERE tb_book.book_group=N'ວິທະຍາສາດທໍາມະຊາດ' 
@@ -885,7 +715,7 @@ exports.naturalOfferBookReportOneYear = async (req, res) => {
             }
         }
     }
-    );
+    )
 }
 
 // select social offer books in one year
@@ -901,7 +731,7 @@ exports.socialOfferBookReportOneYear = (req, res) => {
             console.log("SOCIAL SPECIFIC YEAR ERROR. ", err)
         } else {
             if (data.recordset[0].socialCount <= 0) {
-                res.send("No Social Specific Year");
+                res.send("No Social Specific Year")
             } else if (data.recordset[0].socialCount > 0) {
                 sql.query(`SELECT tb_book.book_name,tb_book.book_id FROM tb_book
                 WHERE tb_book.book_group=N'ວິທະຍາສາດສັງຄົມ' 
@@ -1032,7 +862,7 @@ exports.socialOfferBookReportBetweenYear = (req, res) => {
 // count books in one year
 exports.countBookReportOneYear = async (req, res) => {
 
-    const { offer_year } = req.body;
+    const { offer_year } = req.body
     await sql.query(`
     SELECT COUNT(tb_book.book_id) as allBooks FROM tb_book WHERE Year(tb_book.offer_date)='${offer_year}' AND tb_book.research_state!=1
     `, function (err, data) {
@@ -1040,7 +870,7 @@ exports.countBookReportOneYear = async (req, res) => {
             return console.log("Error @ Here")
         } else {
             if (data.recordset[0].allBooks <= 0) {
-                res.send("allBooks have no value");
+                res.send("allBooks have no value")
             } else if (data.recordset[0].allBooks > 0) {
                 sql.query(`SELECT COUNT(tb_book.book_name) AS allBooks,
                     (SELECT COUNT(tb_book.book_group) FROM tb_book
@@ -1071,7 +901,7 @@ exports.countBookReportOneYear = async (req, res) => {
 
 // select natural books in one year
 exports.naturalBookReportOneYear = async (req, res) => {
-    const { offer_year } = req.body;
+    const { offer_year } = req.body
     return await sql.query(` 
     SELECT COUNT (*) AS facCount FROM tb_book
     WHERE tb_book.book_group=N'ວິທະຍາສາດທໍາມະຊາດ' 
@@ -1081,7 +911,7 @@ exports.naturalBookReportOneYear = async (req, res) => {
             console.log("Error ### Here I am error ", err)
         } else {
             if (data.recordset[0].facCount <= 0) {
-                res.send("Natural specific Year has no value");
+                res.send("Natural specific Year has no value")
             } else if (data.recordset[0].facCount > 0) {
                 sql.query(`SELECT tb_book.book_name , tb_book.book_id
                 FROM tb_book INNER JOIN tb_fund ON tb_book.fund_id=tb_fund.fund_id
@@ -1115,7 +945,7 @@ exports.socialBookReportOneYear = async (req, res) => {
             console.log("SOCIAL SPECIFIC YEAR ERROR. ", err)
         } else {
             if (data.recordset[0].socialCount <= 0) {
-                res.send("No Social Specific Year");
+                res.send("No Social Specific Year")
             } else if (data.recordset[0].socialCount > 0) {
                 sql.query(`SELECT tb_book.book_name , book_id
             FROM tb_book INNER JOIN tb_fund ON tb_book.fund_id=tb_fund.fund_id
@@ -1180,7 +1010,7 @@ exports.countBookReportBetweenYear = async (req, res) => {
 
 }
 exports.cancelApproveResearchThirdFaseBook = (req, res) => {
-    const { book_id } = req.body;
+    const { book_id } = req.body
     sql.query(`
     UPDATE tb_book SET research_state=3,book_file=NULL,year_print='none',
     deleted=0 WHERE book_id=N'${book_id}'
@@ -1189,7 +1019,7 @@ exports.cancelApproveResearchThirdFaseBook = (req, res) => {
             if (err) {
                 res.send('error update book syntax')
             } else {
-                res.send("success");
+                res.send("success")
             }
         })
 }
@@ -1291,28 +1121,6 @@ exports.approvedBookReport = (req, res) => {
     })
 }
 
-// cancelApproveResearchThirdFaseBook
-// exports.cancelApproveResearchThirdFaseBook = (req, res) => {
-//     const { book_id } = req.body;
-//     sql.query(`
-//     UPDATE tb_book SET research_state=3,
-//     deleted=0 WHERE book_id=N'${book_id}'
-//     `,
-//         (err, result) => {
-//             if (err) {
-//                 res.send('error update:', err)
-//                 console.log("cancel approve resarch err")
-
-//             } else {
-//                 console.log("cancel approve resarch success")
-
-//                 res.send(result);
-//             }
-//         })
-// }
-
-
-////////////////////////////// unapprove books report ///////////////////////////////////
 // unapprove books report in one year
 exports.unapproveBookReportOneYear = (req, res) => {
     const { offer_year } = req.body
@@ -1346,7 +1154,7 @@ exports.unapproveBookReportOneYear = (req, res) => {
 
 // unapprove books report in between year 
 exports.unapproveBookReportBetweenYear = (req, res) => {
-    const { from_year, until_year } = req.body;
+    const { from_year, until_year } = req.body
 
     sql.query(`
     SELECT COUNT(*) AS countUnApprovalResearchBetweenYear from tb_book  
@@ -1372,7 +1180,7 @@ exports.unapproveBookReportBetweenYear = (req, res) => {
 
             }
         }
-    });
+    })
 }
 
 ////////////////////////////////// nearly dateline books report /////////////////////////////
@@ -1384,14 +1192,14 @@ exports.nearlyDatelineBookReport = (req, res) => {
     AND FORMAT(tb_book.date_line,'yyyy-MM') BETWEEN FORMAT(DATEADD(month, 0, (GETDATE())),'yyyy-MM')     
     AND FORMAT(DATEADD(month,${total_month},(GETDATE())),'yyyy-MM')
     AND FORMAT(tb_book.date_line,'yyyy-MM-dd') > FORMAT(GETDATE(),'yyyy-MM-dd')`
-    , function (err, result) {
-        if (err) {
-            console.log("Error Syntax count countNearDealine: ", err)
-        } else {
-            if (result.recordset[0].countNearDealine <= 0) {
-                res.send("Near deadlined has no value")
-            } else if (result.recordset[0].countNearDealine > 0) {
-                sql.query(`SELECT tb_book.book_name, tb_book.book_group,tb_book.book_id,
+        , function (err, result) {
+            if (err) {
+                console.log("Error Syntax count countNearDealine: ", err)
+            } else {
+                if (result.recordset[0].countNearDealine <= 0) {
+                    res.send("Near deadlined has no value")
+                } else if (result.recordset[0].countNearDealine > 0) {
+                    sql.query(`SELECT tb_book.book_name, tb_book.book_group,tb_book.book_id,
                 CASE WHEN tb_book.research_state=2 THEN '50%' ELSE '70%' END  AS complete, tb_book.appro_date, 
                 tb_book.date_line, (DATEDIFF(DAY, GETDATE(), tb_book.date_line)) AS time_left 
                 FROM tb_book
@@ -1399,20 +1207,20 @@ exports.nearlyDatelineBookReport = (req, res) => {
                 AND  FORMAT(tb_book.date_line,'yyyy-MM') BETWEEN FORMAT(DATEADD(month, 0, (GETDATE())),'yyyy-MM') 
                 AND FORMAT(DATEADD(month, ${total_month}, (GETDATE())),'yyyy-MM')
                 AND FORMAT(tb_book.date_line,'yyyy-MM-dd') > FORMAT(GETDATE(),'yyyy-MM-dd')`,
-                    (err, result) => {
-                        if (err) {
-                            console.log('query nearly dateline book error:' + err)
-                            return res.json('query nearly dateline book error:' + err)
-                        } else {
-                            return res.json(result.recordset)
-                        }
-                    })
+                        (err, result) => {
+                            if (err) {
+                                console.log('query nearly dateline book error:' + err)
+                                return res.json('query nearly dateline book error:' + err)
+                            } else {
+                                return res.json(result.recordset)
+                            }
+                        })
 
-            } else {
+                } else {
 
+                }
             }
-        }
-    })
+        })
 }
 
 //////////////////////////// over dateline books report ////////////////////////////////////
@@ -1452,7 +1260,7 @@ exports.overDatelineBookReport = (req, res) => {
 //////////////////////////// complete books report ////////////////////////////////////
 // complete books report in year
 exports.completeBookReportOneYear = (req, res) => {
-    const { offer_year } = req.body;
+    const { offer_year } = req.body
     sql.query(` 
 	SELECT COUNT(*) AS countCompleteBookOneYear
     FROM tb_book
@@ -1487,7 +1295,7 @@ exports.completeBookReportOneYear = (req, res) => {
 
 // complete books report between year
 exports.completeBookReportBetweenYear = (req, res) => {
-    const { offer_year, until_year } = req.body;
+    const { offer_year, until_year } = req.body
     sql.query(`
     SELECT COUNT(*) AS countCompleteBookBetweenYear 
     FROM tb_book
@@ -1499,7 +1307,7 @@ exports.completeBookReportBetweenYear = (req, res) => {
             console.log("Error Syntax countCompleteBookBetweenYear: ", err)
         } else {
             if (result.recordset[0].countCompleteBookBetweenYear <= 0) {
-                console.log("Has no value");
+                console.log("Has no value")
                 res.send("countCompleteBookBetweenYear has no value")
             } else if (result.recordset[0].countCompleteBookBetweenYear > 0) {
                 console.log("has value")
@@ -1524,12 +1332,12 @@ exports.completeBookReportBetweenYear = (req, res) => {
 
 exports.createApproveResearchBookProcedure_50_70_percentage = (req, res) => {
     const { book_id, year_print } = req.body
-    sql.query(`UPDATE tb_book SET research_state=4,deleted=0,book_file='unUpload',year_print='${year_print}' WHERE book_id=N'${book_id}';`,
+    sql.query(`UPDATE tb_book SET upl_emp_id=null,research_state=4,deleted=0,book_file='unUpload',year_print='${year_print}' WHERE book_id=N'${book_id}'`,
         (err, result) => {
             if (err) {
                 res.send("syntax book error")
             } else {
-                res.send("success");
+                res.send("success")
             }
         })
 }
@@ -1543,7 +1351,7 @@ exports.createApproveResearchBookProcedure_50_70_percentage = (req, res) => {
 // createResearch_paper_upload
 
 exports.createResearch_paper_upload = (req, res) => {
-    const { book_id, book_file, upload_date, upload_state, upl_emp_id } = req.body;
+    const { book_id, book_file, upload_date, upload_state, upl_emp_id } = req.body
     sql.query(` 
     UPDATE tb_book SET 
 dbo.tb_book.upl_emp_id=${upl_emp_id},
@@ -1556,15 +1364,15 @@ WHERE dbo.tb_book.book_id=N'${book_id}'
     `,
         (err, result) => {
             if (err) {
-                res.send('error update update book file');
+                res.send('error update update book file')
             } else {
-                res.send("success");
+                res.send("success")
             }
         })
 }
 
 exports.updateResearch_paper_upload = (req, res) => {
-    const { book_id, book_name, book_group, proposal_file, fund_id, fund, appro_date, date_line, appro_emp_id, deleted, research_state, year_print, upload_state } = req.body;
+    const { book_id, book_name, book_group, proposal_file, fund_id, fund, appro_date, date_line, appro_emp_id, deleted, research_state, year_print, upload_state } = req.body
     sql.query(`
     UPDATE tb_book SET year_print='${year_print}',
     book_name=N'${book_name}',book_group=N'${book_group}',proposal_file=N'${proposal_file}',fund_id=${fund_id},
@@ -1576,7 +1384,7 @@ exports.updateResearch_paper_upload = (req, res) => {
             if (err) {
                 res.send('error syntax update book')
             } else {
-                res.send('success');
+                res.send('success')
             }
         })
 }
@@ -1585,7 +1393,7 @@ exports.updateResearch_paper_upload = (req, res) => {
 // cancelResearch_paper_upload
 
 exports.cancelResearch_paper_upload = (req, res) => {
-    const { book_id } = req.body;
+    const { book_id } = req.body
     sql.query(` 
     UPDATE tb_book SET 
     dbo.tb_book.upl_emp_id=NULL,
@@ -1600,7 +1408,7 @@ exports.cancelResearch_paper_upload = (req, res) => {
             if (err) {
                 res.send('error cancel book file')
             } else {
-                res.send("success");
+                res.send("success")
             }
         })
 }
@@ -1609,20 +1417,20 @@ exports.cancelResearch_paper_upload = (req, res) => {
 // getAllApproveResearchBookFile
 
 exports.getAllApproveResearchBookFile = (req, res) => {
-    sql.query(`select * from tb_book where research_state=4 and deleted=0 and book_file !='unUpload';`,
+    sql.query(`select * from tb_book where research_state=4 and deleted=0 and book_file !='unUpload'`,
         (err, result) => {
             if (err) {
                 res.send('error update:', err)
             } else {
                 console.log("select getAllApproveResearchBookFile")
-                res.send(result.recordset);
+                res.send(result.recordset)
             }
         })
 }
 
 // updateResearch_uploadState_false 
 exports.updateResearch_uploadState_false = (req, res) => {
-    const { book_id } = req.body;
+    const { book_id } = req.body
     sql.query(`
     UPDATE tb_book SET
     dbo.tb_book.upload_state=0,
@@ -1634,7 +1442,7 @@ exports.updateResearch_uploadState_false = (req, res) => {
                 res.send('error update:', err)
             } else {
                 console.log("updated update Research upload state false ")
-                res.send(result.recordset);
+                res.send(result.recordset)
             }
         })
 }
@@ -1642,7 +1450,7 @@ exports.updateResearch_uploadState_false = (req, res) => {
 
 // updateResearch_uploadState_true 
 exports.updateResearch_uploadState_true = (req, res) => {
-    const { book_id } = req.body;
+    const { book_id } = req.body
     sql.query(`
     UPDATE tb_book SET
     dbo.tb_book.upload_state=1,
@@ -1654,7 +1462,7 @@ exports.updateResearch_uploadState_true = (req, res) => {
                 res.send('error update:', err)
             } else {
                 console.log("updated update Research upload state true ")
-                res.send(result.recordset);
+                res.send(result.recordset)
             }
         })
 }
@@ -1668,13 +1476,13 @@ exports.getSuccessUploadBook = (req, res) => {
             if (err) {
                 res.send('error select syntax')
             } else {
-                res.send(result.recordset);
+                res.send(result.recordset)
             }
         })
 }
 
 exports.checkDateline = (req, res) => {
-    const { book_id, date_line } = req.body;
+    const { book_id, date_line } = req.body
     sql.query(`
     SELECT tb_book.book_name FROM tb_book WHERE tb_book.book_id= '${book_id}' 
     AND CAST('${date_line}' AS DATE) > FORMAT(tb_book.offer_date,'yyyy-MM-dd')
@@ -1685,14 +1493,62 @@ exports.checkDateline = (req, res) => {
             } else {
                 // res.send(result.recordset)
                 console.log(result.recordset[0])
-                if(result.recordset[0]>0){
-                    res.send('allow');
-                }else{
-                    res.send('no data');
+                if (result.recordset[0] > 0) {
+                    res.send('allow')
+                } else {
+                    res.send('no data')
                 }
             }
         })
 }
 
 
+exports.getBookIdAndEmp_id = (req, res) => {
 
+    const empId = req.params.id
+
+    sql.query(`
+    SELECT tb_book.book_id,tb_book.offer_emp_id,tb_employee.name,tb_employee.surname FROM tb_book inner join tb_employee on tb_book.offer_emp_id = tb_employee.emp_id 
+	WHERE tb_book.offer_emp_id=${empId}
+    `, function (err, result) {
+        if (err) {
+            console.log("error syntax query book_id and emp_id")
+        } else {
+            res.send(result.recordset)
+        }
+    })
+}
+
+exports.getBookApprovalByEmp_id = (req, res) => {
+
+    const empId = req.params.id
+
+    sql.query(`
+    SELECT tb_book.book_id,tb_book.appro_emp_id,tb_employee.name,tb_employee.surname FROM tb_book inner join tb_employee on tb_book.appro_emp_id = tb_employee.emp_id 
+	WHERE tb_book.appro_emp_id=${empId}
+    `, function (err, result) {
+        if (err) {
+            console.log("error syntax query book_id and emp_id")
+        } else {
+            res.send(result.recordset)
+        }
+    })
+}
+
+
+
+exports.getUploadBookByEmp_id = (req, res) => {
+    const empId = req.params.id
+    sql.query(` 
+SELECT tb_book.book_id,tb_book.upl_emp_id,tb_employee.name,tb_employee.surname 
+FROM tb_book inner join tb_employee 
+on tb_book.upl_emp_id = tb_employee.emp_id
+WHERE tb_book.upl_emp_id=${empId} AND research_state=4
+    `, function (err, result) {
+        if (err) {
+            console.log("error syntax query book_id and emp_id")
+        } else {
+            res.send(result.recordset)
+        }
+    })
+}

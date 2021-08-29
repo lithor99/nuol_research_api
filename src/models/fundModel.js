@@ -34,10 +34,8 @@ exports.editFund = async (req, res) => {
     const _id = req.params.id
     const { fund_name, tel, email, address } = req.body;
 
-
-
     sql.query(`
-    UPDATE tb_fund SET fund_name=N'${fund_name}',tel='${tel}',email='${email}',address='${address}'
+    UPDATE tb_fund SET fund_name=N'${fund_name}',tel=N'${tel}',email=N'${email}',address=N'${address}'
     WHERE fund_id=${_id}`, function (err, result) {
         if (err) {
             res.send("countEmail syntax error")

@@ -14,11 +14,12 @@ const config = {
 
     // _____________-------------------------______________-------------___________________
 
-    // server: 'localhost',
-    server: '192.168.43.191',
+    server: 'localhost',
+    // server: '192.168.43.191',
+    // server: '192.168.137.1',
     user: 'sa',
-    password: '12345',
-    // password: 'simple123',
+    // password: '12345',
+    password: 'simple123',
     database: 'db_nuol_research',
     port: 1443,
     options: {

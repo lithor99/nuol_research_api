@@ -628,7 +628,7 @@ exports.editMemberBanAdmin = (req, res) => {
     let member_id = req.params.id
     const { ban_state, username, email } = req.body
     sql.query(`
-    UPDATE tb_member SET username='${username}', email='${email}',ban_state=${ban_state} WHERE member_id=${member_id}
+    UPDATE tb_member SET username=N'${username}', email=N'${email}',ban_state=${ban_state} WHERE member_id=${member_id}
     `,
         (err, result) => {
             if (err) {

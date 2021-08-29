@@ -73,7 +73,10 @@ router.put('/research_paper_upload_state/false', bookModel.updateResearch_upload
 router.put('/research_paper_upload_state/true', bookModel.updateResearch_uploadState_true);
 
 
-
+// router get book_id,emp_id : data.recordset[0].emp_id
+router.get(`/book/emp_id/:id`, bookModel.getBookIdAndEmp_id)
+router.get(`/bookApprovalByemp_id/:id`, bookModel.getBookApprovalByEmp_id)
+router.get(`/bookUploadByemp_id/:id`, bookModel.getUploadBookByEmp_id)
 
 
 //report---------------------------------------------------------------------------
